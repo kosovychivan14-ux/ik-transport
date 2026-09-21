@@ -12,4 +12,12 @@
 
 Весь сайт готовий до публікації у папці `dist`. Налаштування Vercel збережені у `vercel.json`.
 
-Для повторної публікації оновіть гілку `main` підключеного GitHub-репозиторію або запустіть `DEPLOY-VERCEL.cmd`.
+Сайт опубліковано через Vercel CLI. Код збережено у відкритому репозиторії https://github.com/kosovychivan14-ux/ik-transport.
+
+Для повторної публікації з цієї папки:
+
+```sh
+npx --yes vercel@59.23.2 deploy --prod --yes --scope ivan-kosovych
+```
+
+Автоматичний деплой після змін у GitHub ще не підключений: Vercel вимагає спочатку додати GitHub у Login Connections акаунта.
