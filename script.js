@@ -49,20 +49,27 @@
     document.head.appendChild(script);
     fbq('init', META_PIXEL_ID); fbq('track', 'PageView'); fbq('track', 'ViewContent');
   }
-  document.querySelectorAll('[data-telegram]').forEach(link => {
-    const params = new URLSearchParams(location.search);
-    const parts = ['web'];
-    for (const key of ['utm_source', 'utm_campaign', 'utm_content']) {
-      const value = params.get(key);
-      if (value) parts.push(value.toLowerCase().replace(/[^a-z0-9_-]/g, '').slice(0, 16));
+  const landingTimestamp = Date.now();
+  function updateTelegramHref(link) {
+    if (!window.IKAttribution || typeof window.IKAttribution.buildLaunchUrl !== 'function') return;
+    try {
+      const href = window.IKAttribution.buildLaunchUrl({
+        search: location.search,
+        cookieString: document.cookie,
+        landingTimestamp
+      });
+      if (typeof href === 'string' && href) link.href = href;
+    } catch (_) {
+      // Keep the static Telegram URL when attribution storage is unavailable.
     }
-    link.href = `https://t.me/ivankosovych_bot?start=${parts.filter(Boolean).join('_').slice(0, 64)}`;
+  }
+  document.querySelectorAll('[data-telegram]').forEach(link => {
+    updateTelegramHref(link);
     link.addEventListener('click', () => {
-      const detail = { destination: 'ivankosovych_bot' };
-      for (const key of ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term']) {
-        const value = params.get(key);
-        if (value) detail[key] = value.slice(0, 200);
-      }
+      updateTelegramHref(link);
+      const detail = window.IKAttribution && typeof window.IKAttribution.eventDetail === 'function'
+        ? window.IKAttribution.eventDetail(location.search)
+        : { destination: 'ivankosovych_bot' };
       if (typeof window.fbq === 'function') window.fbq('trackCustom', 'TelegramButtonClick', detail);
       window.dispatchEvent(new CustomEvent('TelegramButtonClick', { detail }));
     });
