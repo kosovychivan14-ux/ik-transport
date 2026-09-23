@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Безкоштовний вебінар: як електротранспорт створює дохід 24/7 — Іван Косович</title>
+<meta name="description" content="Безкоштовний вебінар українською: за 60 хвилин розберемо, як електротранспорт формує пасивний дохід, які є формати участі від $100 та з чого почати. Реєстрація в Telegram.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;500;600;700;800;900&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="bg-orbs" aria-hidden="true"><span class="orb orb--lime"></span><span class="orb orb--cyan"></span><span class="orb orb--violet"></span></div>
+<div class="bg-grid" aria-hidden="true"></div>
+<div class="scroll-progress" id="scrollProgress" aria-hidden="true"></div>
+
+<header class="nav" id="nav">
+  <a class="nav__logo" href="#top">IK<span class="nav__logo-dot"></span></a>
+  <nav class="nav__links">
+    <a href="#pains">Болі</a>
+    <a href="#program">Програма</a>
+    <a href="#speaker">Спікер</a>
+    <a href="#faq">FAQ</a>
+  </nav>
+  <div class="nav__cta">
+    <span class="nav__timer" id="navTimer" aria-hidden="true"><i></i><b id="navTimerText">--:--:--</b></span>
+    <a class="btn btn--lime btn--sm" href="https://t.me/ivankosovych_bot" target="_blank" rel="noopener">Зайняти місце</a>
+  </div>
+  <button class="nav__burger" id="burger" aria-label="Меню"><span></span><span></span><span></span></button>
+</header>
+
+<main id="top">
+
+  <!-- ============ HERO ============ -->
+  <section class="hero">
+    <span class="hero__watermark" aria-hidden="true">Вебінар</span>
+    <div class="hero__inner">
+      <div class="hero__copy">
+        <p class="eyebrow reveal"><span class="eyebrow__dot"></span>Безкоштовний вебінар · українською · <span id="webinarDateLabel">дата уточнюється</span></p>
+        <h1 class="hero__title reveal">
+          <span class="hero__line">Гроші мають працювати,</span>
+          <span class="hero__line hero__line--outline">поки ти</span>
+          <span class="hero__line hero__line--lime">спиш</span>
+        </h1>
+        <p class="hero__sub reveal">За 60 хвилин наживо розберемо, як електротранспорт створює дохід 24/7: звідки беруться гроші в моделі, які формати участі є від <strong>$100</strong> і з чого почати саме тобі. Без води — тільки модель, цифри й чесно про ризики.</p>
+
+        <div class="countdown reveal" role="timer" aria-label="Час до початку вебінару">
+          <p class="countdown__label">До початку вебінару залишилось</p>
+          <div class="countdown__row">
+            <div class="countdown__cell"><b id="cdD">00</b><span>днів</span></div>
+            <div class="countdown__cell"><b id="cdH">00</b><span>годин</span></div>
+            <div class="countdown__cell"><b id="cdM">00</b><span>хвилин</span></div>
+            <div class="countdown__cell"><b id="cdS">00</b><span>секунд</span></div>
+          </div>
+        </div>
+
+        <div class="hero__cta reveal">
+          <a class="btn btn--lime btn--lg btn--pulse" href="https://t.me/ivankosovych_bot" target="_blank" rel="noopener">Зареєструватися безкоштовно</a>
+          <a class="btn btn--ghost btn--lg" href="#program">Програма вебінару</a>
+        </div>
+        <p class="hero__micro reveal">Реєстрація в Telegram — 30 секунд. Без спаму: тільки дата й нагадування.</p>
+
+        <ul class="hero__stats reveal">
+          <li><strong data-count="60" data-suffix="">0</strong><span>хвилин живого розбору</span></li>
+          <li><strong>$100</strong><span>мінімальний старт</span></li>
+          <li><strong data-count="4" data-suffix="">0</strong><span>напрями електротранспорту</span></li>
+        </ul>
+      </div>
+
+      <div class="hero__visual reveal">
+        <div class="hud">
+          <div class="hud__top"><span class="hud__id">ВЕБІНАР · LIVE</span><span class="hud__live"><i></i>РЕЄСТРАЦІЯ ВІДКРИТА</span></div>
+          <div class="hud__frame">
+            <i class="hud__c hud__c--tl"></i><i class="hud__c hud__c--tr"></i><i class="hud__c hud__c--bl"></i><i class="hud__c hud__c--br"></i>
+            <img src="assets/ivan-cutout.webp" alt="Іван Косович — ведучий вебінару">
+            <div class="hud__scan"></div>
+          </div>
+          <div class="hud__bottom"><span>ІВАН КОСОВИЧ</span><span>ВЕДУЧИЙ ЕФІРУ</span></div>
+        </div>
+        <div class="chip chip--a">Дохід 24/7</div>
+        <div class="chip chip--b">Старт від $100</div>
+        <div class="chip chip--c">60 хв · наживо</div>
+      </div>
+    </div>
+    <a class="hero__scroll" href="#pains" aria-label="Далі">↓</a>
+  </section>
+
+  <!-- ============ MARQUEE ============ -->
+  <div class="marquee" aria-hidden="true">
+    <div class="marquee__track">
+      <span>Пасивний дохід</span><i>✦</i><span>Електротранспорт</span><i>✦</i><span>Безкоштовний вебінар</span><i>✦</i><span>Старт від $100</span><i>✦</i><span>Дохід 24/7</span><i>✦</i><span>Українською</span><i>✦</i>
+      <span>Пасивний дохід</span><i>✦</i><span>Електротранспорт</span><i>✦</i><span>Безкоштовний вебінар</span><i>✦</i><span>Старт від $100</span><i>✦</i><span>Дохід 24/7</span><i>✦</i><span>Українською</span><i>✦</i>
+    </div>
+  </div>
+
+  <!-- ============ PAINS ============ -->
+  <section class="section" id="pains">
+    <div class="wrap">
+      <p class="kicker reveal">Чесно про головне</p>
+      <h2 class="h2 reveal">Знайомо?<br><span class="h2--lime">Тоді читай далі</span></h2>
+      <p class="lead reveal">Більшість людей не бідні через лінь. Вони бідні, бо їхні гроші не працюють. Подивись, чи впізнаєш себе:</p>
+      <div class="pains">
+        <article class="pain reveal">
+          <span class="pain__icon">₴</span>
+          <h3>Гроші тануть на картці</h3>
+          <p>Заощадження лежать мертвим вантажем, а інфляція щороку тихо з'їдає їхню цінність. Ти наче й відкладаєш — а багатшим не стаєш.</p>
+        </article>
+        <article class="pain reveal">
+          <span class="pain__icon">◧</span>
+          <h3>Стеля зарплати</h3>
+          <p>Працюєш більше, береш підробітки — а рівень життя стоїть на місці. Обмінювати години на гроші — гра, в якій неможливо виграти.</p>
+        </article>
+        <article class="pain reveal">
+          <span class="pain__icon">⚠</span>
+          <h3>Страх помилитися</h3>
+          <p>Скрізь кричать про «гарантований дохід», а за рогом чекають шахраї. Уже не віриш нікому — і через це стоїш на місці.</p>
+        </article>
+        <article class="pain reveal">
+          <span class="pain__icon">◷</span>
+          <h3>Немає часу розбиратися</h3>
+          <p>Інвестиції здаються чимось складним, для «обраних» з економічною освітою. А розбиратися ніколи — робота, сім'я, життя.</p>
+        </article>
+      </div>
+      <div class="pains__verdict reveal">
+        <p>Якщо хоча б один пункт — про тебе, цей вебінар зроблений саме для тебе.<br>За годину ти зрозумієш те, на що в інших ідуть місяці проб і помилок.</p>
+        <a class="btn btn--lime btn--lg" href="https://t.me/ivankosovych_bot" target="_blank" rel="noopener">Хочу розібратися — реєструюсь</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PROMISE ============ -->
+  <section class="section section--alt" id="promise">
+    <div class="wrap">
+      <p class="kicker reveal">Що ти отримаєш</p>
+      <h2 class="h2 reveal">Після вебінару<br><span class="h2--lime">в голові стане ясно</span></h2>
+      <ul class="checklist">
+        <li class="reveal"><span class="checklist__tick">✓</span><div><strong>Зрозумієш модель.</strong> Звідки реально беруться гроші: оренда, доставка, шерінг електротранспорту. Без магії — тільки бізнес-логіка.</div></li>
+        <li class="reveal"><span class="checklist__tick">✓</span><div><strong>Побачиш цифри.</strong> Формати участі від $100: що вкладаєш, що отримуєш, за яких умов. Математика, яку можна перевірити.</div></li>
+        <li class="reveal"><span class="checklist__tick">✓</span><div><strong>Оціниш ризики чесно.</strong> Що може піти не так і як відрізнити реальний проєкт від схеми. Це знання залишиться з тобою назавжди.</div></li>
+        <li class="reveal"><span class="checklist__tick">✓</span><div><strong>Матимеш наступний крок.</strong> Конкретний план дій, а не «подумаю колись». Рішення ухвалюватимеш ти — але вже з повною картиною.</div></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ PROGRAM ============ -->
+  <section class="section" id="program">
+    <div class="wrap">
+      <p class="kicker reveal">Програма ефіру</p>
+      <h2 class="h2 reveal">60 хвилин,<br><span class="h2--lime">які окупаються</span></h2>
+      <p class="lead reveal">Жодної води. Кожен блок — відповідь на питання, яке ти ставиш собі зараз.</p>
+      <div class="learn">
+        <article class="learn__row reveal"><span class="learn__num">01</span><div><h3>Чому електротранспорт — це гроші</h3><p>Ринок, який росте на очах: автопілот, дрони, шерінг. Чому саме зараз — найкращий момент зайти.</p></div></article>
+        <article class="learn__row reveal"><span class="learn__num">02</span><div><h3>Звідки береться дохід 24/7</h3><p>Розбираємо юніт-економіку: хто платить, за що і як гроші доходять до учасника. На пальцях і з прикладами.</p></div></article>
+        <article class="learn__row reveal"><span class="learn__num">03</span><div><h3>Формати участі від $100</h3><p>Всі варіанти входу: умови, цифри, терміни. Що підійде саме тобі — зрозумієш прямо на ефірі.</p></div></article>
+        <article class="learn__row reveal"><span class="learn__num">04</span><div><h3>Ризики — чесно і без прикрас</h3><p>Що може піти не так. Як перевіряти будь-який проєкт, щоб ніколи не потрапити на шахраїв.</p></div></article>
+        <article class="learn__row reveal"><span class="learn__num">05</span><div><h3>Твій перший крок + живі запитання</h3><p>Конкретний план дій і відповіді на твої запитання в прямому ефірі. Підеш з ясністю, а не з сумнівами.</p></div></article>
+      </div>
+      <div class="center reveal"><a class="btn btn--lime btn--lg btn--pulse" href="https://t.me/ivankosovych_bot" target="_blank" rel="noopener">Зайняти місце на ефірі</a></div>
+    </div>
+  </section>
+
+  <!-- ============ SPEAKER ============ -->
+  <section class="section section--alt" id="speaker">
+    <div class="wrap">
+      <p class="kicker reveal">Хто веде</p>
+      <h2 class="h2 reveal">Людина, якій<br><span class="h2--lime">можна ставити запитання</span></h2>
+      <div class="speaker reveal">
+        <div class="speaker__photo hud">
+          <div class="hud__top"><span class="hud__id">IVAN.KOSOVYCH</span><span class="hud__live"><i></i>НА ЗВ'ЯЗКУ</span></div>
+          <div class="hud__frame">
+            <i class="hud__c hud__c--tl"></i><i class="hud__c hud__c--tr"></i><i class="hud__c hud__c--bl"></i><i class="hud__c hud__c--br"></i>
+            <img src="assets/ivan-cutout.webp" alt="Іван Косович">
+            <div class="hud__scan"></div>
+          </div>
+          <div class="hud__bottom"><span>ПАРТНЕР КОМПАНІЇ</span><span>ВЕДУЧИЙ ВЕБІНАРУ</span></div>
+        </div>
+        <div class="speaker__body">
+          <h2 class="h2">Іван Косович</h2>
+          <p class="speaker__role">Партнер компанії · ведучий вебінару</p>
+          <p class="speaker__text">Я — партнер компанії, яка розвиває електротранспорт: автомобілі на автопілоті, дрони-доставщики, електросамокати й велосипеди в США та Дубаї.</p>
+          <p class="speaker__text">На вебінарі не буду «продавати мрію». Покажу, як усе влаштовано зсередини: модель, цифри, умови — і чесно розповім про ризики. Ти ставиш гострі запитання — я відповідаю прямо.</p>
+          <div class="speaker__facts">
+            <div><strong>США й Дубаї</strong><span>географія проєкту</span></div>
+            <div><strong>4 напрями</strong><span>електротранспорту</span></div>
+            <div><strong>Українською</strong><span>мова вебінару</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ STEPS ============ -->
+  <section class="section" id="steps">
+    <div class="wrap">
+      <p class="kicker reveal">Три прості кроки</p>
+      <h2 class="h2 reveal">Реєстрація займе<br><span class="h2--lime">30 секунд</span></h2>
+      <div class="steps">
+        <article class="step reveal"><span class="step__num">01</span><h3>Натисни кнопку</h3><p>Будь-яка кнопка на цій сторінці веде в мій Telegram-бот. Це безкоштовно.</p></article>
+        <article class="step reveal"><span class="step__num">02</span><h3>Натисни «Розпочати»</h3><p>Бот зафіксує твою реєстрацію і покаже точну дату та час вебінару.</p></article>
+        <article class="step reveal"><span class="step__num">03</span><h3>Приходь на ефір</h3><p>За годину до старту бот надішле нагадування з посиланням на кімнату вебінару.</p></article>
+      </div>
+      <div class="center reveal"><a class="btn btn--lime btn--lg btn--pulse" href="https://t.me/ivankosovych_bot" target="_blank" rel="noopener">Почати реєстрацію</a></div>
+    </div>
+  </section>
+
+  <!-- ============ FAQ ============ -->
+  <section class="section section--alt" id="faq">
+    <div class="wrap wrap--narrow">
+      <p class="kicker reveal">Запитання, які ти вже хочеш поставити</p>
+      <h2 class="h2 reveal">Розвіюємо сумніви</h2>
+      <div class="faq">
+        <details class="faq__item reveal"><summary>Це безкоштовно? Де підступ?</summary><p>Так, вебінар повністю безкоштовний. Підступу немає: мета ефіру — показати проєкт тим, кому він реально підходить. Рішення про участь ухвалюєш тільки ти, після повної картини.</p></details>
+        <details class="faq__item reveal"><summary>А це не фінансова піраміда?</summary><p>Справедливе запитання. Піраміди живуть з внесків нових учасників і не мають реального продукту. Тут продукт — фізичний електротранспорт, який працює й приносить дохід з оренди та доставки. На вебінарі розберемо модель настільки детально, що ти сам зможеш це перевірити.</p></details>
+        <details class="faq__item reveal"><summary>Чи треба буде щось купувати одразу?</summary><p>Ні. Вебінар — це розбір, а не продаж у лоб. Ти дізнаєшся формати участі від $100, умови й ризики — і спокійно вирішиш удома.</p></details>
+        <details class="faq__item reveal"><summary>Я нічого не тямлю в інвестиціях. Мені буде зрозуміло?</summary><p>Саме для тебе цей вебінар і зроблений. Все пояснюю простою мовою, на пальцях, з прикладами. Жодного складного сленгу.</p></details>
+        <details class="faq__item reveal"><summary>А якщо не зможу бути наживо?</summary><p>Зареєструйся все одно — бот надішле тобі запис після ефіру. Але наживо краще: зможеш поставити своє запитання й отримати відповідь одразу.</p></details>
+        <details class="faq__item reveal"><summary>Скільки триває вебінар?</summary><p>Близько 60 хвилин: 40 хвилин розбір + відповіді на запитання в прямому ефірі.</p></details>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FINAL CTA ============ -->
+  <section class="section" id="register">
+    <div class="wrap">
+      <div class="final reveal">
+        <p class="kicker kicker--dark">Безкоштовно · українською · наживо</p>
+        <h2 class="final__title">Місце чекає.<br>Рішення — за тобою</h2>
+        <p class="final__sub">Через рік ти або розумітимеш, як змусити гроші працювати, — або будеш там само, де зараз. Вебінар — перший крок. Він безкоштовний.</p>
+        <div class="countdown countdown--dark" role="timer" aria-label="Час до початку вебінару">
+          <div class="countdown__row">
+            <div class="countdown__cell"><b id="cdD2">00</b><span>днів</span></div>
+            <div class="countdown__cell"><b id="cdH2">00</b><span>годин</span></div>
+            <div class="countdown__cell"><b id="cdM2">00</b><span>хвилин</span></div>
+            <div class="countdown__cell"><b id="cdS2">00</b><span>секунд</span></div>
+          </div>
+        </div>
+        <a class="btn btn--dark btn--lg btn--pulse" href="https://t.me/ivankosovych_bot" target="_blank" rel="noopener">Зареєструватися безкоштовно</a>
+        <p class="final__micro">30 секунд у Telegram · без спаму · тільки дата й нагадування</p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <div class="wrap footer__inner">
+    <span class="nav__logo">IK<span class="nav__logo-dot"></span></span>
+    <p>Транспорт майбутнього · © 2026 Іван Косович</p>
+  </div>
+  <div class="wrap"><p class="disclaimer">Матеріали сторінки мають інформаційний характер і не є фінансовою рекомендацією. Будь-які інвестиційні рішення пов'язані з ризиком — оцінюй їх самостійно.</p></div>
+</footer>
+
+<div class="sticky-cta" id="stickyCta">
+  <div class="sticky-cta__info"><strong>Безкоштовний вебінар</strong><span id="stickyDate">дата уточнюється</span></div>
+  <a class="btn btn--lime" href="https://t.me/ivankosovych_bot" target="_blank" rel="noopener">Зайняти місце</a>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
