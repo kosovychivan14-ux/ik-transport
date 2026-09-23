@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Студія ведучого — IK E-Transport</title>
+<meta name="description" content="Студія ведучого IK E-Transport: камера, слайди, показ екрана, запис і ефір.">
+<link rel="manifest" href="./studio.webmanifest">
+<meta name="theme-color" content="#04060a">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;900&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-mark">◆</span>
+    <div>
+      <strong>IK · Студія ведучого</strong>
+      <span>E-Transport · вебінарна</span>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <span id="live-pill" class="pill">Ефір не запущено</span>
+    <span id="room-clock" class="clock" aria-label="Поточний час">--:--:--</span>
+    <button id="stop-sources" class="btn btn-danger-ghost" disabled>Вимкнути все</button>
+  </div>
+</header>
+
+<div id="browser-notice" class="notice" hidden></div>
+<div id="studio-message" class="toast" role="status" data-type="info"></div>
+
+<main class="studio">
+  <!-- ============ ПРОГРАМА ============ -->
+  <section class="card program-card" aria-label="Програма ефіру">
+    <div class="card-head">
+      <h2><span class="num">01</span>Програма</h2>
+      <div class="head-meta">
+        <span id="preview-source-label" class="src-label">Попередній перегляд</span>
+        <span class="badge offline-badge">Локально</span>
+        <span class="badge local-badge">Видно лише вам</span>
+      </div>
+    </div>
+
+    <div id="preview-shell">
+      <div id="program-preview" data-layout="camera">
+        <video id="program-out" muted playsinline aria-label="Зведений кадр програми"></video>
+        <div id="camera-layer" aria-label="Зона камери. Перетягніть або скористайтеся стрілками."></div>
+        <div id="program-empty">
+          <p>Кадр порожній</p>
+          <span>Увімкніть камеру, відкрийте слайди або оберіть екран —<br>зведений кадр з’явиться тут.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="program-controls">
+      <div class="ctl-group">
+        <span class="ctl-label">Композиція</span>
+        <div class="segmented" role="radiogroup" aria-label="Композиція кадру">
+          <label><input type="radio" name="layout" value="camera" checked><span>Камера</span></label>
+          <label><input type="radio" name="layout" value="screen"><span>Контент</span></label>
+          <label><input type="radio" name="layout" value="pip"><span>Контент + камера</span></label>
+        </div>
+      </div>
+      <div class="ctl-group">
+        <span class="ctl-label">Контент</span>
+        <div class="btn-row">
+          <button id="show-slides" class="btn btn-chip" aria-pressed="false" disabled>Слайди</button>
+          <button id="show-screen" class="btn btn-chip" aria-pressed="false" disabled>Екран</button>
+        </div>
+      </div>
+      <div class="ctl-group cam-pos">
+        <span class="ctl-label">Камера в кадрі</span>
+        <div class="campos">
+          <div class="pad" role="group" aria-label="Положення камери">
+            <button data-camera-corner="0,0" aria-label="Лівий верхній кут">◤</button>
+            <button data-camera-move="up" aria-label="Вгору">▲</button>
+            <button data-camera-corner="1,0" aria-label="Правий верхній кут">◥</button>
+            <button data-camera-move="left" aria-label="Вліво">◀</button>
+            <button id="reset-camera-position" aria-label="Скинути положення">⟲</button>
+            <button data-camera-move="right" aria-label="Вправо">▶</button>
+            <button data-camera-corner="0,1" aria-label="Лівий нижній кут">◣</button>
+            <button data-camera-move="down" aria-label="Вниз">▼</button>
+            <button data-camera-corner="1,1" aria-label="Правий нижній кут">◢</button>
+          </div>
+          <div class="size-row">
+            <label for="camera-size">Розмір</label>
+            <input type="range" id="camera-size" min="18" max="50" step="1" value="28">
+            <output id="camera-size-value" for="camera-size">28%</output>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <aside class="side">
+    <!-- ============ ПРИСТРОЇ ============ -->
+    <section class="card" aria-label="Пристрої">
+      <div class="card-head"><h2><span class="num">02</span>Пристрої</h2></div>
+
+      <div class="device">
+        <div class="device-top">
+          <button id="toggle-camera" class="btn btn-device" aria-pressed="false"><span id="camera-button-text">Увімкнути камеру</span></button>
+          <span id="camera-state" class="dev-state">Вимкнена</span>
+        </div>
+        <select id="camera-select" class="select" aria-label="Вибір камери"><option value="">Камера за замовчуванням</option></select>
+        <div class="tile">
+          <video id="camera-preview" muted playsinline></video>
+          <canvas id="camera-blurred" hidden></canvas>
+          <div id="camera-empty" class="tile-empty">Камера вимкнена</div>
+          <div id="blur-placeholder" class="tile-empty" hidden>Готуємо розмиття…</div>
+        </div>
+        <label class="check"><input type="checkbox" id="blur-toggle"><span>Розмити фон</span></label>
+        <div class="size-row">
+          <label for="blur-strength">Сила</label>
+          <input type="range" id="blur-strength" min="4" max="24" step="1" value="14" disabled>
+          <output id="blur-strength-value" for="blur-strength">14</output>
+        </div>
+        <p id="blur-status" class="hint">Вимкнено. Обробка працює лише на вашому пристрої.</p>
+      </div>
+
+      <div class="device">
+        <div class="device-top">
+          <button id="toggle-microphone" class="btn btn-device" aria-pressed="false"><span id="microphone-button-text">Увімкнути мікрофон</span></button>
+          <span id="microphone-state" class="dev-state">Вимкнений</span>
+        </div>
+        <select id="microphone-select" class="select" aria-label="Вибір мікрофона"><option value="">Мікрофон за замовчуванням</option></select>
+        <div class="meter-row">
+          <progress id="mic-level" max="1" value="0" aria-label="Рівень мікрофона"></progress>
+          <span id="mic-level-text" class="hint">Мікрофон вимкнений</span>
+        </div>
+      </div>
+
+      <div class="device">
+        <div class="device-top">
+          <button id="toggle-screen" class="btn btn-device" aria-pressed="false"><span id="screen-button-text">Показати екран</span></button>
+        </div>
+        <div class="tile">
+          <video id="screen-preview" muted playsinline hidden></video>
+          <div id="screen-empty" class="tile-empty">Натисніть «Показати екран» і оберіть вкладку або вікно</div>
+        </div>
+        <p class="hint">Звук екрана не захоплюється — лише відео.</p>
+      </div>
+    </section>
+
+    <!-- ============ МАТЕРІАЛИ ============ -->
+    <section class="card" aria-label="Матеріали">
+      <div class="card-head"><h2><span class="num">03</span>Матеріали</h2></div>
+      <div class="btn-row wrap">
+        <label class="btn btn-neon file-btn">Відкрити файл<input type="file" id="slides-file" accept=".pdf,.png,.jpg,.jpeg,.webp" multiple hidden></label>
+        <button id="load-saved-slides" class="btn btn-ghost">E-Transport UA</button>
+      </div>
+      <p id="deck-name" class="hint">Презентацію ще не відкрито</p>
+      <div id="slide-layer" class="slide-thumb" aria-live="polite"></div>
+      <div id="slides-navigation" class="slide-nav" hidden>
+        <button id="slide-prev" class="btn btn-chip">←</button>
+        <input type="number" id="slide-number" min="1" value="1" aria-label="Номер слайда">
+        <span id="slide-count" class="hint">із 0</span>
+        <button id="slide-next" class="btn btn-chip">→</button>
+      </div>
+      <div class="btn-row wrap">
+        <button id="remove-slides" class="btn btn-ghost" disabled>Прибрати слайди</button>
+      </div>
+      <p id="materials-status" class="hint" data-type="info"></p>
+      <form id="website-form" class="web-row">
+        <input type="text" id="website-url" class="input" placeholder="https://… — сайт для показу" autocomplete="off">
+        <button type="submit" class="btn btn-chip">ОК</button>
+      </form>
+      <a id="website-link" class="hint link" href="#" target="_blank" rel="noopener" hidden></a>
+      <p id="website-guide" class="hint" hidden>Відкрийте сайт, потім натисніть «Обрати вкладку» і виберіть його вкладку.</p>
+      <button id="share-website" class="btn btn-ghost" disabled>Обрати вкладку або вікно</button>
+    </section>
+
+    <!-- ============ ЕФІР І ЗАПИС ============ -->
+    <section class="card" aria-label="Ефір і запис">
+      <div class="card-head"><h2><span class="num">04</span>Ефір і запис</h2></div>
+      <div class="btn-row">
+        <button id="go-live" class="btn btn-live" disabled>Почати ефір</button>
+        <button id="stop-live" class="btn btn-ghost" disabled>Завершити</button>
+      </div>
+      <p id="broadcast-help" class="hint">Перевіряємо підключення відеосервісу…</p>
+      <hr class="sep">
+      <div class="btn-row">
+        <button id="start-recording" class="btn btn-neon">● Запис</button>
+        <button id="stop-recording" class="btn btn-ghost" disabled>Зупинити</button>
+        <span id="recording-time" class="rec-time">00:00</span>
+      </div>
+      <p id="recording-state" class="hint" data-state="idle">Готово до запису</p>
+      <a id="recording-download" class="btn btn-chip" href="#" download hidden>Завантажити запис</a>
+      <p class="hint">Запис зберігається файлом WebM на вашому пристрої.</p>
+    </section>
+  </aside>
+</main>
+
+<footer class="foot">IK E-Transport · Студія ведучого · кадр 1920×1080</footer>
+
+<script type="module" src="./app.js"></script>
+</body>
+</html>
