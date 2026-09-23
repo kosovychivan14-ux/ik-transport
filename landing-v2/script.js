@@ -45,4 +45,20 @@
       }
     });
   });
+  // Speaker photo parallax (fine pointers only)
+  var speakerCard = document.querySelector('.speaker');
+  var speakerPhoto = document.querySelector('.speaker__photo');
+  if (speakerCard && speakerPhoto && window.matchMedia('(pointer:fine)').matches) {
+    speakerCard.addEventListener('mousemove', function (e) {
+      var r = speakerCard.getBoundingClientRect();
+      var x = (e.clientX - r.left) / r.width - 0.5;
+      var y = (e.clientY - r.top) / r.height - 0.5;
+      speakerPhoto.style.setProperty('--px', x.toFixed(3));
+      speakerPhoto.style.setProperty('--py', y.toFixed(3));
+    });
+    speakerCard.addEventListener('mouseleave', function () {
+      speakerPhoto.style.setProperty('--px', 0);
+      speakerPhoto.style.setProperty('--py', 0);
+    });
+  }
 })();
