@@ -43,6 +43,7 @@
   <button id="btnAgents">📋 Агенти</button>
   <button id="btnPause">⏸ Пауза</button>
   <button id="btnSpeed">⏩ 1×</button>
+  <button id="btnRoof">🏠 Дах</button>
 </div>
 <div id="hint">Миша: обертання · колесо: зум · права кнопка: панорама</div>
 <script type="module">
@@ -191,13 +192,15 @@ box(0.3,WALL_H-2.5,DOOR_W,M.wall,6,(WALL_H+2.5)/2,DOOR_Z);                      
 /* Дверний портал — ціанова рамка */
 const doorGlow=box(0.1,2.5,DOOR_W+0.5,new THREE.MeshBasicMaterial({color:0x22d3ee,transparent:true,opacity:.25}),6,1.25,DOOR_Z,world,false);
 doorGlow.material.side=THREE.DoubleSide;
-/* Стеля */
-box(HALL.x1-HALL.x0,0.2,HALL.z1-HALL.z0,new THREE.MeshStandardMaterial({color:0x11161d,roughness:.9}),(HALL.x0+HALL.x1)/2,4.4,0);
-box(LOUNGE.x1-LOUNGE.x0,0.2,LOUNGE.z1-LOUNGE.z0,new THREE.MeshStandardMaterial({color:0x151009,roughness:.9}),(LOUNGE.x0+LOUNGE.x1)/2,4.4,0);
+/* Стеля (за замовчуванням прихована — вид «ляльковий будиночок»; кнопка «Дах» вмикає) */
+const ceilings=[
+box(HALL.x1-HALL.x0,0.2,HALL.z1-HALL.z0,new THREE.MeshStandardMaterial({color:0x11161d,roughness:.9}),(HALL.x0+HALL.x1)/2,4.4,0),
+box(LOUNGE.x1-LOUNGE.x0,0.2,LOUNGE.z1-LOUNGE.z0,new THREE.MeshStandardMaterial({color:0x151009,roughness:.9}),(LOUNGE.x0+LOUNGE.x1)/2,4.4,0)];
+ceilings.forEach(c=>c.visible=false);
 /* Шестикутні лампи */
 function hexLamp(x,z){
   const g=new THREE.Group(); g.position.set(x,4.4,z);
-  const rod=new THREE.Mesh(new THREE.CylinderGeometry(0.03,0.03,0.6),M.chrome); rod.position.y=-0.3; g.add(rod);
+  const rod=new THREE.Mesh(new THREE.CylinderGeometry(0.03,0.03,3.6),M.chrome); rod.position.y=1.5; g.add(rod);
   const shade=new THREE.Mesh(new THREE.CylinderGeometry(0.55,0.7,0.35,6),
     new THREE.MeshStandardMaterial({color:0x222a33,roughness:.4,metalness:.7}));
   shade.position.y=-0.75; g.add(shade);
@@ -777,6 +780,12 @@ async function deliverStork(){
 
 /* ============ UI ============ */
 document.getElementById('btnStork').onclick=deliverStork;
+document.getElementById('btnRoof').onclick=e=>{
+  const on=!ceilings[0].visible;
+  ceilings.forEach(c=>c.visible=on);
+  e.target.classList.toggle('on',on);
+  log(on?'🏠 дах показано':'🏠 дах приховано — вид зверху');
+};
 document.getElementById('btnAgents').onclick=e=>{
   const p=document.getElementById('agentPanel');
   p.style.display=p.style.display==='none'?'block':'none';
