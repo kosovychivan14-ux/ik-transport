@@ -39,6 +39,7 @@
   #zoneL{left:0;} #zoneR{right:0;}
   .stick{position:fixed;width:124px;height:124px;border-radius:50%;border:2px solid #22d3ee66;background:#0b0f1655;z-index:7;display:none;touch-action:none;pointer-events:none;}
   .sknob{position:absolute;left:50%;top:50%;width:54px;height:54px;border-radius:50%;background:#22d3ee44;border:2px solid #22d3ee;transform:translate(-50%,-50%);}
+  #dbg{position:fixed;top:34px;left:50%;transform:translateX(-50%);z-index:9;display:none;font:10px/1.5 monospace;color:#7df9ff;background:#00000088;padding:4px 10px;border-radius:6px;pointer-events:none;white-space:nowrap;}
 </style>
 <script type="importmap">
 {"imports":{
@@ -68,6 +69,7 @@
 <div id="zoneL"></div><div id="zoneR"></div>
 <div id="stickL" class="stick"><div class="sknob"></div></div>
 <div id="stickR" class="stick"><div class="sknob"></div></div>
+<div id="dbg"></div>
 <div id="hint">Миша: обертання · колесо: зум · права кнопка: панорама · клік по агенту — хто він</div>
 <script type="module">
 import * as THREE from 'three';
@@ -811,8 +813,10 @@ function setWalk(on){
   document.getElementById('btnWalk').classList.toggle('on',on);
   controls.enabled=!on;
   const touch='ontouchstart'in window, showZ=on&&touch;
+  touchMode=touch;
   document.getElementById('zoneL').style.display=showZ?'block':'none';
   document.getElementById('zoneR').style.display=showZ?'block':'none';
+  dbgEl.style.display=showZ?'block':'none';
   for(const id of['controls','agentPanel','agentCard','journal'])document.getElementById(id).style.zIndex=on?'8':'';
   document.getElementById('hint').textContent=on
     ?(touch?'Торкнись лівої половини — рух · правої — огляд · тап по агенту — хто він'
@@ -856,8 +860,10 @@ function handleTap(e){
   const hits=raycaster.intersectObjects(pickMeshes,false);
   if(hits.length){const A=hits[0].object.userData.agent; if(A&&A.def)askAgent(A);}
 }
-/* Плаваючі стіки як у мобільних іграх: торкнувся половини екрана — стік з'явився під пальцем */
-let joyDX=0, joyDY=0, lookDX=0, lookDY=0;
+/* Плаваючі стіки як у мобільних іграх: торкнувся половини екрана — стік з'явився під пальцем.
+   Touch-події (перевірено: доходять до iPhone), + захист від iOS pinch-жесту двома пальцями. */
+let joyDX=0, joyDY=0, lookDX=0, lookDY=0, touchMode=false, zEvL=0, zEvR=0, frameNo=0, dbgOn=true;
+const dbgEl=document.getElementById('dbg');
 function tapAgentAt(cx,cy){
   if(!walkMode)return;
   const r=renderer.domElement.getBoundingClientRect();
@@ -866,36 +872,56 @@ function tapAgentAt(cx,cy){
   const hits=raycaster.intersectObjects(pickMeshes,false);
   if(hits.length){const A=hits[0].object.userData.agent; if(A&&A.def)askAgent(A);}
 }
-function bindZone(zoneId,stickId,onMove,onEnd){
+function bindZone(zoneId,stickId,onMove,onEnd,onTouch){
   const zone=document.getElementById(zoneId), stick=document.getElementById(stickId), knob=stick.firstElementChild;
-  let pid=null, ox=0, oy=0, t0=0, moved=false;
-  zone.addEventListener('pointerdown',e=>{
-    if(pid!==null)return;
-    pid=e.pointerId; ox=e.clientX; oy=e.clientY; t0=performance.now(); moved=false;
-    try{zone.setPointerCapture(pid);}catch(_){}
+  let tid=null, ox=0, oy=0, t0=0, moved=false;
+  const begin=(id,x,y)=>{
+    if(tid!==null)return;
+    tid=id; ox=x; oy=y; t0=performance.now(); moved=false; onTouch();
     stick.style.left=(ox-62)+'px'; stick.style.top=(oy-62)+'px'; stick.style.display='block';
     knob.style.transform='translate(-50%,-50%)';
     onMove(0,0);
-    e.preventDefault();
-  });
-  zone.addEventListener('pointermove',e=>{
-    if(e.pointerId!==pid)return;
-    let dx=(e.clientX-ox)/62, dy=(e.clientY-oy)/62;
-    if(Math.abs(e.clientX-ox)+Math.abs(e.clientY-oy)>12)moved=true;
+  };
+  const drag=(id,x,y)=>{
+    if(id!==tid)return;
+    let dx=(x-ox)/62, dy=(y-oy)/62;
+    if(Math.abs(x-ox)+Math.abs(y-oy)>12)moved=true;
     const m=Math.hypot(dx,dy); if(m>1){dx/=m; dy/=m;}
     knob.style.transform='translate(calc(-50% + '+(dx*34)+'px), calc(-50% + '+(dy*34)+'px))';
     onMove(dx,dy);
-  });
-  const end=e=>{
-    if(e.pointerId!==pid)return;
-    pid=null; stick.style.display='none'; onEnd();
-    if(!moved&&performance.now()-t0<500)tapAgentAt(e.clientX,e.clientY);
   };
-  zone.addEventListener('pointerup',end);
-  zone.addEventListener('pointercancel',end);
+  const finish=(id,x,y)=>{
+    if(id!==tid)return;
+    tid=null; stick.style.display='none'; onEnd();
+    if(!moved&&performance.now()-t0<500)tapAgentAt(x,y);
+  };
+  zone.addEventListener('touchstart',e=>{
+    e.preventDefault();
+    const t=e.changedTouches[0];
+    begin(t.identifier,t.clientX,t.clientY);
+  },{passive:false});
+  zone.addEventListener('touchmove',e=>{
+    e.preventDefault();
+    for(const t of e.changedTouches)drag(t.identifier,t.clientX,t.clientY);
+  },{passive:false});
+  const tend=e=>{for(const t of e.changedTouches)finish(t.identifier,t.clientX,t.clientY);};
+  zone.addEventListener('touchend',tend);
+  zone.addEventListener('touchcancel',tend);
+  /* миша на тачскрін-ноутбуках: pointer-події тільки для миші, щоб не дублювати тач */
+  let mDown=false;
+  zone.addEventListener('pointerdown',e=>{
+    if(e.pointerType!=='mouse')return;
+    mDown=true; begin('m',e.clientX,e.clientY); e.preventDefault();
+  });
+  zone.addEventListener('pointermove',e=>{if(mDown&&e.pointerType==='mouse')drag('m',e.clientX,e.clientY);});
+  const mUp=e=>{if(e.pointerType==='mouse'&&mDown){mDown=false; finish('m',e.clientX,e.clientY);}};
+  zone.addEventListener('pointerup',mUp);
+  zone.addEventListener('pointercancel',mUp);
 }
-bindZone('zoneL','stickL',(dx,dy)=>{joyDX=dx; joyDY=dy;},()=>{joyDX=joyDY=0;});
-bindZone('zoneR','stickR',(dx,dy)=>{lookDX=dx; lookDY=dy;},()=>{lookDX=lookDY=0;});
+/* iOS: не давати сафарі перехоплювати два пальці як pinch-зум */
+for(const g of['gesturestart','gesturechange','gestureend'])document.addEventListener(g,e=>e.preventDefault());
+bindZone('zoneL','stickL',(dx,dy)=>{joyDX=dx; joyDY=dy;},()=>{joyDX=joyDY=0;},()=>{zEvL++;});
+bindZone('zoneR','stickR',(dx,dy)=>{lookDX=dx; lookDY=dy;},()=>{lookDX=lookDY=0;},()=>{zEvR++;});
 /* Стіни для колізій (коло r=0.45) */
 const WALLS=[
   {x1:-14,z1:-8,x2:-14,z2:8},{x1:26,z1:-8,x2:26,z2:8},
@@ -962,7 +988,8 @@ log('🖱 клік по агенту — хто він · 🚶 «Гуляти» 
 updateHolos(); updateDash();
 
 /* Зовнішній API: сюди підключиться команда «деплой агента» — лелека прилетить сам */
-window.officeAPI={deployAgent:()=>{if(storkQueue.length&&!storkBusy)deliverStork();},askAgent,get agents(){return agents;}};
+window.officeAPI={deployAgent:()=>{if(storkQueue.length&&!storkBusy)deliverStork();},askAgent,get agents(){return agents;},
+get debug(){return{walkMode,touch:'ontouchstart'in window,touchMode,joyDX,joyDY,lookDX,lookDY,walkYaw,walkPitch,zEvL,zEvR};}};
 
 /* ============ ГОЛОВНИЙ ЦИКЛ ============ */
 const clock=new THREE.Clock();
@@ -994,7 +1021,9 @@ function loop(){
   if(walkMode){
     if(Math.abs(lookDX)>0.12)walkYaw-=lookDX*2.6*dt;                 /* правий стік — огляд */
     if(Math.abs(lookDY)>0.12)walkPitch=Math.max(-1.2,Math.min(1.2,walkPitch-lookDY*2*dt));
-    const f=((keys.KeyW||keys.ArrowUp)?1:0)-((keys.KeyS||keys.ArrowDown)?1:0)-joyDY;
+    if(touchMode&&dbgOn&&((frameNo=(frameNo||0)+1)%15===0))dbgEl.textContent=
+      'L '+joyDX.toFixed(2)+','+joyDY.toFixed(2)+' · R '+lookDX.toFixed(2)+','+lookDY.toFixed(2)+
+      ' · торкань L/R: '+zEvL+'/'+zEvR+' · yaw '+walkYaw.toFixed(2);    const f=((keys.KeyW||keys.ArrowUp)?1:0)-((keys.KeyS||keys.ArrowDown)?1:0)-joyDY;
     const s=((keys.KeyD||keys.ArrowRight)?1:0)-((keys.KeyA||keys.ArrowLeft)?1:0)+joyDX;
     const moving=!!(f||s);
     if(moving){
