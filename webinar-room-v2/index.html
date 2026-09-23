@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Вебінарна кімната — IK Transport</title>
+<meta name="description" content="Онлайн-кімната вебінару IK Transport: прямий ефір, живий чат, програма та бонуси.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;800&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="bg" aria-hidden="true">
+  <div class="bg-glow bg-glow--lime"></div>
+  <div class="bg-glow bg-glow--violet"></div>
+  <div class="bg-grid"></div>
+</div>
+
+<header class="hud-bar">
+  <div class="hud-bar__inner">
+    <div class="brand">
+      <span class="brand__mark">IK</span>
+      <span class="brand__text">IK TRANSPORT <em>/ вебінарна кімната</em></span>
+    </div>
+    <div class="hud-bar__meta">
+      <span class="pill" id="status-pill"><span class="pill__dot"></span><span id="status-text">Очікування ефіру</span></span>
+      <span class="hud-stat"><span class="hud-stat__label">Глядачів</span><span class="hud-stat__value" id="viewers">0</span></span>
+      <span class="hud-stat"><span class="hud-stat__label">Київ</span><span class="hud-stat__value mono" id="clock">--:--:--</span></span>
+    </div>
+  </div>
+</header>
+
+<main class="room">
+  <section class="stage-col">
+    <div class="sec-index">[ 01 — ефір ]</div>
+
+    <div class="stage hud-card">
+      <span class="corner tl"></span><span class="corner tr"></span>
+      <span class="corner bl"></span><span class="corner br"></span>
+
+      <!-- PRE-LIVE -->
+      <div class="stage-state" id="state-prelive">
+        <div class="prelive__grid" aria-hidden="true"></div>
+        <div class="prelive__content">
+          <div class="live-badge live-badge--off"><span class="live-badge__dot"></span>ЕФІР ЩЕ НЕ РОЗПОЧАВСЯ</div>
+          <h1 class="prelive__title">До старту<br>залишилось</h1>
+          <div class="timer" role="timer" aria-label="Зворотний відлік до ефіру">
+            <div class="timer__cell"><span class="timer__num" id="cd-d">00</span><span class="timer__label">днів</span></div>
+            <div class="timer__sep">:</div>
+            <div class="timer__cell"><span class="timer__num" id="cd-h">00</span><span class="timer__label">годин</span></div>
+            <div class="timer__sep">:</div>
+            <div class="timer__cell"><span class="timer__num" id="cd-m">00</span><span class="timer__label">хвилин</span></div>
+            <div class="timer__sep">:</div>
+            <div class="timer__cell"><span class="timer__num" id="cd-s">00</span><span class="timer__label">секунд</span></div>
+          </div>
+          <p class="prelive__note">Четвер, 19:00 за Києвом · тримай цю вкладку відкритою,<br>ефір увімкнеться автоматично</p>
+          <a class="btn btn--lime" href="https://t.me/ivankosovych_bot" target="_blank" rel="noopener">Нагадати в Telegram</a>
+        </div>
+      </div>
+
+      <!-- LIVE -->
+      <div class="stage-state is-hidden" id="state-live">
+        <canvas id="stream-canvas" aria-label="Відео ефіру"></canvas>
+        <div class="stage__overlay-top">
+          <div class="live-badge"><span class="live-badge__dot"></span>LIVE</div>
+          <div class="stage__topic">Електротранспорт 24/7: як змусити авто працювати на тебе</div>
+        </div>
+        <div class="stage__overlay-bottom">
+          <div class="speaker">
+            <span class="speaker__avatar">ІК</span>
+            <span class="speaker__info"><strong>Іван Косович</strong><span>спікер · IK Transport</span></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ENDED -->
+      <div class="stage-state is-hidden" id="state-ended">
+        <div class="prelive__content">
+          <div class="live-badge live-badge--off"><span class="live-badge__dot"></span>ЕФІР ЗАВЕРШЕНО</div>
+          <h1 class="prelive__title">Дякуємо,<br>що були з нами</h1>
+          <p class="prelive__note">Запис і бонусні матеріали — у Telegram-боті.<br>Наступний ефір — у четвер о 19:00 за Києвом.</p>
+          <a class="btn btn--lime" href="https://t.me/ivankosovych_bot" target="_blank" rel="noopener">Забрати запис і бонуси</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="reactions hud-card">
+      <span class="corner tl"></span><span class="corner tr"></span>
+      <span class="corner bl"></span><span class="corner br"></span>
+      <span class="reactions__label">Реакції</span>
+      <div class="reactions__row" id="reactions">
+        <button class="react" data-emoji="🔥" type="button"><span class="react__emoji">🔥</span><span class="react__count" data-count>0</span></button>
+        <button class="react" data-emoji="❤️" type="button"><span class="react__emoji">❤️</span><span class="react__count" data-count>0</span></button>
+        <button class="react" data-emoji="👏" type="button"><span class="react__emoji">👏</span><span class="react__count" data-count>0</span></button>
+        <button class="react" data-emoji="🚀" type="button"><span class="react__emoji">🚀</span><span class="react__count" data-count>0</span></button>
+        <button class="react" data-emoji="💡" type="button"><span class="react__emoji">💡</span><span class="react__count" data-count>0</span></button>
+      </div>
+    </div>
+
+    <div class="sec-index">[ 02 — програма ]</div>
+    <div class="program hud-card">
+      <span class="corner tl"></span><span class="corner tr"></span>
+      <span class="corner bl"></span><span class="corner br"></span>
+      <ul class="program__list" id="program-list">
+        <li data-start="19:00"><span class="program__time mono">19:00</span><span class="program__dot"></span><span class="program__text">Відкриття: чому електротранспорт — це актив, а не витрати</span></li>
+        <li data-start="19:15"><span class="program__time mono">19:15</span><span class="program__dot"></span><span class="program__text">Математика 24/7: скільки реально приносить авто на добу</span></li>
+        <li data-start="19:35"><span class="program__time mono">19:35</span><span class="program__dot"></span><span class="program__text">Живий розбір: підключаємо авто до системи прямо в ефірі</span></li>
+        <li data-start="20:00"><span class="program__time mono">20:00</span><span class="program__dot"></span><span class="program__text">Питання-відповіді та бонус для учасників ефіру</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <aside class="chat-col">
+    <div class="sec-index">[ 03 — чат ]</div>
+    <div class="chat hud-card">
+      <span class="corner tl"></span><span class="corner tr"></span>
+      <span class="corner bl"></span><span class="corner br"></span>
+      <div class="chat__head">
+        <span class="chat__title">Живий чат</span>
+        <span class="chat__online"><span class="pill__dot"></span><span id="chat-online">0</span> онлайн</span>
+      </div>
+      <div class="chat__messages" id="chat-messages" aria-live="polite"></div>
+      <form class="chat__form" id="chat-form">
+        <input class="chat__input" id="chat-input" type="text" maxlength="200" placeholder="Написати в чат…" autocomplete="off">
+        <button class="btn btn--lime btn--sm" type="submit">Надіслати</button>
+      </form>
+      <p class="chat__hint">Будь ввічливим: модератор прибирає спам і образи.</p>
+    </div>
+
+    <div class="sec-index">[ 04 — бонус ]</div>
+    <div class="bonus hud-card">
+      <span class="corner tl"></span><span class="corner tr"></span>
+      <span class="corner bl"></span><span class="corner br"></span>
+      <h2 class="bonus__title">Бонус учасника ефіру</h2>
+      <p class="bonus__text">Чек-лист «10 кроків до авто, що заробляє» + калькулятор окупності — тільки для тих, хто в кімнаті.</p>
+      <a class="btn btn--lime btn--block" href="https://t.me/ivankosovych_bot" target="_blank" rel="noopener">Забрати бонус у Telegram</a>
+    </div>
+  </aside>
+</main>
+
+<footer class="footer">
+  <span>IK TRANSPORT · вебінарна кімната</span>
+  <span class="mono" id="footer-clock"></span>
+</footer>
+
+<div class="fx" id="fx" aria-hidden="true"></div>
+<script src="script.js"></script>
+</body>
+</html>
