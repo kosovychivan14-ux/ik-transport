@@ -27,6 +27,16 @@
   #controls button:hover{background:#22d3ee22;}
   #controls button.on{background:#22d3ee33;border-color:#22d3ee;}
   #hint{position:fixed;bottom:14px;left:14px;color:#5b6b82;font-size:11px;z-index:5;pointer-events:none;}
+  #agentCard{position:fixed;left:10px;bottom:64px;width:292px;max-width:86vw;background:#0b0f16ee;border:1px solid #22d3ee77;border-radius:12px;padding:12px 14px;color:#c9d4e3;font-size:13px;z-index:6;backdrop-filter:blur(6px);box-shadow:0 8px 30px #000c;}
+  #acHead{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;font-size:15px;color:#fff;}
+  #acClose{cursor:pointer;color:#5b6b82;padding:2px 8px;font-size:16px;}
+  #acClose:hover{color:#67e8f9;}
+  .acRow{margin:6px 0;opacity:.93;line-height:1.45;}
+  #acSched{color:#67e8f9;}
+  #acTasks{margin:4px 0 0;padding-left:18px;}
+  #acTasks li{margin:2px 0;}
+  #joy{position:fixed;left:18px;bottom:76px;width:124px;height:124px;border-radius:50%;border:2px solid #22d3ee66;background:#0b0f1655;z-index:6;display:none;touch-action:none;}
+  #joyKnob{position:absolute;left:50%;top:50%;width:54px;height:54px;border-radius:50%;background:#22d3ee44;border:2px solid #22d3ee;transform:translate(-50%,-50%);}
 </style>
 <script type="importmap">
 {"imports":{
@@ -40,13 +50,21 @@
 <div id="title">🥥 AI AGENTS HOME · 3D</div>
 <div id="journal" class="closed"><h4 id="journalHead">📜 ЖУРНАЛ <span id="jArrow">▸</span></h4><div id="log"></div></div>
 <div id="agentPanel"><h4>📋 АГЕНТИ</h4><div id="agentRows"></div></div>
+<div id="agentCard" style="display:none">
+  <div id="acHead"><b id="acName"></b><span id="acClose">✕</span></div>
+  <div id="acSched" class="acRow"></div>
+  <div id="acDesc" class="acRow"></div>
+  <div class="acRow"><b>За що відповідаю:</b><ul id="acTasks"></ul></div>
+  <div id="acStatus" class="acRow"></div>
+</div>
 <div id="controls">
-  <button id="btnStork">🪶 Лелека!</button>
+  <button id="btnWalk">🚶 Гуляти</button>
   <button id="btnAgents">📋 Агенти</button>
   <button id="btnPause">⏸ Пауза</button>
   <button id="btnSpeed">⏩ 1×</button>
 </div>
-<div id="hint">Миша: обертання · колесо: зум · права кнопка: панорама</div>
+<div id="joy"><div id="joyKnob"></div></div>
+<div id="hint">Миша: обертання · колесо: зум · права кнопка: панорама · клік по агенту — хто він</div>
 <script type="module">
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
@@ -579,6 +597,7 @@ function spawnAgent(idx,dropX,dropZ){
     way:[],pose:'stand',birth:performance.now()};
   if(d){d.busy=A;}
   agents.push(A); setStatus(idx,'йде');
+  R.g.traverse(o=>{if(o.isMesh){o.userData.agent=A; pickMeshes.push(o);}});
   A.state='toWork'; A.way=d?pathThroughDoor(x,z,d.x,d.z+(d.face===0?1.25:-1.25)):[];
   A.faceDesk=d?d.face+Math.PI:0;
   log('🤖 <b style="color:'+def.css+'">'+def.short+'</b> прибув в офіс');
@@ -737,10 +756,10 @@ function updateDog(dt,t){
 }
 
 /* ============ ЛЕЛЕКА: доставка ============ */
-let storkBusy=false;
+let storkBusy=false, storkIn=9; // автодоставка: перший за 9с, далі кожні 20с
 async function deliverStork(){
   if(storkBusy)return;
-  if(!storkQueue.length){log('🪶 усі агенти вже в офісі');return;}
+  if(!storkQueue.length)return; // черга порожня — тихо
   storkBusy=true;
   const idx=AGENTS.indexOf(storkQueue.shift());
   log('🪶 лелека летить з новим агентом…');
@@ -776,7 +795,88 @@ async function deliverStork(){
 }
 
 /* ============ UI ============ */
-document.getElementById('btnStork').onclick=deliverStork;
+/* ============ ПРОГУЛЯНКА (WASD + огляд) ============ */
+let walkMode=false, walkYaw=0, walkPitch=0;
+const walkPos=new THREE.Vector3(), savedCam=new THREE.Vector3(), savedTgt=new THREE.Vector3();
+const keys={};
+addEventListener('keydown',e=>{keys[e.code]=true;
+  if(walkMode&&['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code))e.preventDefault();});
+addEventListener('keyup',e=>{keys[e.code]=false;});
+function setWalk(on){
+  walkMode=on;
+  document.getElementById('btnWalk').classList.toggle('on',on);
+  controls.enabled=!on;
+  document.getElementById('joy').style.display=(on&&('ontouchstart'in window))?'block':'none';
+  document.getElementById('hint').textContent=on
+    ?'WASD/стрілки — рух · Shift — біг · тягни — огляд · клік по агенту — хто він'
+    :'Миша: обертання · колесо: зум · права кнопка: панорама · клік по агенту — хто він';
+  if(on){
+    savedCam.copy(camera.position); savedTgt.copy(controls.target);
+    const dx=controls.target.x-camera.position.x, dz=controls.target.z-camera.position.z;
+    walkYaw=Math.atan2(dx,dz);
+    walkPitch=Math.max(-1.2,Math.min(1.2,Math.atan2(controls.target.y-camera.position.y,Math.hypot(dx,dz))));
+    walkPos.set(Math.max(-13.2,Math.min(25.2,camera.position.x)),1.7,Math.max(-7.2,Math.min(7.2,camera.position.z)));
+    log('🚶 режим прогулянки');
+  }else{
+    camera.position.copy(savedCam); controls.target.copy(savedTgt);
+  }
+}
+document.getElementById('btnWalk').onclick=()=>setWalk(!walkMode);
+/* огляд мишею/пальцем + клік-вибір агента */
+const raycaster=new THREE.Raycaster(), mouseNDC=new THREE.Vector2(), pickMeshes=[];
+let lookId=null, lx=0, ly=0, downX=0, downY=0, downT=0;
+renderer.domElement.addEventListener('pointerdown',e=>{
+  downX=e.clientX; downY=e.clientY; downT=performance.now();
+  if(walkMode){lookId=e.pointerId; lx=e.clientX; ly=e.clientY;}
+});
+addEventListener('pointermove',e=>{
+  if(walkMode&&e.pointerId===lookId){
+    walkYaw-=(e.clientX-lx)*0.0042;
+    walkPitch=Math.max(-1.2,Math.min(1.2,walkPitch-(e.clientY-ly)*0.0042));
+    lx=e.clientX; ly=e.clientY;
+  }
+});
+addEventListener('pointerup',e=>{
+  if(e.pointerId===lookId)lookId=null;
+  if(Math.hypot(e.clientX-downX,e.clientY-downY)<6&&performance.now()-downT<600)handleTap(e);
+});
+function handleTap(e){
+  if(e.target!==renderer.domElement)return;
+  const r=renderer.domElement.getBoundingClientRect();
+  mouseNDC.set(((e.clientX-r.left)/r.width)*2-1,-((e.clientY-r.top)/r.height)*2+1);
+  raycaster.setFromCamera(mouseNDC,camera);
+  const hits=raycaster.intersectObjects(pickMeshes,false);
+  if(hits.length){const A=hits[0].object.userData.agent; if(A&&A.def)askAgent(A);}
+}
+/* джойстик для сенсорних */
+const joyEl=document.getElementById('joy'), knobEl=document.getElementById('joyKnob');
+let joyId=null, joyDX=0, joyDY=0;
+function joyMove(t){
+  const r=joyEl.getBoundingClientRect();
+  let dx=(t.clientX-(r.left+r.width/2))/(r.width/2), dy=(t.clientY-(r.top+r.height/2))/(r.height/2);
+  const m=Math.hypot(dx,dy); if(m>1){dx/=m; dy/=m;}
+  joyDX=dx; joyDY=dy;
+  knobEl.style.transform='translate(calc(-50% + '+(dx*34)+'px), calc(-50% + '+(dy*34)+'px))';
+}
+joyEl.addEventListener('touchstart',e=>{joyId=e.changedTouches[0].identifier; joyMove(e.changedTouches[0]); e.preventDefault();},{passive:false});
+joyEl.addEventListener('touchmove',e=>{for(const t of e.changedTouches)if(t.identifier===joyId)joyMove(t); e.preventDefault();},{passive:false});
+const joyEnd=e=>{for(const t of e.changedTouches)if(t.identifier===joyId){joyId=null; joyDX=joyDY=0; knobEl.style.transform='translate(-50%,-50%)';}};
+joyEl.addEventListener('touchend',joyEnd); joyEl.addEventListener('touchcancel',joyEnd);
+
+/* ============ ЗАПИТАТИ АГЕНТА ============ */
+const STATE_TXT={work:'працює 💻',break:'на перерві ☕',toWork:'йде на місце 🚶',toBreak:'йде на перерву 🚶',idle:'очікує ⏳'};
+function askAgent(A){
+  const def=A.def;
+  document.getElementById('acName').innerHTML='<span style="color:'+def.css+'">●</span> '+def.short;
+  document.getElementById('acSched').textContent='🕐 '+def.sched;
+  document.getElementById('acDesc').textContent=def.desc;
+  document.getElementById('acTasks').innerHTML=def.pc.map(t=>'<li>'+t+'</li>').join('');
+  document.getElementById('acStatus').textContent='Статус: '+(STATE_TXT[A.state]||A.state);
+  document.getElementById('agentCard').style.display='block';
+  chatBubble(A.R,'«Я — '+def.short+'»',3);
+  log('❓ запитали <b style="color:'+def.css+'">'+def.short+'</b>: хто він і що робить');
+}
+document.getElementById('acClose').onclick=()=>{document.getElementById('agentCard').style.display='none';};
 /* Журнал: згорнути/розгорнути тиком по заголовку */
 const journal=document.getElementById('journal');
 function setJournal(open){
@@ -808,8 +908,12 @@ addEventListener('resize',()=>{
 for(let i=0;i<FIRST_WAVE;i++)spawnAgent(i);
 dog.g.position.set(11,0,-2);
 log('🏢 3D-офіс відкрито: зал + лаунж');
-log('🪶 натисни «Лелека!», щоб привести решту агентів');
+log('🪶 лелека сам приведе решту агентів');
+log('🖱 клік по агенту — хто він · 🚶 «Гуляти» — прогулянка офісом');
 updateHolos(); updateDash();
+
+/* Зовнішній API: сюди підключиться команда «деплой агента» — лелека прилетить сам */
+window.officeAPI={deployAgent:()=>{if(storkQueue.length&&!storkBusy)deliverStork();},askAgent,get agents(){return agents;}};
 
 /* ============ ГОЛОВНИЙ ЦИКЛ ============ */
 const clock=new THREE.Clock();
@@ -833,8 +937,28 @@ function loop(){
       billboardToCam(b.R,b.mesh);
       if(t>b.until){b.R.g.remove(b.mesh);bubbles.splice(i,1);}}
   }
-  if(focusT){controls.target.lerp(focusT,0.08);
+  if(focusT&&!walkMode){controls.target.lerp(focusT,0.08);
     if(controls.target.distanceTo(focusT)<0.1)focusT=null;}
+  /* лелека-система: сам привозить агентів з черги */
+  if(!paused&&storkQueue.length&&!storkBusy){storkIn-=dt; if(storkIn<=0){storkIn=20; deliverStork();}}
+  /* прогулянка */
+  if(walkMode){
+    const f=((keys.KeyW||keys.ArrowUp)?1:0)-((keys.KeyS||keys.ArrowDown)?1:0)-joyDY;
+    const s=((keys.KeyD||keys.ArrowRight)?1:0)-((keys.KeyA||keys.ArrowLeft)?1:0)+joyDX;
+    if(f||s){
+      const sp=(keys.ShiftLeft||keys.ShiftRight?5.5:3)*dt;
+      const fx=Math.sin(walkYaw), fz=Math.cos(walkYaw);
+      let nx=walkPos.x+(fx*f-fz*s)*sp, nz=walkPos.z+(fz*f+fx*s)*sp;
+      nx=Math.max(-13.2,Math.min(25.2,nx)); nz=Math.max(-7.2,Math.min(7.2,nz));
+      if((walkPos.x-6)*(nx-6)<0&&Math.abs(nz-DOOR_Z)>1.4)nx=walkPos.x; /* перегородка — лише через двері */
+      for(const d of DESKS){const dx=nx-d.x,dz=nz-d.z,dst=Math.hypot(dx,dz);
+        if(dst<1.3&&dst>1e-4){nx=d.x+dx/dst*1.3; nz=d.z+dz/dst*1.3;}}
+      walkPos.x=nx; walkPos.z=nz;
+    }
+    camera.position.set(walkPos.x,1.7,walkPos.z);
+    const cp=Math.cos(walkPitch);
+    camera.lookAt(walkPos.x+Math.sin(walkYaw)*cp,1.7+Math.sin(walkPitch),walkPos.z+Math.cos(walkYaw)*cp);
+  }
   controls.update();
   renderer.render(scene,camera);
 }
