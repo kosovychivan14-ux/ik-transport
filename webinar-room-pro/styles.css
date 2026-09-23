@@ -398,3 +398,111 @@ body{
   .chat__form{gap:8px}
   .chat__form .btn--sm{padding:11px 12px;font-size:11px}
 }
+
+/* ============ v1 AI-рекрутинг ============ */
+
+/* --- кваліфікаційний гейт --- */
+.qual-modal,.cta-modal{
+  position:fixed;inset:0;z-index:220;display:flex;align-items:center;justify-content:center;
+  background:rgba(2,4,7,.88);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  padding:20px;overflow-y:auto;
+}
+.qual-modal__box,.cta-modal__box{width:min(520px,100%);padding:40px 34px 30px;text-align:left;position:relative}
+.qual-modal__kicker,.cta-modal__kicker{font-size:11px;letter-spacing:.22em;color:var(--lime);margin-bottom:14px}
+.cta-modal__kicker{text-align:center}
+.qual-modal__title,.cta-modal__title{font-family:var(--font-d);font-weight:800;font-size:clamp(20px,3.6vw,28px);margin-bottom:10px;line-height:1.25}
+.cta-modal__box{text-align:center}
+.qual-modal__sub,.cta-modal__text{color:var(--muted);font-size:14px;line-height:1.6;margin-bottom:22px}
+.qual-field{display:block;margin-bottom:16px}
+.qual-field__label{display:block;font-size:12.5px;font-weight:700;letter-spacing:.04em;margin-bottom:8px;color:var(--text)}
+.qual-field__input{width:100%}
+select.qual-field__input option{background:#0a0e15}
+.qual-radio{display:flex;gap:22px;margin-top:4px}
+.qual-radio label{display:flex;align-items:center;gap:9px;font-size:14px;cursor:pointer}
+.qual-radio input{accent-color:var(--lime);width:17px;height:17px}
+.qual-note{font-size:11.5px;color:var(--muted);text-align:center;margin-top:12px}
+.btn--ghost{
+  background:transparent;color:var(--lime);border:1px solid var(--lime-line);
+  margin-top:12px;box-shadow:none;
+}
+.btn--ghost:hover{box-shadow:0 0 24px rgba(215,249,36,.25);transform:translateY(-2px)}
+
+/* --- панель ведучого / ліди --- */
+.host-bar{
+  display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+  background:rgba(70,224,255,.06);border:1px dashed rgba(70,224,255,.4);
+  border-radius:16px;padding:14px 20px;margin-bottom:20px;
+}
+.host-bar__label{font-size:11px;letter-spacing:.2em;color:var(--cyan)}
+.ghost-btn--sm{padding:10px 16px;font-size:12px}
+.leads-panel{padding:24px;margin-bottom:22px}
+.leads-panel__head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+.leads-panel__title{font-family:var(--font-d);font-size:15px}
+.leads-panel__empty{color:var(--muted);font-size:14px}
+.lead-row{padding:14px 0;border-bottom:1px solid var(--border)}
+.lead-row:last-child{border-bottom:0}
+.lead-row__main{display:flex;align-items:center;gap:12px;font-size:15px;margin-bottom:6px}
+.lead-row__level{font-size:13px}
+.lead-row__meta{font-size:12px;color:var(--lime);margin-bottom:4px}
+.lead-row__sub{font-size:12.5px;color:var(--muted)}
+
+/* --- опитування --- */
+.polls{display:flex;flex-direction:column;gap:14px;margin-bottom:6px}
+.poll{padding:22px}
+.poll__kicker{font-size:10.5px;letter-spacing:.2em;color:var(--cyan);margin-bottom:10px}
+.poll__q{font-family:var(--font-d);font-size:16px;margin-bottom:16px}
+.poll__opts{display:flex;flex-direction:column;gap:10px}
+.poll__opt{
+  position:relative;display:grid;grid-template-columns:1fr auto;gap:4px 12px;align-items:center;
+  background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:12px;
+  padding:12px 16px;cursor:pointer;color:var(--text);font-family:var(--font-b);font-size:14px;
+  text-align:left;overflow:hidden;transition:border-color .15s;
+}
+.poll__opt:hover{border-color:var(--lime-line)}
+.poll__opt-text{position:relative;z-index:1;font-weight:600}
+.poll__bar{position:absolute;inset:0;z-index:0}
+.poll__fill{display:block;height:100%;width:0;background:var(--lime-soft);transition:width .8s ease;border-right:2px solid var(--lime-line)}
+.poll__pct{position:relative;z-index:1;font-size:12px;color:var(--lime)}
+.poll__opt.is-voted{cursor:default}
+.poll__opt.is-mine{border-color:var(--lime-line);box-shadow:0 0 18px rgba(215,249,36,.18)}
+.poll:empty{display:none}
+
+/* --- бот у чаті --- */
+.msg--bot .msg__name{color:var(--violet)}
+.msg--bot{background:rgba(139,92,246,.07);border:1px solid rgba(139,92,246,.28);border-radius:12px;padding:10px 12px}
+
+/* --- помічник на вкладці записів --- */
+.rec-ai{padding:26px;margin-bottom:30px}
+.rec-ai__head{display:flex;align-items:center;gap:16px;margin-bottom:16px}
+.rec-ai__avatar{
+  width:52px;height:52px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  font-size:24px;background:rgba(139,92,246,.12);border:1px solid rgba(139,92,246,.4);
+  box-shadow:0 0 24px rgba(139,92,246,.3);
+}
+.rec-ai__title{font-family:var(--font-d);font-size:16px;margin-bottom:4px}
+.rec-ai__sub{color:var(--muted);font-size:13px}
+.rec-ai__messages{display:flex;flex-direction:column;gap:10px;max-height:280px;overflow-y:auto;margin-bottom:14px}
+.rec-ai__msg{
+  align-self:flex-start;max-width:88%;font-size:13.5px;line-height:1.55;
+  background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.3);border-radius:14px 14px 14px 4px;
+  padding:10px 14px;
+}
+.rec-ai__msg--me{align-self:flex-end;background:var(--lime-soft);border:1px solid var(--lime-line);border-radius:14px 14px 4px 14px}
+.rec-ai__form{display:flex;gap:10px}
+
+/* --- кнопка нагадувань у розкладі --- */
+.sched-notify{margin-bottom:26px;max-width:420px}
+
+/* --- livekit --- */
+#livekit-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#04060a}
+.livekit-note{
+  position:absolute;top:64px;right:22px;z-index:5;
+  font-family:var(--font-m);font-size:10.5px;letter-spacing:.12em;color:var(--cyan);
+  background:rgba(4,6,10,.7);border:1px solid rgba(70,224,255,.4);border-radius:999px;padding:5px 12px;
+}
+
+@media (max-width:640px){
+  .qual-modal__box,.cta-modal__box{padding:32px 22px 24px}
+  .rec-ai{padding:20px}
+  .poll{padding:18px}
+}

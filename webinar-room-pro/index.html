@@ -40,6 +40,24 @@
 
   <!-- ============ КІМНАТА ============ -->
   <section id="tab-room" class="tabpanel" role="tabpanel">
+    <div class="host-bar is-hidden" id="host-bar">
+      <span class="host-bar__label mono">РЕЖИМ ВЕДУЧОГО</span>
+      <button class="btn btn--lime btn--sm" id="host-cta-now" type="button">Показати CTA зараз</button>
+      <button class="ghost-btn ghost-btn--sm" id="host-leads-toggle" type="button">Панель «Ліди»</button>
+    </div>
+
+    <div class="leads-panel hud-card is-hidden" id="leads-panel">
+      <span class="corner tl"></span><span class="corner tr"></span>
+      <span class="corner bl"></span><span class="corner br"></span>
+      <div class="leads-panel__head">
+        <h3 class="leads-panel__title">Ліди · скоринг залучення</h3>
+        <button class="btn btn--lime btn--sm" id="leads-export" type="button">Експорт CSV</button>
+      </div>
+      <div class="leads-panel__body" id="leads-body">
+        <p class="leads-panel__empty">Поки що немає даних — дочекайтесь перших глядачів.</p>
+      </div>
+    </div>
+
     <div class="room-grid">
       <div class="stage-col">
         <div class="sec-index">[ 01 — ефір ]</div>
@@ -67,6 +85,8 @@
 
           <div class="stage-state is-hidden" id="state-live">
             <canvas id="stream-canvas" aria-label="Відео ефіру"></canvas>
+            <video id="livekit-video" class="is-hidden" autoplay playsinline muted aria-label="Прямий ефір"></video>
+            <div class="livekit-note is-hidden" id="livekit-note">Підключено через LiveKit</div>
             <div class="stage__overlay-top">
               <div class="live-badge"><span class="live-badge__dot"></span><span id="live-badge-text">LIVE</span></div>
               <div class="stage__topic">Електротранспорт 24/7: як змусити авто працювати на тебе</div>
@@ -114,7 +134,10 @@
           </div>
         </div>
 
-        <div class="sec-index">[ 02 — програма ]</div>
+        <div class="sec-index">[ 02 — опитування ]</div>
+        <div class="polls" id="polls"></div>
+
+        <div class="sec-index">[ 03 — програма ]</div>
         <div class="program hud-card">
           <span class="corner tl"></span><span class="corner tr"></span>
           <span class="corner bl"></span><span class="corner br"></span>
@@ -128,7 +151,7 @@
       </div>
 
       <aside class="chat-col">
-        <div class="sec-index">[ 03 — чат ]</div>
+        <div class="sec-index">[ 04 — чат ]</div>
         <div class="chat hud-card">
           <span class="corner tl"></span><span class="corner tr"></span>
           <span class="corner bl"></span><span class="corner br"></span>
@@ -144,7 +167,7 @@
           <p class="chat__hint">Будь ввічливим: модератор прибирає спам і образи.</p>
         </div>
 
-        <div class="sec-index">[ 04 — бонус ]</div>
+        <div class="sec-index">[ 05 — бонус ]</div>
         <div class="bonus hud-card">
           <span class="corner tl"></span><span class="corner tr"></span>
           <span class="corner bl"></span><span class="corner br"></span>
@@ -168,6 +191,10 @@
     <div class="sec-index">[ 01 — розклад ]</div>
     <h1 class="page-title">Розклад<span class="lime">.</span></h1>
     <p class="page-sub">Електротранспорт. Від технології до бізнесу.<br>Щочетверга о 19:00 за Києвом.</p>
+    <button class="ghost-btn sched-notify" id="notify-btn" type="button">
+      <span class="ghost-btn__play">◉</span>
+      <span class="ghost-btn__text">Увімкнути нагадування в браузері<small>Сповістимо про початок ефіру</small></span>
+    </button>
     <div class="sched-grid" id="sched-list"></div>
 
     <div class="sec-index">[ 02 — як виглядатиме очікування ]</div>
@@ -218,6 +245,24 @@
         </div>
       </div>
     </div>
+
+    <div class="sec-index">[ 02 — помічник ]</div>
+    <div class="rec-ai hud-card">
+      <span class="corner tl"></span><span class="corner tr"></span>
+      <span class="corner bl"></span><span class="corner br"></span>
+      <div class="rec-ai__head">
+        <span class="rec-ai__avatar">🤖</span>
+        <div>
+          <h3 class="rec-ai__title">Помічник Івана</h3>
+          <p class="rec-ai__sub">AI-модератор відповідає навіть на записах — питайте!</p>
+        </div>
+      </div>
+      <div class="rec-ai__messages" id="rec-ai-messages" aria-live="polite"></div>
+      <form class="rec-ai__form" id="rec-ai-form">
+        <input class="chat__input" id="rec-ai-input" type="text" maxlength="200" placeholder="Наприклад: як приєднатися?" autocomplete="off">
+        <button class="btn btn--lime btn--sm" type="submit">Запитати</button>
+      </form>
+    </div>
   </section>
 
 </main>
@@ -249,6 +294,63 @@
 </div>
 
 <div class="fx" id="fx" aria-hidden="true"></div>
+
+<!-- кваліфікаційний гейт -->
+<div class="qual-modal is-hidden" id="qual-modal" role="dialog" aria-modal="true" aria-label="Кілька питань перед входом">
+  <div class="qual-modal__box hud-card">
+    <span class="corner tl"></span><span class="corner tr"></span>
+    <span class="corner bl"></span><span class="corner br"></span>
+    <div class="qual-modal__kicker mono">ЛАСКАВО ПРОСИМО</div>
+    <h2 class="qual-modal__title">Кілька питань перед входом</h2>
+    <p class="qual-modal__sub">Це допоможе нам зробити ефір кориснішим саме для вас.</p>
+    <form id="qual-form">
+      <label class="qual-field">
+        <span class="qual-field__label">Ваше ім'я</span>
+        <input class="chat__input qual-field__input" id="qual-name" type="text" maxlength="40" placeholder="Як до вас звертатись?" required>
+      </label>
+      <label class="qual-field">
+        <span class="qual-field__label">Звідки дізнались про вебінар?</span>
+        <input class="chat__input qual-field__input" id="qual-source" type="text" maxlength="120" placeholder="Telegram, Instagram, друзі…" required>
+      </label>
+      <label class="qual-field">
+        <span class="qual-field__label">Ваша головна ціль</span>
+        <select class="chat__input qual-field__input" id="qual-goal" required>
+          <option value="" disabled selected>Оберіть…</option>
+          <option value="income">Додатковий дохід</option>
+          <option value="business">Свій бізнес</option>
+          <option value="team">Команда</option>
+          <option value="curious">Просто цікаво</option>
+        </select>
+      </label>
+      <div class="qual-field">
+        <span class="qual-field__label">Готові приділяти 5+ годин на тиждень?</span>
+        <div class="qual-radio">
+          <label><input type="radio" name="qual-time" value="yes" required> Так</label>
+          <label><input type="radio" name="qual-time" value="no"> Ні</label>
+        </div>
+      </div>
+      <button class="btn btn--lime btn--block" type="submit">Увійти в кімнату</button>
+      <p class="qual-note">Натискаючи, ви погоджуєтесь з правилами кімнати.</p>
+    </form>
+  </div>
+</div>
+
+<!-- Timed CTA overlay -->
+<div class="cta-modal is-hidden" id="cta-modal" role="dialog" aria-modal="true" aria-label="Приєднатися до команди">
+  <div class="cta-modal__box hud-card">
+    <span class="corner tl"></span><span class="corner tr"></span>
+    <span class="corner bl"></span><span class="corner br"></span>
+    <button class="demo-modal__close" id="cta-close" type="button" aria-label="Закрити">✕</button>
+    <div class="cta-modal__kicker mono">МОМЕНТ РІШЕННЯ</div>
+    <h2 class="cta-modal__title">Готові змусити авто<br>працювати на вас?</h2>
+    <p class="cta-modal__text">Приєднуйтесь до команди IK Transport: навчимо, дамо інструменти й підтримку на кожному кроці.</p>
+    <a class="btn btn--lime btn--block" id="cta-join" href="https://t.me/ivankosovych_bot" target="_blank" rel="noopener">Приєднатися до команди</a>
+    <a class="btn btn--ghost btn--block" id="cta-call" href="https://t.me/ivankosovych_bot" target="_blank" rel="noopener">Хочу дзвінок 1:1</a>
+  </div>
+</div>
+
+<script src="config.js"></script>
 <script src="app.js"></script>
+<script src="ai.js"></script>
 </body>
 </html>

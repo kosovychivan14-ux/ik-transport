@@ -98,6 +98,7 @@
         setPill('pill--test', 'Тестовий ефір');
         liveBadgeText.textContent = 'ТЕСТ · LIVE';
         addSysOnce('test', 'Тестовий ефір: перевірка сцени');
+        wrpEvent('wrp:test-live-start');
       } else {
         test = null;
         $('test-launch').disabled = false;
@@ -107,6 +108,7 @@
         preliveTitle.innerHTML = PRELIVE_TITLE;
         preliveNote.innerHTML = PRELIVE_NOTE;
         liveBadgeText.textContent = 'LIVE';
+        wrpEvent('wrp:test-live-end');
         addSysOnce('test-end', 'Тест завершено — кімната в звичайному режимі');
       }
       tickClock();
@@ -120,8 +122,12 @@
     if (state === 'live') {
       setPill('pill--live', 'Прямий ефір');
       addSysOnce('live', 'Іван Косович приєднався до ефіру');
+      wrpEvent('wrp:live-start');
     }
-    else if (state === 'ended') setPill(null, 'Ефір завершено');
+    else if (state === 'ended') {
+      setPill(null, 'Ефір завершено');
+      wrpEvent('wrp:live-end');
+    }
     else {
       setPill(null, 'Очікування ефіру');
       var target = s > nowMs ? start : nextWebinarStart(kyivNow());
@@ -144,6 +150,14 @@
     if (sysFlags[key]) return;
     sysFlags[key] = true;
     addSys(text);
+  }
+
+  /* події для AI-модуля (ai.js): wrp:live-start / wrp:live-end / wrp:chat-sent */
+  var wrpFired = {};
+  function wrpEvent(name) {
+    if (wrpFired[name]) return;
+    wrpFired[name] = true;
+    try { window.dispatchEvent(new CustomEvent(name)); } catch (e) {}
   }
 
   /* ---------- програма ---------- */
@@ -228,6 +242,7 @@
     var input = $('chat-input'), v = input.value.trim();
     if (!v) return;
     addMsg('', v, true);
+    try { window.dispatchEvent(new CustomEvent('wrp:chat-sent', { detail: { text: v } })); } catch (err) {}
     input.value = '';
   });
 
@@ -276,6 +291,7 @@
       var dt = new Date(d);
       var label = fmt.format(dt);
       label = label.charAt(0).toUpperCase() + label.slice(1);
+      var dtTag = dt.getFullYear() + pad(dt.getMonth() + 1) + pad(dt.getDate());
       var card = document.createElement('div');
       card.className = 'sched-card hud-card' + (i === 0 ? ' sched-card--next' : '');
       card.innerHTML =
@@ -285,7 +301,7 @@
         '<div class="sched-card__date">' + label + '</div>' +
         '<div class="sched-card__time">19:00 за Києвом</div>' +
         '<div class="sched-card__title">Електротранспорт. Від технології до бізнесу.</div>' +
-        '<a class="btn btn--lime btn--sm" href="https://t.me/ivankosovych_bot" target="_blank" rel="noopener">Нагадати в Telegram</a>';
+        '<a class="btn btn--lime btn--sm" href="https://t.me/ivankosovych_bot?start=remind_' + dtTag + '" target="_blank" rel="noopener">Нагадати в Telegram</a>';
       list.appendChild(card);
       d = new Date(d);
       d.setDate(d.getDate() + 7);
