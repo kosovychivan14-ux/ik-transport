@@ -264,10 +264,41 @@ body{
   .chat{height:440px}
 }
 @media (max-width:640px){
-  .hud-bar__inner{padding:12px 16px}
-  .room{padding:20px 16px 6px}
-  .timer__cell{min-width:64px;padding:10px 6px 8px}
-  .timer__sep{font-size:22px;padding-top:10px}
-  .stage{min-height:300px}
+  .hud-bar__inner{padding:12px 16px;gap:10px}
+  .brand__text{font-size:10px}
+  .hud-bar__meta{gap:12px}
+  .pill{font-size:10px;padding:6px 11px}
+  .hud-stat__value{font-size:13px}
+  .room{padding:20px 16px 6px;gap:20px}
+  /* сцена: прибираємо фіксоване 16/9, висота під контент */
+  .stage{aspect-ratio:auto;min-height:0}
+  .stage-state{position:relative;inset:auto;min-height:0}
+  #state-live{min-height:300px}
+  .prelive__content{padding:28px 14px}
+  .prelive__title{font-size:24px;margin-bottom:20px}
+  .live-badge{margin-bottom:16px}
+  .timer{gap:7px;margin-bottom:18px}
+  .timer__cell{min-width:56px;padding:10px 4px 8px;border-radius:11px}
+  .timer__num{font-size:24px}
+  .timer__label{font-size:9px;letter-spacing:.1em}
+  .timer__sep{font-size:20px;padding-top:10px}
+  .prelive__note{font-size:13.5px;margin-bottom:20px}
+  .prelive__note br{display:none}
+  .stage__topic{display:none}
+  .stage__overlay-top,.stage__overlay-bottom{padding:14px 16px}
+  .chat{height:430px;padding:16px}
+  .chat__input{font-size:16px} /* без авто-зуму в iOS */
+  .reactions{padding:14px 16px;gap:12px}
+  .program{padding:4px 18px}
+  .program__list li{font-size:13px;padding:13px 0;gap:12px}
+  .bonus{padding:20px}
   .footer{padding:20px 16px 28px}
+}
+@media (max-width:420px){
+  .hud-stat--clock{display:none}
+  .hud-bar__meta{gap:10px}
+  .timer__cell{min-width:50px}
+  .timer__num{font-size:21px}
+  .chat__form{gap:8px}
+  .chat__form .btn--sm{padding:11px 12px;font-size:11px}
 }
