@@ -263,10 +263,25 @@
     if (sb && videoEl && !videoEl.classList.contains('is-hidden')) sb.classList.remove('is-hidden');
   }
 
-  /* ============ глядачі ============ */
+  /* ============ глядачі: тепер це реальний список учасників ============ */
   function startViewers() {
-    viewers = (webinar.audienceBase || 200) + Math.floor(Math.random() * 41) - 20;
+    var P = window.WRP_PARTICIPANTS;
+    if (P) {
+      P.reset(120 + Math.floor(Math.random() * 51)); // 120–170 на старті
+      P.onJoin(onParticipantJoin);
+      viewers = P.count();
+    } else {
+      viewers = (webinar.audienceBase || 200) + Math.floor(Math.random() * 41) - 20;
+    }
     paintViewers();
+  }
+  // кількість на лічильнику завжди = довжині списку учасників
+  function onParticipantJoin(p) {
+    var P = window.WRP_PARTICIPANTS;
+    viewers = P ? P.count() : viewers;
+    paintViewers();
+    var verb = p.f ? 'приєдналась' : 'приєднався';
+    addChatMsg('', p.flag + ' ' + p.name + ' · ' + p.country + ' ' + verb, 'msg--sys');
   }
   function paintViewers() {
     var v = Math.max(60, viewers);
@@ -275,14 +290,16 @@
     var el3 = $('eg-watchers-n'); if (el3) el3.textContent = v;
     var el4 = $('eg-sched-viewers'); if (el4) el4.textContent = v;
   }
-  (function wander() {
+  // нові учасники приєднуються протягом ефіру — кожен з'являється в чаті й у списку
+  (function joinLoop() {
     setTimeout(function () {
-      if (api.takeover && !endedState) {
-        viewers = Math.max(80, Math.min(1500, viewers + Math.floor(Math.random() * 25) - 12));
-        paintViewers();
+      var P = window.WRP_PARTICIPANTS;
+      if (api.takeover && !endedState && P) {
+        var n = Math.random() < 0.22 ? 2 : 1;
+        for (var i = 0; i < n; i++) P.joinOne();
       }
-      wander();
-    }, 4000 + Math.random() * 3000);
+      joinLoop();
+    }, 9000 + Math.random() * 16000);
   })();
 
   /* ============ сесія ============ */

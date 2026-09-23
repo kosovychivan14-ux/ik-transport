@@ -95,7 +95,7 @@
             <div class="stage__overlay-top">
               <div class="live-badge"><span class="live-badge__dot"></span><span id="live-badge-text">LIVE</span></div>
               <div class="stage__topic" id="stage-topic">Електротранспорт 24/7: як змусити авто працювати на тебе</div>
-              <div class="live-watchers" id="eg-watchers" title="Зараз дивляться">👁&nbsp;<b id="eg-watchers-n">0</b></div>
+              <button class="live-watchers" id="eg-watchers" type="button" title="Показати учасників ефіру">👁&nbsp;<b id="eg-watchers-n">0</b></button>
             </div>
             <div class="stage__started mono" id="eg-started"></div>
             <div class="stage__overlay-bottom">
@@ -372,7 +372,19 @@
   </div>
 </div>
 
+<!-- панель учасників ефіру -->
+<div class="p-scrim is-hidden" id="p-scrim"></div>
+<aside class="p-drawer" id="p-drawer" role="dialog" aria-label="Учасники ефіру">
+  <div class="p-drawer__head">
+    <div class="p-drawer__title"><strong>Учасники ефіру</strong><span class="p-drawer__count" id="p-count">0</span></div>
+    <button class="p-drawer__close" id="p-close" type="button" aria-label="Закрити">✕</button>
+  </div>
+  <div class="p-drawer__search"><input id="p-search" type="search" placeholder="Пошук за ім'ям або країною…" autocomplete="off"></div>
+  <div class="p-drawer__list" id="p-list"></div>
+</aside>
+
 <script src="config.js"></script>
+<script src="participants.js"></script>
 <script src="evergreen.js"></script>
 <script src="app.js"></script>
 <script src="ai.js"></script>
