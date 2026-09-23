@@ -119,17 +119,19 @@ const cio = new IntersectionObserver(entries => {
 $$('[data-count]').forEach(el => cio.observe(el));
 
 /* ---------- паралакс HUD-фото за мишею ---------- */
+/* ---------- паралакс фото за мишею ---------- */
 $$('.hero__visual, .speaker__photo').forEach(zone => {
-  const img = $('.hud__frame img', zone);
+  const img = $('.hud--photo > img', zone);
   if(!img || window.matchMedia('(hover: none)').matches) return;
+  img.style.transition = 'transform .35s ease-out';
+  img.style.transform = 'scale(1.08)';
   zone.addEventListener('mousemove', e => {
     const r = zone.getBoundingClientRect();
-    img.style.setProperty('--px', (((e.clientX - r.left) / r.width) - 0.5).toFixed(3));
-    img.style.setProperty('--py', (((e.clientY - r.top) / r.height) - 0.5).toFixed(3));
+    const x = (((e.clientX - r.left) / r.width) - 0.5) * 14;
+    const y = (((e.clientY - r.top) / r.height) - 0.5) * 10;
+    img.style.transform = 'scale(1.08) translate(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px)';
   });
-  zone.addEventListener('mouseleave', () => {
-    img.style.setProperty('--px', 0); img.style.setProperty('--py', 0);
-  });
+  zone.addEventListener('mouseleave', () => { img.style.transform = 'scale(1.08)'; });
 });
 
 /* ---------- плавний скрол для hero-стрілки ---------- */
