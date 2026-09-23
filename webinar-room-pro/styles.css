@@ -621,3 +621,10 @@ button.live-watchers:focus-visible{outline:2px solid var(--lime);outline-offset:
   .join-toasts{left:10px;bottom:10px;max-width:86%}
   .join-toast{font-size:11px;padding:7px 13px}
 }
+
+/* мобільна версія: панель учасників і тости */
+@media (max-width:640px){
+  .p-drawer__search input{font-size:16px} /* без авто-зуму на iOS */
+  .p-drawer__title{font-size:15px}
+  .p-row__main strong{font-size:13px}
+}
