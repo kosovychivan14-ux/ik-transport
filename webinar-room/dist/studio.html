@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#101513">
+  <meta name="description" content="Студія ведучого Івана Косовича: камера, мікрофон і презентація у браузері.">
+  <title>Студія ведучого — Іван Косович</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23101513'/%3E%3Ctext x='8' y='45' font-family='Arial' font-size='37' font-weight='700' fill='%23c5f574'%3EIK%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/studio.css">
+  <link rel="manifest" href="/studio.webmanifest">
+  <link rel="apple-touch-icon" href="/ik-studio-icon.svg">
+  <link rel="stylesheet" href="/materials.css">
+  <link rel="stylesheet" href="/camera-effects.css">
+  <link rel="stylesheet" href="/live.css">
+  <meta name="referrer" content="no-referrer">
+  <script src="https://telegram.org/js/telegram-web-app.js" defer></script>
+  <script src="/vendor/livekit/livekit-client.umd.js" defer></script>
+  <script type="module" src="/studio-recording-client.js"></script>
+  <script type="module" src="/studio.js"></script>
+  <script type="module" src="/studio-recordings.js"></script>
+  <script type="module" src="/analytics-presenter.js"></script>
+  <script type="module" src="/studio-pwa.js"></script>
+  <script type="module" src="/studio-share.js"></script>
+  <script type="module" src="/premiere-admin.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#studio-main">Перейти до студії</a>
+  <header class="header studio-header">
+    <a class="brand" href="/#room" aria-label="IK — Іван Косович — вебінарна кімната"><span class="monogram">IK<span>↗</span></span><span>ІВАН<br>КОСОВИЧ</span></a>
+    <span class="studio-header-label">СТУДІЯ ВЕДУЧОГО</span>
+    <span class="studio-header-actions"><button id="install-studio-app" class="install-studio-app" type="button" hidden>Встановити програму</button><a class="back-to-room" href="/#room">До керування <span aria-hidden="true">↗</span></a></span>
+  </header>
+  <main id="studio-main" tabindex="-1">
+    <div class="studio-heading"><div><p class="eyebrow">ВАША КАМЕРА. ВАША ПРЕЗЕНТАЦІЯ.</p><h1>Готові до зустрічі<span class="accent">?</span></h1><p class="studio-intro">Підготуйте камеру, перевірте звук та відкрийте слайди.</p></div><span class="offline-badge">Ефір не запущено</span></div>
+    <div id="browser-notice" class="studio-notice" role="status" hidden></div>
+    <div class="studio-grid">
+      <section class="studio-workspace" aria-label="Попередній перегляд і керування">
+        <section class="materials-panel" aria-labelledby="materials-title">
+          <h2 id="materials-title">Матеріали вебінару</h2>
+          <div class="materials-grid">
+            <div class="material-card">
+              <div class="saved-deck"><span class="saved-deck-tag">ЗБЕРЕЖЕНА ПРЕЗЕНТАЦІЯ</span><strong>E-Transport українською</strong><span class="saved-deck-meta">13 слайдів · PDF · 27,6 МБ</span><button id="load-saved-slides" class="material-button">Відкрити E-Transport UA</button><p class="material-help">Доступна й після повторного відкриття студії.</p></div>
+              <label class="material-label" for="slides-file">Відкрити іншу презентацію</label>
+              <input id="slides-file" class="slides-file" type="file" accept=".pdf,.png,.jpg,.jpeg,.webp" multiple aria-describedby="slides-help">
+              <p id="slides-help" class="material-help">Один PDF або зображення JPG, PNG, WebP — до 80 МБ і 200 слайдів. PowerPoint: збережіть як PDF.</p>
+              <p id="deck-name" class="deck-name">Презентацію ще не відкрито</p>
+              <div class="material-actions"><button id="show-slides" class="material-button" disabled>Показати слайди</button><button id="remove-slides" class="material-link-button" disabled>Прибрати з перегляду</button></div>
+            </div>
+            <div class="material-card">
+              <form id="website-form"><label class="material-label" for="website-url">Сайт для показу</label><div class="website-input-row"><input id="website-url" type="text" inputmode="url" autocomplete="url" placeholder="https://…" required aria-describedby="website-help"><button class="material-button" type="submit">Додати</button></div></form>
+              <p id="website-help" class="material-help">Відкрийте сайт в окремій вкладці: там можна гортати сторінки й натискати посилання.</p>
+              <a id="website-link" class="website-link" href="#" target="_blank" rel="noopener noreferrer" hidden>Відкрити сайт ↗</a>
+              <div id="website-guide" hidden><button id="share-website" class="material-button">Обрати вкладку або вікно</button><p class="material-help">У запиті браузера оберіть саме сайт, потім керуйте ним у його вкладці або вікні.</p></div>
+            </div>
+          </div>
+          <p id="materials-status" class="materials-status" role="status" aria-live="polite">E-Transport уже збережена у студії. Інші вибрані файли відкриваються лише в цій вкладці до перезавантаження.</p>
+        </section>
+        <div id="preview-shell" class="preview-shell">
+        <div class="preview-bar"><span id="preview-source-label">Попередній перегляд</span><span class="preview-bar-actions"><span class="local-badge">ВИДНО ЛИШЕ ВАМ</span><button id="preview-fullscreen" class="preview-fullscreen" type="button" aria-label="Розгорнути попередній перегляд на весь екран">Розгорнути слайди ⛶</button></span></div>
+        <div class="preview-command-bar" aria-label="Швидке керування ефіром">
+          <span id="quick-broadcast-state" class="quick-broadcast-state">Ефір не запущено</span>
+          <button id="quick-go-live" class="quick-live-button" type="button" disabled>Почати ефір</button>
+          <button id="quick-stop-live" class="quick-stop-button" type="button" disabled>Завершити ефір</button>
+          <button id="quick-start-recording" class="quick-record-button" type="button">● Записати</button>
+          <button id="quick-stop-recording" class="quick-stop-record-button" type="button" disabled>■ Стоп</button>
+          <label class="quick-blur"><input id="quick-blur-toggle" type="checkbox"> Розмиття фону</label>
+        </div>
+        <div id="slides-navigation" class="slides-navigation" role="group" aria-label="Керування слайдами" hidden><button id="slide-prev" aria-label="Попередній слайд">←</button><label for="slide-number">Слайд</label><input id="slide-number" type="number" min="1" max="1" value="1" inputmode="numeric"><span id="slide-count">із 0</span><button id="slide-next" aria-label="Наступний слайд">→</button><button id="show-screen" class="material-link-button" disabled>Повернутися до екрана</button></div>
+        <div id="program-preview" class="program-preview" data-layout="camera">
+          <div id="camera-layer" class="camera-layer" role="group" aria-label="Ваше відео. У режимі з матеріалом можна перетягувати або рухати клавішами стрілок."><video id="camera-preview" autoplay muted playsinline aria-label="Попередній перегляд камери" hidden></video><canvas id="camera-blurred" aria-label="Камера з розмитим фоном" hidden></canvas><div id="blur-placeholder" class="blur-placeholder" hidden>Готуємо розмиття…</div><div id="camera-empty" class="source-empty"><span class="source-symbol" aria-hidden="true">◉</span><h2>Ваше місце в кадрі</h2><p>Увімкніть камеру кнопкою нижче.</p><span class="studio-signature">IK<span>↗</span></span></div><span class="camera-drag-hint" aria-hidden="true">✥</span><span class="preview-nameplate">Іван Косович <span>Ведучий</span></span></div>
+          <div id="screen-layer" class="screen-layer" hidden><video id="screen-preview" autoplay muted playsinline aria-label="Попередній перегляд спільного екрана" hidden></video><div id="slide-layer" class="slide-layer" hidden></div><div id="screen-empty" class="source-empty"><span class="source-symbol" aria-hidden="true">▤</span><h2>Ваші слайди або сайт</h2><p>Додайте презентацію вище або оберіть вкладку для показу.</p></div></div>
+        </div>
+        </div>
+        <div class="studio-controls" aria-label="Керування пристроями">
+          <button id="toggle-camera" class="source-control" aria-pressed="false"><span class="control-icon" aria-hidden="true">◉</span><span id="camera-button-text">Увімкнути камеру</span></button>
+          <button id="toggle-microphone" class="source-control" aria-pressed="false"><span class="control-icon" aria-hidden="true">♪</span><span id="microphone-button-text">Увімкнути мікрофон</span></button>
+          <button id="toggle-screen" class="source-control" aria-pressed="false"><span class="control-icon" aria-hidden="true">▤</span><span id="screen-button-text">Показати екран</span></button>
+          <button id="stop-sources" class="stop-sources" disabled>Вимкнути все</button>
+        </div>
+        <p id="studio-message" class="studio-message" role="status" aria-live="polite">Камера й мікрофон вимкнені. Нічого не передається глядачам.</p>
+        <section class="camera-edit-panel" aria-labelledby="camera-position-title"><h2 id="camera-position-title">Твоє місце в кадрі</h2><p>Перетягни своє відео мишею або пальцем. Положення й розмір зберігаються у цьому браузері.</p><div class="camera-position-controls"><fieldset><legend>Швидке розміщення</legend><div class="camera-corners"><button data-camera-corner="0,0">↖ Зліва вгорі</button><button data-camera-corner="1,0">↗ Справа вгорі</button><button data-camera-corner="0,1">↙ Зліва внизу</button><button data-camera-corner="1,1">↘ Справа внизу</button></div></fieldset><div><fieldset><legend>Посунути відео</legend><div class="camera-direction"><button data-camera-move="ArrowLeft" aria-label="Камеру лівіше">←</button><button data-camera-move="ArrowUp" aria-label="Камеру вище">↑</button><button data-camera-move="ArrowDown" aria-label="Камеру нижче">↓</button><button data-camera-move="ArrowRight" aria-label="Камеру правіше">→</button></div></fieldset><label class="camera-size-label" for="camera-size">Розмір відео <output id="camera-size-value" for="camera-size">28%</output></label><input id="camera-size" type="range" min="18" max="50" step="1" value="28"><button id="reset-camera-position" class="camera-reset">Скинути положення й розмір</button></div></div></section>
+        <fieldset class="layout-panel"><legend>Що буде в кадрі</legend><div class="layout-options"><label><input type="radio" name="layout" value="camera" checked><span class="layout-mini layout-camera" aria-hidden="true"><i></i></span><span>Камера</span></label><label><input type="radio" name="layout" value="screen"><span class="layout-mini layout-screen" aria-hidden="true"><i></i></span><span>Матеріал</span></label><label><input type="radio" name="layout" value="pip"><span class="layout-mini layout-pip" aria-hidden="true"><i></i><b></b></span><span>Матеріал + камера</span></label></div></fieldset>
+        <div class="presenter-tip"><span aria-hidden="true">↗</span><p>Гортайте завантажені слайди кнопками ← →. Для живого показу сайту керуйте його вкладкою; у студію повертайтеся, щоб змінити матеріал. Нове вікно сайту потрібно обрати для показу окремо.</p></div>
+      </section>
+      <aside class="studio-sidebar" aria-label="Налаштування студії">
+        <section class="device-panel"><div class="panel-heading"><h2>Ваші пристрої</h2><span>01</span></div><p class="device-intro">Дозвольте доступ лише до тих джерел, які хочете використати.</p>
+          <label class="device-label" for="camera-select">Камера <span id="camera-state">Вимкнена</span></label><select id="camera-select" aria-describedby="device-help"><option value="">Камера за замовчуванням</option></select>
+          <label class="device-label" for="microphone-select">Мікрофон <span id="microphone-state">Вимкнений</span></label><select id="microphone-select" aria-describedby="device-help"><option value="">Мікрофон за замовчуванням</option></select>
+          <div class="mic-level-row"><label for="mic-level">Рівень звуку</label><span id="mic-level-text">Мікрофон вимкнений</span></div><meter id="mic-level" min="0" max="1" value="0" aria-label="Рівень звуку мікрофона">0</meter>
+          <p id="device-help" class="device-help">Назви пристроїв з’являться після надання доступу. Звук не відтворюється у ваших динаміках, щоб уникнути луни.</p>
+          <div class="blur-settings"><label class="blur-switch"><input id="blur-toggle" type="checkbox">Розмиття фону</label><label class="blur-strength-label" for="blur-strength">Сила розмиття <output id="blur-strength-value" for="blur-strength">14</output></label><input id="blur-strength" type="range" min="4" max="24" value="14" step="1" disabled><p id="blur-status" class="blur-status" role="status">Вимкнено. Обробка працює лише на вашому пристрої.</p></div>
+        </section>
+        <section class="broadcast-panel" aria-labelledby="broadcast-title"><span class="eyebrow">ПРИВАТНИЙ ТЕСТ ЕФІРУ</span><h2 id="broadcast-title">Студія без OBS</h2><p>Камера, слайди та звук передаються одним кадром після запуску ефіру.</p><div class="connection-state"><span aria-hidden="true">○</span><div><strong id="broadcast-state">Перевіряємо підключення…</strong><span>Доступ до тесту — лише для власника.</span></div></div><button id="go-live" class="go-live-button" disabled aria-describedby="broadcast-help">Почати ефір</button><button id="stop-live" class="text-button" disabled>Завершити ефір</button><p id="broadcast-help">Перевіряємо підключення відеосервісу…</p><a class="text-button" href="https://ik-webinar-telegram-test.vercel.app/live.html" target="_blank" rel="noopener noreferrer">Відкрити кімнату глядача ↗</a></section>
+        <section class="recording-panel" aria-labelledby="recording-title"><span class="eyebrow">ЗАПИС ПРЕЗЕНТАЦІЇ</span><h2 id="recording-title">Запис як повтор ефіру</h2><p>Записує той самий кадр зі слайдами, камерою та мікрофоном. Після завершення він автоматично з’явиться клієнтам.</p><div class="recording-status-row"><span id="recording-dot" aria-hidden="true">●</span><div><strong id="recording-state">Готово до запису</strong><span id="recording-time">00:00</span></div></div><div class="recording-buttons"><button id="start-recording" class="go-live-button" type="button">Почати запис</button><button id="stop-recording" class="text-button" type="button" disabled>Завершити й опублікувати</button></div><progress id="recording-upload-progress" max="100" value="0" hidden>0%</progress><div id="recording-result" class="recording-result" hidden><a id="recording-download" class="recording-result-button" href="#">Скачати запис</a><button id="recording-visibility" class="recording-result-button" type="button">Сховати від людей</button></div><p class="recording-help">Залишайте вкладку студії відкритою до завершення завантаження.</p></section>
+        <section class="recording-library" aria-labelledby="recording-library-title"><h2 id="recording-library-title">Збережені записи</h2><p id="studio-recordings-status" role="status">Оновлюємо список…</p><div id="studio-recordings-list" class="studio-recordings-list"></div></section><section class="premiere-admin-panel" aria-labelledby="premiere-admin-title"><span class="eyebrow">ЗАПЛАНОВАНА ПРЕМ’ЄРА</span><h2 id="premiere-admin-title">Допуски з SendPulse</h2><p id="premiere-admin-status" role="status">Оновлюємо дані…</p><div class="premiere-admin-metrics"><div><strong id="premiere-total">0</strong><span>контактів</span></div><div><strong id="premiere-eligible">0</strong><span>допущено</span></div><div><strong id="premiere-opened">0</strong><span>відкрили</span></div></div><div id="premiere-contacts" class="premiere-contacts"></div><button id="premiere-refresh" class="recording-result-button" type="button">Оновити статуси</button><p class="recording-help">Останній крок прогріву викликає <code>POST /api/sendpulse/funnel</code>. Якщо точний <code>webinar_at</code> не передано, персональна прем’єра призначається через 48 годин після завершення прогріву.</p></section><section class="viewer-share-panel" aria-labelledby="viewer-share-title"><span class="eyebrow">TELEGRAM MINI APP</span><h2 id="viewer-share-title">Посилання для кнопки SendPulse</h2><p>Вставте цю адресу у спеціальне повідомлення SendPulse як кнопку Web App / Mini App. Поточні сценарії бота змінювати не потрібно.</p><a class="viewer-share-link" href="https://ik-webinar-telegram-test.vercel.app/live.html#room" target="_blank" rel="noopener noreferrer">ik-webinar-telegram-test.vercel.app/live.html#room</a><div class="viewer-share-actions"><button id="copy-viewer-invite" class="recording-result-button" type="button">Копіювати URL кімнати</button><a class="recording-result-button" href="https://login.sendpulse.com/messengers/" target="_blank" rel="noopener noreferrer">Відкрити SendPulse</a></div><p id="viewer-share-status" class="recording-help" role="status"></p></section><a class="analytics-studio-link" href="/analytics.html"><strong>Аналітика вебінару</strong><span>Глядачі, час перегляду, слайди, записи та CSV →</span></a>
+        <details class="phone-help"><summary>А якщо камера телефона краща?</summary><p>Студію можна відкрити на телефоні й перевірити його камеру. Доступність показу екрана залежить від браузера.</p><p>Щоб використовувати телефон як камеру, а слайдами керувати з комп’ютера, потрібне окреме з’єднання пристроїв. Цей режим ще не підключений.</p></details>
+      </aside>
+    </div>
+  </main>
+  <footer><span>© 2026 Іван Косович</span><span>IK / Студія ведучого</span></footer>
+  <noscript>Для роботи камери, мікрофона й показу екрана потрібно увімкнути JavaScript.</noscript>
+</body>
+</html>

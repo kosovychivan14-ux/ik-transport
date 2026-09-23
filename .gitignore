@@ -1,5 +1,9 @@
 .vercel/
 node_modules/
+.openai/
+.sites-runtime/
+tmp/
+webinar-room/supabase/.temp/
 .env
 .env.*
 !.env.example

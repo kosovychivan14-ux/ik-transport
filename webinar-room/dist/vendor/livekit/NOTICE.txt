@@ -1,0 +1,3 @@
+LiveKit JS Client SDK 2.22.3
+https://github.com/livekit/client-sdk-js
+Apache-2.0; see LICENSE.

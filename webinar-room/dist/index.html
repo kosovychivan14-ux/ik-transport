@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#101513">
+  <meta name="description" content="Вебінарна кімната Івана Косовича. Презентації, онлайн-зустрічі та записи.">
+  <title>Керування вебінарами — Іван Косович</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23101513'/%3E%3Ctext x='8' y='45' font-family='Arial' font-size='37' font-weight='700' fill='%23c5f574'%3EIK%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="/style.css">
+  <script src="https://telegram.org/js/telegram-web-app.js" defer></script>
+  <script type="module" src="/app.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Перейти до кімнати</a>
+  <header class="header">
+    <a class="brand" href="#room" aria-label="IK — Іван Косович — вебінарна кімната"><span class="monogram">IK<span>↗</span></span><span>ІВАН<br>КОСОВИЧ</span></a>
+    <nav class="main-nav" aria-label="Головна навігація">
+      <a href="#room" data-page="room" aria-current="page"><span class="nav-icon">▣</span>Кімната</a>
+      <a href="#schedule" data-page="schedule"><span class="nav-icon">▦</span>Розклад</a>
+      <a href="#recordings" data-page="recordings"><span class="nav-icon">▷</span>Записи</a>
+    </nav>
+    <a class="studio-entry" href="/studio.html">Студія ведучого <span aria-hidden="true">↗</span></a>
+  </header>
+  <main id="main" tabindex="-1">
+    <div class="preview-note"><span class="preview-label">ПАНЕЛЬ ВЛАСНИКА</span><span>Керування та перевірка вебінарів. У Telegram учасники бачать окрему кімнату глядача.</span></div>
+    <section id="room-page" class="page" aria-labelledby="room-title">
+      <div class="page-heading"><div><p class="eyebrow">ПРОСТІР ДЛЯ НОВИХ МОЖЛИВОСТЕЙ</p><h1 id="room-title">Вебінарна кімната<span class="accent">.</span></h1></div><span class="room-label">IK / WEBINAR ROOM</span></div>
+      <div class="room-grid">
+        <div class="room-main">
+          <div class="room-toolbar"><span id="room-status" class="status">Демонстраційний запис</span><button class="text-button" id="expand-button" aria-label="Розгорнути презентацію">Розгорнути <span aria-hidden="true">⛶</span></button></div>
+          <div class="stage" id="stage" aria-label="Презентація">
+            <div class="slide" id="slide">
+              <div class="slide-copy"><span class="slide-kicker" id="slide-kicker">ЗНАЙОМСТВО З КІМНАТОЮ</span><h2 id="slide-title">Технології.<br>Можливості.<br><span>Новий погляд.</span></h2><p id="slide-description">Простір для ваших презентацій<br>та зустрічей з Іваном Косовичем.</p><span class="slide-signature">IK<span>↗</span><span class="signature-caption">ІВАН КОСОВИЧ</span></span></div>
+              <div class="slide-visual"><img id="slide-image" src="/autonomous-car.webp" alt="Автономний електромобіль із лендингу Івана Косовича"><span class="image-caption" id="image-caption">ВІД ТЕХНОЛОГІЇ ДО РОЗУМІННЯ</span></div>
+              <span class="slide-number" id="slide-number">01 / 03</span>
+            </div>
+            <video id="video" playsinline controls preload="metadata" hidden aria-label="Ваше тестове відео"></video>
+            <div id="stage-overlay" class="stage-overlay"><button id="hero-play" class="hero-play" aria-label="Дивитися демонстраційну презентацію"><span class="play-circle" aria-hidden="true">▶</span><span>Дивитися презентацію<small>Огляд кімнати · 30 секунд · без звуку</small></span></button></div>
+            <div id="waiting-panel" class="waiting-panel" hidden><span class="waiting-icon" aria-hidden="true">◷</span><span class="eyebrow">ДЕМОНСТРАЦІЙНИЙ СЕАНС</span><h2>Зустрінемось за мить</h2><p>Після відліку відкриється спільний показ демопрезентації.</p><div class="countdown" id="countdown" role="timer">00:30</div><span class="waiting-hint">Це перевірка розкладу. Реальну дату встановимо окремо.</span></div>
+            <div id="live-panel" class="waiting-panel" hidden><span class="waiting-icon" aria-hidden="true">◉</span><span class="eyebrow">ПРЯМА ТРАНСЛЯЦІЯ</span><h2>Приватний тест ефіру</h2><p>Перевірте підключення до студії та перегляд із Telegram.</p><a class="primary-button" href="/live.html">Відкрити ефір ↗</a></div>
+          </div>
+          <div class="player-controls" id="demo-controls"><button id="play-button" class="icon-button" aria-label="Почати перегляд">▶</button><span id="current-time" class="time">00:00</span><input id="progress" type="range" min="0" max="30" value="0" step="0.1" aria-label="Позиція презентації"><span class="time">00:30</span><span class="silent-label">Без звуку</span><button id="restart-button" class="icon-button" aria-label="Почати спочатку">↺</button></div>
+          <div class="session-info"><div><p class="eyebrow">ПРЕЗЕНТАЦІЯ З ІВАНОМ КОСОВИЧЕМ</p><h2>Електротранспорт.<br class="mobile-break"> Від технології до бізнесу.</h2><p>Знайомство з проєктом, його моделлю, умовами та можливостями.</p></div><span class="session-tag">ДЕМО</span></div>
+          <div class="host-row"><div class="avatar"><img src="/ivan-cutout.webp" alt="Іван Косович"></div><div><strong>Іван Косович</strong><span>Ведучий презентації</span></div><a href="https://ik-transport.vercel.app" target="_blank" rel="noopener noreferrer" class="host-link">Про спікера <span aria-hidden="true">↗</span></a></div>
+        </div>
+        <aside class="side-panel" aria-label="Програма та режими перегляду">
+          <div class="panel-heading"><h2>У цій презентації</h2><span>03</span></div><p class="panel-description">Короткий огляд вашої майбутньої кімнати.</p>
+          <div class="chapters" id="chapters"><button data-seek="0" class="chapter active" aria-current="step"><span class="chapter-number">01</span><span><strong>Знайомство</strong><small>Ваш простір для презентацій</small></span><span class="chapter-time">00:00</span></button><button data-seek="10" class="chapter"><span class="chapter-number">02</span><span><strong>Зустрічі за розкладом</strong><small>Від очікування до перегляду</small></span><span class="chapter-time">00:10</span></button><button data-seek="20" class="chapter"><span class="chapter-number">03</span><span><strong>Перегляд у записі</strong><small>У зручний для вас час</small></span><span class="chapter-time">00:20</span></button></div>
+          <div class="mode-section"><span class="eyebrow">ПЕРЕВІРТЕ РЕЖИМИ КІМНАТИ</span><div class="mode-buttons" aria-label="Демонстраційний режим"><button data-mode="recording" aria-pressed="true">Запис</button><button data-mode="waiting" aria-pressed="false">За розкладом</button><button data-mode="live" aria-pressed="false">Ефір</button></div><p id="mode-description">Пауза, перемотування та перехід між розділами.</p></div>
+          <div class="video-test"><div class="file-icon" aria-hidden="true">▷</div><h3>Спробуйте своє відео</h3><p>Відкрийте файл із пристрою, щоб перевірити його у кімнаті.</p><label class="upload-button" for="video-file">Обрати відеофайл <span aria-hidden="true">＋</span></label><input id="video-file" type="file" accept="video/*" class="file-input"><p class="file-note" id="file-note">Файл відтворюється лише на вашому пристрої й не завантажується на сервер.</p><button class="text-button" id="reset-video" hidden>Повернути демопрезентацію</button></div>
+        </aside>
+      </div>
+      <div class="bottom-note"><span class="small-mark" aria-hidden="true">IK↗</span><p>Інструменти ведучого. Окремо від кімнати учасників.</p><span>Ваші презентації — ближче.</span></div>
+    </section>
+    <section id="schedule-page" class="page" hidden aria-labelledby="schedule-title"><div class="page-heading"><div><p class="eyebrow">НАСТУПНІ ЗУСТРІЧІ</p><h1 id="schedule-title">Розклад<span class="accent">.</span></h1></div></div><article class="event-card"><div class="event-date"><span>ДАТА</span><strong>Незабаром</strong><span>Буде оголошено</span></div><div class="event-details"><span class="status">Очікуємо дату</span><h2>Електротранспорт.<br>Від технології до бізнесу.</h2><p>Іван Косович · Презентація українською</p><p>Актуальна дата та реєстрація з’являться у Telegram-боті.</p><a class="primary-button" href="https://t.me/ivankosovych_bot" target="_blank" rel="noopener noreferrer">Відкрити Telegram-бот <span aria-hidden="true">↗</span></a></div><img src="/ivan-cutout.webp" alt="Іван Косович" class="event-portrait"></article><div class="schedule-demo"><h2>Як виглядатиме очікування?</h2><p>Запустіть тестовий відлік на 30 секунд. Після нього кімната перейде до показу демопрезентації.</p><button class="secondary-button" id="test-schedule">Перевірити запуск за розкладом</button></div></section>
+    <section id="recordings-page" class="page" hidden aria-labelledby="recordings-title"><div class="page-heading"><div><p class="eyebrow">ПОВЕРТАЙТЕСЬ ДО ВАЖЛИВОГО</p><h1 id="recordings-title">Записи<span class="accent">.</span></h1></div><span class="room-label">БІБЛІОТЕКА ПРЕЗЕНТАЦІЙ</span></div><div class="recording-grid"><article class="recording-card"><button class="recording-thumbnail" id="open-demo" aria-label="Дивитися демонстраційну презентацію"><img src="/autonomous-car.webp" alt="Електромобіль із презентації"><span class="recording-play">▶</span><span class="duration">00:30</span></button><div class="recording-copy"><span class="eyebrow">ДЕМОНСТРАЦІЙНА ПРЕЗЕНТАЦІЯ</span><h2>Знайомство з вебінарною кімнатою</h2><p>Іван Косович · 3 слайди · без звуку</p><button class="text-button" id="open-demo-link">Переглянути <span aria-hidden="true">↗</span></button></div></article><div class="empty-recordings"><span aria-hidden="true">▤</span><h2>Тут будуть ваші записи</h2><p>Після додавання відео учасники зможуть повертатися до презентацій у зручний час.</p></div></div></section>
+  </main>
+  <footer><span>© 2026 Іван Косович</span><span>Вебінарний простір IK</span></footer>
+  <div id="toast" class="toast" role="status" hidden></div>
+  <noscript>Для перегляду презентації потрібно увімкнути JavaScript у браузері.</noscript>
+</body>
+</html>

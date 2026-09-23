@@ -1,0 +1,27 @@
+{
+  "name": "ik-webinar-room",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node server.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "check": "node scripts/check-syntax.mjs",
+    "vendor:pdf": "node scripts/vendor-pdf.mjs",
+    "vendor:vision": "node scripts/vendor-vision.mjs",
+    "vendor:livekit": "node scripts/vendor-livekit.mjs",
+    "build:recording": "esbuild scripts/studio-recording-entry.js --bundle --format=esm --platform=browser --outfile=dist/studio-recording-client.js --minify",
+    "prepare:telegram": "node scripts/prepare-telegram-app.mjs"
+  },
+  "dependencies": {
+    "@mediapipe/tasks-vision": "1.0.1",
+    "@vercel/blob": "^2.8.0",
+    "jose": "6.2.12",
+    "livekit-client": "2.22.3",
+    "livekit-server-sdk": "2.19.1",
+    "pdfjs-dist": "6.3.289"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2"
+  }
+}

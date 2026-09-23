@@ -1,0 +1,7 @@
+.vercel/
+node_modules/
+views/
+server/
+studio/
+
+.env*

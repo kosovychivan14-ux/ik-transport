@@ -1,0 +1,48 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {createTelegramSessions} from '../server/telegram-session.mjs';
+import {SignJWT,jwtVerify} from 'jose';
+test('Telegram gateway hides room assets and rejects unsigned login; a valid signed session unlocks the room',async()=>{
+  process.env.PRESENTER_SESSION_SECRET='local-test-only-'.repeat(3);
+  const {default:app}=await import('../telegram-app/server.mjs');
+  const server=app.listen(0,'127.0.0.1');await new Promise(resolve=>server.once('listening',resolve));
+  const base=`http://127.0.0.1:${server.address().port}`;
+  try{
+    const gate=await fetch(base+'/');assert.match(await gate.text(),/Вхід через ChatGPT не потрібний/);
+    assert.equal((await fetch(base+'/api/recordings')).status,403);
+    assert.equal((await fetch(base+'/api/recordings/visibility',{method:'POST'})).status,403);
+    assert.equal((await fetch(base+'/api/recordings/delete',{method:'POST'})).status,403);
+    assert.equal((await fetch(base+'/api/recordings/manage',{method:'POST'})).status,403);
+    assert.equal((await fetch(base+'/api/analytics/summary')).status,403);
+    assert.equal((await fetch(base+'/api/analytics/events',{method:'POST'})).status,403);
+    assert.equal((await fetch(base+'/app.js')).status,403);
+    const forged=await fetch(base+'/api/telegram/session',{method:'POST',headers:{'Content-Type':'application/json',Origin:base.replace('http:','https:')},body:JSON.stringify({initData:'user={"id":511274530}'})});assert.equal(forged.status,403);assert.equal(forged.headers.get('set-cookie'),null);
+    const sessions=createTelegramSessions({secret:process.env.PRESENTER_SESSION_SECRET,verifyTelegram:()=>({id:'511274530',name:'Owner'})});
+    const cookie=(await sessions.create('unit-test-only')).split(';')[0];
+    const room=await fetch(base+'/',{headers:{Cookie:cookie}});assert.equal(room.status,200);assert.match(await room.text(),/Кімната учасника/);assert.match(room.headers.get('cache-control'),/no-store/);
+    const html=await (await fetch(base+'/',{headers:{Cookie:cookie}})).text();
+    assert.doesNotMatch(html,/id="video-file"|data-mode=|make-presenter-link|href="\/studio|src="\/app\.js/);
+    for(const path of ['/viewer.js','/viewer-fullscreen.js'])assert.equal((await fetch(base+path,{headers:{Cookie:cookie}})).status,200,path);
+    for(const path of ['/app.js','/timeline.js','/studio.js','/assets/presentations/e-transport.pdf'])assert.equal((await fetch(base+path,{headers:{Cookie:cookie}})).status,404,path);
+    const studioGate=await fetch(base+'/studio.html',{headers:{Cookie:cookie}});assert.match(await studioGate.text(),/studio-gate.js/);
+    const endpoint=base+'/api/studio/session',headers={'Content-Type':'application/json',Origin:base.replace('http:','https:')};
+    const sign=async(subject,expires)=>new SignJWT({scope:'presenter'}).setProtectedHeader({alg:'HS256'}).setIssuer('ik-webinar-access').setAudience('ik-presenter').setSubject(subject).setExpirationTime(expires).sign(new TextEncoder().encode(process.env.PRESENTER_SESSION_SECRET));
+    for(const ticket of ['forged',await sign('other','5m'),await sign('511274530',1)])assert.equal((await fetch(endpoint,{method:'POST',headers,body:JSON.stringify({presenterTicket:ticket})})).status,403);
+    const ticket=await sign('511274530','5m');
+    assert.equal((await fetch(endpoint,{method:'POST',headers:{...headers,Origin:'https://evil.example'},body:JSON.stringify({presenterTicket:ticket})})).status,403);
+    const login=await fetch(endpoint,{method:'POST',headers,body:JSON.stringify({presenterTicket:ticket})});assert.equal(login.status,200);
+    const setCookie=login.headers.get('set-cookie');assert.match(setCookie,/Secure; HttpOnly; SameSite=Lax/);
+    const presenterCookie=setCookie.split(';')[0],auth={Cookie:presenterCookie};
+    const studio=await fetch(base+'/studio.html',{headers:auth});const studioHtml=await studio.text();assert.match(studioHtml,/id="go-live"/);assert.match(studioHtml,/id="start-recording"/);assert.match(studio.headers.get('permissions-policy'),/camera=\(self\)/);
+    const analytics=await fetch(base+'/analytics.html',{headers:auth});assert.equal(analytics.status,200);assert.match(await analytics.text(),/Результати вебінару/);
+    const analyticsSummary=await fetch(base+'/api/analytics/summary',{headers:auth});assert.equal(analyticsSummary.status,200);assert.equal((await analyticsSummary.json()).configured,false);
+    assert.equal((await fetch(base+'/api/live/status',{headers:auth})).status,200);
+    assert.equal((await (await fetch(base+'/api/live/status',{headers:auth})).json()).presenterAuthorized,true);
+    assert.equal((await (await fetch(base+'/api/live/status',{headers:{Cookie:cookie}})).json()).presenterAuthorized,false);
+    for(const path of ['/studio.js','/studio-live.js','/studio-recorder.js','/studio-recording-client.js','/studio-recordings.js','/recording-backup.js','/analytics-dashboard.js','/analytics-presenter.js','/analytics.css','/live-connection.js','/vendor/pdfjs/pdf.mjs','/vendor/mediapipe/wasm/vision_wasm_internal.wasm'])assert.equal((await fetch(base+path,{headers:auth})).status,200,path);
+    const pdf=await fetch(base+'/assets/presentations/e-transport.pdf',{headers:auth});assert.equal(pdf.status,206);const bytes=await pdf.arrayBuffer();assert.equal(bytes.byteLength,2097152);assert.match(pdf.headers.get('content-range'),/^bytes 0-2097151\/27648667$/);
+    const part=await fetch(base+'/assets/presentations/e-transport.pdf',{headers:{...auth,Range:'bytes=2097152-'}});assert.equal(part.status,206);assert.match(part.headers.get('content-range'),/^bytes 2097152-/);
+    const {payload}=await jwtVerify(presenterCookie.split('=')[1],new TextEncoder().encode(process.env.PRESENTER_SESSION_SECRET));assert.equal(payload.exp-payload.iat,28800);
+    const secret=await fetch(base+'/server/telegram-auth.mjs',{headers:{Cookie:cookie}});assert.equal(secret.status,404);
+  }finally{await new Promise(resolve=>server.close(resolve));}
+});

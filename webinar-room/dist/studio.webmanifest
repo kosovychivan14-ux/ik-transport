@@ -1,0 +1,13 @@
+{
+  "name": "IK Webinar Studio",
+  "short_name": "IK Studio",
+  "description": "Студія ведучого Івана Косовича",
+  "start_url": "/studio.html",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#101513",
+  "theme_color": "#101513",
+  "icons": [
+    {"src": "/ik-studio-icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable"}
+  ]
+}

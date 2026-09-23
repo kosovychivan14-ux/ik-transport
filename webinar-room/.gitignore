@@ -1,0 +1,8 @@
+.sites-runtime/
+node_modules/
+*.tar.gz
+.env*
+!.env.example
+
+.vercel
+.env*

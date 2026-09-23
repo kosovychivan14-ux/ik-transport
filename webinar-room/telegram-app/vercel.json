@@ -1,0 +1,1 @@
+{"functions":{"server.mjs":{"includeFiles":"{views/**,studio/**,server/**,gate.html,gate.js,studio-gate.html,studio-gate.js}"}}}

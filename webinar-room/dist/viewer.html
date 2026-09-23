@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#101513">
+  <title>Кімната учасника — Іван Косович</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/live.css">
+  <link rel="stylesheet" href="/viewer.css">
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script src="/vendor/livekit/livekit-client.umd.js" defer></script>
+  <script type="module" src="/live-viewer.js"></script>
+  <script type="module" src="/viewer.js"></script>
+  <script type="module" src="/recordings.js"></script>
+  <script type="module" src="/analytics-client.js"></script>
+  <script type="module" src="/premiere.js"></script>
+</head>
+<body class="viewer-body">
+  <a class="skip-link" href="#viewer-main">Перейти до вмісту</a>
+  <header class="viewer-header">
+    <a class="brand" href="#room" aria-label="IK — кімната учасника">
+      <span class="monogram">IK<span>↗</span></span><span>ІВАН<br>КОСОВИЧ</span>
+    </a>
+    <span class="viewer-label">КІМНАТА УЧАСНИКА</span>
+  </header>
+
+  <main id="viewer-main" class="viewer-main">
+    <nav class="viewer-nav" aria-label="Навігація кімнатою">
+      <a href="#room" data-tab="room" aria-current="page"><span aria-hidden="true">●</span>Кімната</a>
+      <a href="#schedule" data-tab="schedule"><span aria-hidden="true">□</span>Розклад</a>
+      <a href="#records" data-tab="records"><span aria-hidden="true">▷</span>Записи</a>
+      <a href="#lessons" data-tab="lessons"><span aria-hidden="true">▤</span>Закриті уроки</a>
+      <a href="#tools" data-tab="tools"><span aria-hidden="true">◇</span>Інструменти</a>
+      <a href="#strategies" data-tab="strategies"><span aria-hidden="true">↗</span>Стратегії</a>
+      <a href="#insights" data-tab="insights"><span aria-hidden="true">✦</span>VIP-розбори</a>
+    </nav>
+
+    <section id="room" class="viewer-page" data-page="room" aria-labelledby="room-title">
+      <div class="viewer-heading">
+        <p class="eyebrow">ПРЯМА ОНЛАЙН-ПРЕЗЕНТАЦІЯ</p>
+        <h1 id="room-title">Електротранспорт.<br><span class="accent">Від технології до бізнесу.</span></h1>
+        <p>Кімната для перегляду презентації Івана Косовича.</p>
+        <p class="viewer-clock"><span class="clock-label">СЬОГОДНІ · КИЇВ</span><time id="viewer-date">Сьогодні</time><span class="clock-separator" aria-hidden="true">·</span><time id="viewer-time">—:—</time><span id="viewer-time-sync">Оновлюємо час…</span></p>
+      </div>
+
+      <div class="viewer-player">
+      <article class="viewer-stage" data-state="waiting" aria-label="Пряма трансляція">
+        <div class="viewer-stage-top"><span class="stage-top-spacer" aria-hidden="true"></span><span class="stage-state" data-live-badge>ОЧІКУВАННЯ</span><span class="viewer-stage-audience" aria-label="Кількість глядачів"><strong id="viewer-stage-audience-count">0</strong><span>дивляться</span></span></div>
+        <div class="live-video-box">
+          <video id="live-video" playsinline autoplay muted aria-label="Пряма трансляція Івана Косовича"></video>
+          <video id="premiere-video" playsinline preload="auto" muted hidden aria-label="Запланована прем’єра презентації Івана Косовича"></video>
+          <div id="live-wait" class="live-wait viewer-wait">
+            <div class="wait-rings" aria-hidden="true"><span class="monogram">IK<span>↗</span></span></div>
+            <p id="live-wait-kicker" class="eyebrow">КІМНАТА ВІДКРИТА</p>
+            <h2 id="live-wait-title">Незабаром почнеться пряма презентація</h2>
+            <p id="live-wait-description">Коли Іван розпочне зустріч, відео з’явиться тут.</p>
+            <span id="wait-indicator" class="wait-indicator" aria-label="Очікуємо початок"><i></i><i></i><i></i></span>
+          </div>
+        </div>
+      </article>
+
+      <div class="viewer-display-controls">
+        <button class="viewer-fullscreen" type="button" data-fullscreen aria-label="Відкрити відео на весь екран">На весь екран ⛶</button>
+        <button id="premiere-sound" class="viewer-fullscreen" type="button" hidden>Увімкнути звук</button>
+      </div>
+
+      <div id="live-audio" aria-hidden="true"></div>
+      <div class="viewer-actions" aria-label="Керування переглядом">
+        <button id="join-live" class="primary-button" type="button" disabled>Приєднатися до ефіру <span aria-hidden="true">→</span></button>
+        <button id="live-sound" class="secondary-button" type="button" disabled>Увімкнути звук</button>
+        <button id="leave-live" class="viewer-leave" type="button" disabled>Вийти з ефіру</button>
+      </div>
+      <p id="live-status" class="viewer-status" role="status" aria-live="polite">Готуємо кімнату…</p>
+
+      <p id="fullscreen-notice" class="fullscreen-notice" role="status" hidden></p>
+      </div>
+      <p class="rotation-tip">Натисніть ⛶ для перегляду на весь екран або поверніть телефон горизонтально.</p>
+
+      <section class="live-audience" aria-labelledby="live-audience-title">
+        <div class="live-audience-heading">
+          <div>
+            <p class="eyebrow">АУДИТОРІЯ ВЕБІНАРУ</p>
+            <h2 id="live-audience-title">Учасники прямого ефіру</h2>
+          </div>
+          <div class="live-audience-count" id="live-audience-count-wrap" aria-label="Кількість підключених глядачів">
+            <strong id="live-audience-count">0</strong>
+            <span>глядачів зараз</span>
+          </div>
+        </div>
+        <p id="live-audience-note" class="live-audience-note">Кількість оновиться після підключення до ефіру</p>
+        <div id="live-audience-feed" class="live-audience-feed" role="list" tabindex="0" aria-label="Підключені учасники. Список можна прокручувати"></div>
+        <p id="live-audience-status" class="sr-only" role="status" aria-live="polite"></p>
+      </section>
+
+      <aside class="viewer-host">
+        <div class="viewer-avatar"><img src="/ivan-cutout.webp" alt="Іван Косович"></div>
+        <div><strong>Іван Косович</strong><span>Автор і ведучий зустрічі</span></div>
+        <span class="host-topic">E-TRANSPORT</span>
+      </aside>
+    </section>
+
+    <section id="schedule" class="viewer-page" data-page="schedule" hidden aria-labelledby="schedule-title">
+      <div class="viewer-heading">
+        <p class="eyebrow">ЗУСТРІЧІ</p>
+        <h1 id="schedule-title">Розклад<span class="accent">.</span></h1>
+      </div>
+      <div class="viewer-empty viewer-schedule-empty">
+        <div class="empty-mark" aria-hidden="true">◷</div>
+        <p class="eyebrow">НАСТУПНА ЗУСТРІЧ</p>
+        <h2>Дату наступної зустрічі буде оголошено</h2>
+        <p>Поверніться до кімнати, коли отримаєте запрошення в Telegram.</p>
+      </div>
+    </section>
+
+    <section id="records" class="viewer-page" data-page="records" hidden aria-labelledby="records-title">
+      <div class="viewer-heading">
+        <p class="eyebrow">ПЕРЕГЛЯНУТИ ПІЗНІШЕ</p>
+        <h1 id="records-title">Записи<span class="accent">.</span></h1>
+      </div>
+      <p id="recordings-status" class="recordings-status" role="status">Завантажуємо записи…</p>
+      <div id="recordings-list" class="viewer-recordings-list" hidden></div>
+      <div id="recording-player" class="recording-replay" hidden>
+        <div class="recording-replay-bar"><span class="recording-live-mark">ЗАПИС ЕФІРУ</span><button id="recording-back" type="button">← До всіх записів</button></div>
+        <div class="recording-replay-video"><video id="recording-video" controls playsinline preload="metadata" aria-label="Запис вебінару Івана Косовича"></video></div>
+        <div class="recording-replay-copy"><h2 id="recording-title">Запис презентації</h2><p id="recording-meta"></p><div class="viewer-host"><div class="viewer-avatar"><img src="/ivan-cutout.webp" alt="Іван Косович"></div><div><strong>Іван Косович</strong><span>Автор і ведучий зустрічі</span></div><span class="host-topic">E-TRANSPORT</span></div></div>
+      </div>
+      <div id="recordings-empty" class="viewer-empty">
+        <div class="empty-mark" aria-hidden="true">▷</div>
+        <h2>Опублікованих записів поки немає</h2>
+        <p>Коли з’являться матеріали для перегляду, вони будуть доступні тут.</p>
+      </div>
+    </section>
+    <section id="lessons" class="viewer-page premium-page" data-page="lessons" hidden aria-labelledby="lessons-title"><div class="viewer-heading"><p class="eyebrow">БАЗА ЗНАНЬ СПІЛЬНОТИ</p><h1 id="lessons-title">Закриті уроки<span class="accent">.</span></h1><p>Покрокові матеріали, практичні пояснення та нові уроки для учасників спільноти.</p></div><div class="premium-lock-card"><div class="access-lock" aria-hidden="true"><span></span></div><p class="eyebrow">ЗАКРИТИЙ РОЗДІЛ</p><h2>Доступ лише для учасників спільноти</h2><p>Після відкриття доступу тут з’являться уроки, додаткові матеріали та практичні завдання.</p><div class="premium-preview"><span>Покрокові відеоуроки</span><span>Матеріали до презентацій</span><span>Оновлення щотижня</span></div><strong class="access-denied">ДОСТУП ЗАБОРОНЕНО</strong></div></section>
+    <section id="tools" class="viewer-page premium-page" data-page="tools" hidden aria-labelledby="tools-title"><div class="viewer-heading"><p class="eyebrow">ГОТОВІ РІШЕННЯ</p><h1 id="tools-title">Готові інструменти<span class="accent">.</span></h1><p>Шаблони, калькулятори, чеклісти та робочі матеріали, які можна одразу застосовувати.</p></div><div class="premium-lock-card"><div class="access-lock" aria-hidden="true"><span></span></div><p class="eyebrow">ЗАКРИТИЙ РОЗДІЛ</p><h2>Практичний набір учасника</h2><p>Добірка готових інструментів для аналізу, планування та прийняття зважених рішень.</p><div class="premium-preview"><span>Калькулятори й таблиці</span><span>Перевірені чеклісти</span><span>Готові шаблони</span></div><strong class="access-denied">ДОСТУП ЗАБОРОНЕНО</strong></div></section>
+    <section id="strategies" class="viewer-page premium-page" data-page="strategies" hidden aria-labelledby="strategies-title"><div class="viewer-heading"><p class="eyebrow">СИСТЕМНИЙ ПІДХІД</p><h1 id="strategies-title">Стратегії<span class="accent">.</span></h1><p>Структуровані сценарії дій для різних цілей, стартових умов і рівнів досвіду.</p></div><div class="premium-lock-card"><div class="access-lock" aria-hidden="true"><span></span></div><p class="eyebrow">ЗАКРИТИЙ РОЗДІЛ</p><h2>Стратегії з поясненнями</h2><p>Послідовність кроків, контрольні точки та розбір ризиків для кожного сценарію.</p><div class="premium-preview"><span>Стартові сценарії</span><span>План на 30–90 днів</span><span>Контроль ризиків</span></div><strong class="access-denied">ДОСТУП ЗАБОРОНЕНО</strong></div></section>
+    <section id="insights" class="viewer-page premium-page" data-page="insights" hidden aria-labelledby="insights-title"><div class="viewer-heading"><p class="eyebrow">ТІЛЬКИ ДЛЯ СВОЇХ</p><h1 id="insights-title">VIP-розбори<span class="accent">.</span></h1><p>Закриті зустрічі, розбір реальних ситуацій учасників та відповіді Івана на запитання.</p></div><div class="premium-lock-card premium-featured"><div class="access-lock" aria-hidden="true"><span></span></div><p class="eyebrow">ЕКСКЛЮЗИВНИЙ ДОСТУП</p><h2>Те, чого немає у відкритому доступі</h2><p>Живі розбори кейсів, нові можливості, закриті сесії запитань і відповідей та матеріали для учасників.</p><div class="premium-preview"><span>Розбір реальних кейсів</span><span>Закриті онлайн-зустрічі</span><span>Пріоритетні відповіді</span></div><strong class="access-denied">ДОСТУП ЗАБОРОНЕНО</strong></div></section>
+  </main>
+  <footer class="viewer-footer"><span class="monogram">IK<span>↗</span></span><span>Приватна кімната учасника</span></footer>
+</body>
+</html>
