@@ -44,6 +44,9 @@
       <span class="host-bar__label mono">РЕЖИМ ВЕДУЧОГО</span>
       <button class="btn btn--lime btn--sm" id="host-cta-now" type="button">Показати CTA зараз</button>
       <button class="ghost-btn ghost-btn--sm" id="host-leads-toggle" type="button">Панель «Ліди»</button>
+      <span class="mono host-bar__eg" id="host-eg-info"></span>
+      <button class="ghost-btn ghost-btn--sm" id="host-eg-repick" type="button">Перепризначити вебінар</button>
+      <button class="ghost-btn ghost-btn--sm" id="host-eg-reset" type="button">Скинути історію переглядів</button>
     </div>
 
     <div class="leads-panel hud-card is-hidden" id="leads-panel">
@@ -86,11 +89,15 @@
           <div class="stage-state is-hidden" id="state-live">
             <canvas id="stream-canvas" aria-label="Відео ефіру"></canvas>
             <video id="livekit-video" class="is-hidden" autoplay playsinline muted aria-label="Прямий ефір"></video>
+            <video id="evergreen-video" class="is-hidden" playsinline preload="metadata" aria-label="Запис вебінару"></video>
+            <button class="eg-sound is-hidden" id="eg-sound" type="button">🔊 Увімкнути звук</button>
             <div class="livekit-note is-hidden" id="livekit-note">Підключено через LiveKit</div>
             <div class="stage__overlay-top">
               <div class="live-badge"><span class="live-badge__dot"></span><span id="live-badge-text">LIVE</span></div>
-              <div class="stage__topic">Електротранспорт 24/7: як змусити авто працювати на тебе</div>
+              <div class="stage__topic" id="stage-topic">Електротранспорт 24/7: як змусити авто працювати на тебе</div>
+              <div class="live-watchers" id="eg-watchers" title="Зараз дивляться">👁&nbsp;<b id="eg-watchers-n">0</b></div>
             </div>
+            <div class="stage__started mono" id="eg-started"></div>
             <div class="stage__overlay-bottom">
               <div class="speaker">
                 <span class="speaker__avatar">ІК</span>
@@ -246,7 +253,10 @@
       </div>
     </div>
 
-    <div class="sec-index">[ 02 — помічник ]</div>
+    <div class="sec-index">[ 02 — вебінари ]</div>
+    <div class="rec-grid" id="rec-playlist"></div>
+
+    <div class="sec-index">[ 03 — помічник ]</div>
     <div class="rec-ai hud-card">
       <span class="corner tl"></span><span class="corner tr"></span>
       <span class="corner bl"></span><span class="corner br"></span>
@@ -294,6 +304,19 @@
 </div>
 
 <div class="fx" id="fx" aria-hidden="true"></div>
+
+<!-- перегляд запису з плейлиста -->
+<div class="demo-modal is-hidden" id="rec-modal" role="dialog" aria-modal="true" aria-label="Перегляд запису">
+  <div class="demo-modal__box hud-card">
+    <span class="corner tl"></span><span class="corner tr"></span>
+    <span class="corner bl"></span><span class="corner br"></span>
+    <button class="demo-modal__close" id="rec-close" type="button" aria-label="Закрити">✕</button>
+    <div class="demo-slide__kicker mono" id="rec-modal-date"></div>
+    <h3 class="demo-slide__title" id="rec-modal-title"></h3>
+    <video id="rec-modal-video" class="rec-modal__video is-hidden" controls playsinline preload="metadata"></video>
+    <p class="rec-fallback is-hidden" id="rec-modal-fallback">Відеофайл цього вебінару ще не завантажено — але ви можете подивитися його просто зараз у «прямому ефірі» на вкладці «Кімната». А питання ставте Помічнику Івана нижче 👇</p>
+  </div>
+</div>
 
 <!-- кваліфікаційний гейт -->
 <div class="qual-modal is-hidden" id="qual-modal" role="dialog" aria-modal="true" aria-label="Кілька питань перед входом">
@@ -350,6 +373,7 @@
 </div>
 
 <script src="config.js"></script>
+<script src="evergreen.js"></script>
 <script src="app.js"></script>
 <script src="ai.js"></script>
 </body>

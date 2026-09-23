@@ -118,6 +118,12 @@
     var s = start.getTime();
     var state = (nowMs >= s && nowMs < s + LIVE_MS) ? 'live'
       : (nowMs >= s + LIVE_MS && nowMs < s + LIVE_MS + ENDED_MS) ? 'ended' : 'prelive';
+    // evergreen 24/7: між реальними ефірами сценою керує ротація записаних вебінарів
+    var eg = window.EVERGREEN;
+    if (eg && eg.takeover && state !== 'live' && eg.tick()) {
+      tickClock();
+      return;
+    }
     setState(state);
     if (state === 'live') {
       setPill('pill--live', 'Прямий ефір');
@@ -182,6 +188,7 @@
   /* ---------- глядачі ---------- */
   var viewers = 240 + Math.floor(Math.random() * 140);
   function tickViewers() {
+    if (window.EVERGREEN && window.EVERGREEN.drivesViewers) return; // лічильник веде evergreen
     viewers = Math.max(120, Math.min(900, viewers + Math.floor(Math.random() * 17) - 8));
     $('viewers').textContent = viewers;
     $('chat-online').textContent = Math.max(50, viewers - Math.floor(Math.random() * 30));
@@ -235,6 +242,7 @@
   })();
   setInterval(function () {
     if (document.hidden) return;
+    if (window.EVERGREEN && window.EVERGREEN.chatActive) return; // чат веде evergreen-скрипт
     addMsg(names[Math.floor(Math.random() * names.length)], texts[Math.floor(Math.random() * texts.length)], false);
   }, 6000);
   $('chat-form').addEventListener('submit', function (e) {
@@ -269,7 +277,9 @@
   setInterval(function () {
     if (document.hidden || test) return;
     var nowMs = kyivNow().getTime(), s = start.getTime();
-    if (!(nowMs >= s && nowMs < s + LIVE_MS)) return;
+    var inRealLive = (nowMs >= s && nowMs < s + LIVE_MS);
+    var inEgLive = window.EVERGREEN && window.EVERGREEN.isLiveNow && window.EVERGREEN.isLiveNow();
+    if (!(inRealLive || inEgLive)) return;
     if (Math.random() < 0.5) {
       var btn = reactBtns[Math.floor(Math.random() * reactBtns.length)];
       var count = btn.querySelector('[data-count]');

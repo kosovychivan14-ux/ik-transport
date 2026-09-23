@@ -506,3 +506,51 @@ select.qual-field__input option{background:#0a0e15}
   .rec-ai{padding:20px}
   .poll{padding:18px}
 }
+
+/* ============ v1.1 evergreen 24/7 ============ */
+
+/* повідомлення ведучого в чаті */
+.msg--host .msg__name{color:var(--lime)}
+.msg--host{background:rgba(215,249,36,.06);border:1px solid var(--lime-line);border-radius:12px;padding:10px 12px}
+
+/* відеоплеєр evergreen */
+#evergreen-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#04060a}
+.eg-sound{
+  position:absolute;bottom:78px;right:22px;z-index:6;cursor:pointer;
+  background:rgba(4,6,10,.78);border:1px solid var(--lime-line);color:var(--lime);
+  border-radius:999px;padding:9px 16px;font-family:var(--font-b);font-size:12.5px;font-weight:700;
+}
+.eg-sound:hover{background:var(--lime-soft)}
+
+/* «почався N хв тому» і лічильник «зараз дивляться» */
+.stage__started{
+  position:absolute;top:66px;left:22px;z-index:5;
+  font-size:11px;letter-spacing:.08em;color:var(--muted);
+  background:rgba(4,6,10,.55);padding:4px 10px;border-radius:999px;
+}
+.live-watchers{
+  display:inline-flex;align-items:center;gap:6px;margin-left:auto;white-space:nowrap;
+  font-family:var(--font-m);font-size:12.5px;color:var(--text);
+  background:rgba(4,6,10,.6);border:1px solid var(--border);border-radius:999px;padding:7px 14px;
+}
+.live-watchers b{color:var(--lime)}
+
+/* режим ведучого: evergreen-інфо */
+.host-bar__eg{font-size:11px;letter-spacing:.08em;color:var(--cyan)}
+
+/* картка «зараз у прямому ефірі» в розкладі */
+.sched-card--live{border-color:rgba(255,70,70,.45);box-shadow:0 0 34px rgba(255,70,70,.12),0 24px 60px rgba(0,0,0,.45)}
+.sched-card__badge--live{color:#ff6b6b;border-color:rgba(255,70,70,.5);background:rgba(255,70,70,.12)}
+
+/* модалка перегляду запису */
+.rec-modal__video{width:100%;max-height:52vh;border-radius:14px;background:#000;margin-top:18px}
+.rec-fallback{
+  color:var(--muted);font-size:14.5px;line-height:1.65;margin-top:18px;
+  background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:14px;padding:18px;
+}
+
+@media (max-width:640px){
+  .live-watchers{font-size:11px;padding:6px 11px}
+  .stage__started{top:60px;left:16px;font-size:10px}
+  .eg-sound{bottom:70px;right:16px}
+}

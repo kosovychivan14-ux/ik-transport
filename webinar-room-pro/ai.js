@@ -366,9 +366,11 @@
   /* ============ таймінг LIVE-подій ============ */
   var liveTimers = [];
   function clearLiveTimers() { liveTimers.forEach(clearTimeout); liveTimers = []; }
-  function onLiveStart(isTest) {
+  function onLiveStart(isTest, isEvergreen) {
     liveActive = true;
     clearLiveTimers();
+    // evergreen 24/7: опитування й CTA веде движок evergreen.js за часом відтворення вебінару
+    if (isEvergreen) return;
     var polls = CFG.POLLS || [];
     var d1 = isTest ? 8000 : (CFG.POLL_DELAY_1 || 60) * 1000;
     var d2 = isTest ? 15000 : (CFG.POLL_DELAY_2 || 150) * 1000;
@@ -386,8 +388,11 @@
       addBotMsg('Ефір завершено! 🎬 Запис і бонусні матеріали вже чекають у Telegram-боті — тисніть «Отримати запис у Telegram».');
     }, 1200);
   }
-  window.addEventListener('wrp:live-start', function () { onLiveStart(false); });
-  window.addEventListener('wrp:test-live-start', function () { onLiveStart(true); });
+  window.addEventListener('wrp:live-start', function (e) {
+    var isEvergreen = !!(e && e.detail && e.detail.evergreen);
+    onLiveStart(false, isEvergreen);
+  });
+  window.addEventListener('wrp:test-live-start', function () { onLiveStart(true, false); });
   window.addEventListener('wrp:live-end', onLiveEnd);
   window.addEventListener('wrp:test-live-end', onLiveEnd);
 
@@ -503,4 +508,6 @@
   window.WRP.showCTA = showCTA;
   window.WRP.addScore = addScore;
   window.WRP.botAnswer = botAnswer;
+  window.WRP.renderPoll = renderPoll;
+  window.WRP.resetLiveHooks = function () { ctaShown = false; pollsDone = {}; };
 })();
