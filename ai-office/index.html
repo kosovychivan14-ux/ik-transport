@@ -35,10 +35,10 @@
   #acSched{color:#67e8f9;}
   #acTasks{margin:4px 0 0;padding-left:18px;}
   #acTasks li{margin:2px 0;}
-  #joy{position:fixed;left:18px;bottom:76px;width:124px;height:124px;border-radius:50%;border:2px solid #22d3ee66;background:#0b0f1655;z-index:6;display:none;touch-action:none;}
-  #joyKnob{position:absolute;left:50%;top:50%;width:54px;height:54px;border-radius:50%;background:#22d3ee44;border:2px solid #22d3ee;transform:translate(-50%,-50%);}
-  #joyR{position:fixed;right:18px;bottom:76px;width:124px;height:124px;border-radius:50%;border:2px solid #22d3ee66;background:#0b0f1655;z-index:6;display:none;touch-action:none;}
-  #joyKnobR{position:absolute;left:50%;top:50%;width:54px;height:54px;border-radius:50%;background:#22d3ee44;border:2px solid #22d3ee;transform:translate(-50%,-50%);}
+  #zoneL,#zoneR{position:fixed;top:0;bottom:0;width:50%;z-index:6;display:none;touch-action:none;}
+  #zoneL{left:0;} #zoneR{right:0;}
+  .stick{position:fixed;width:124px;height:124px;border-radius:50%;border:2px solid #22d3ee66;background:#0b0f1655;z-index:7;display:none;touch-action:none;pointer-events:none;}
+  .sknob{position:absolute;left:50%;top:50%;width:54px;height:54px;border-radius:50%;background:#22d3ee44;border:2px solid #22d3ee;transform:translate(-50%,-50%);}
 </style>
 <script type="importmap">
 {"imports":{
@@ -51,7 +51,7 @@
 <div id="stage"></div>
 <div id="title">🥥 AI AGENTS HOME · 3D</div>
 <div id="journal" class="closed"><h4 id="journalHead">📜 ЖУРНАЛ <span id="jArrow">▸</span></h4><div id="log"></div></div>
-<div id="agentPanel"><h4>📋 АГЕНТИ</h4><div id="agentRows"></div></div>
+<div id="agentPanel" style="display:none"><h4>📋 АГЕНТИ</h4><div id="agentRows"></div></div>
 <div id="agentCard" style="display:none">
   <div id="acHead"><b id="acName"></b><span id="acClose">✕</span></div>
   <div id="acSched" class="acRow"></div>
@@ -65,8 +65,9 @@
   <button id="btnPause">⏸ Пауза</button>
   <button id="btnSpeed">⏩ 1×</button>
 </div>
-<div id="joy"><div id="joyKnob"></div></div>
-<div id="joyR"><div id="joyKnobR"></div></div>
+<div id="zoneL"></div><div id="zoneR"></div>
+<div id="stickL" class="stick"><div class="sknob"></div></div>
+<div id="stickR" class="stick"><div class="sknob"></div></div>
 <div id="hint">Миша: обертання · колесо: зум · права кнопка: панорама · клік по агенту — хто він</div>
 <script type="module">
 import * as THREE from 'three';
@@ -809,11 +810,12 @@ function setWalk(on){
   walkMode=on;
   document.getElementById('btnWalk').classList.toggle('on',on);
   controls.enabled=!on;
-  const touch='ontouchstart'in window;
-  document.getElementById('joy').style.display=(on&&touch)?'block':'none';
-  document.getElementById('joyR').style.display=(on&&touch)?'block':'none';
+  const touch='ontouchstart'in window, showZ=on&&touch;
+  document.getElementById('zoneL').style.display=showZ?'block':'none';
+  document.getElementById('zoneR').style.display=showZ?'block':'none';
+  for(const id of['controls','agentPanel','agentCard','journal'])document.getElementById(id).style.zIndex=on?'8':'';
   document.getElementById('hint').textContent=on
-    ?(touch?'Лівий стік — рух · правий — огляд · клік по агенту — хто він'
+    ?(touch?'Торкнись лівої половини — рух · правої — огляд · тап по агенту — хто він'
            :'WASD/стрілки — рух · Shift — біг · тягни — огляд · клік по агенту — хто він')
     :'Миша: обертання · колесо: зум · права кнопка: панорама · клік по агенту — хто він';
   if(on){
@@ -854,37 +856,46 @@ function handleTap(e){
   const hits=raycaster.intersectObjects(pickMeshes,false);
   if(hits.length){const A=hits[0].object.userData.agent; if(A&&A.def)askAgent(A);}
 }
-/* джойстики: лівий — рух, правий — огляд (Pointer Events: стабільно на iOS/Android/десктопі) */
-const joyEl=document.getElementById('joy'), knobEl=document.getElementById('joyKnob');
-const joyREl=document.getElementById('joyR'), knobREl=document.getElementById('joyKnobR');
+/* Плаваючі стіки як у мобільних іграх: торкнувся половини екрана — стік з'явився під пальцем */
 let joyDX=0, joyDY=0, lookDX=0, lookDY=0;
-function bindStick(el,knob,onMove,onEnd){
-  let pid=null;
-  const move=e=>{
-    const r=el.getBoundingClientRect();
-    let dx=(e.clientX-(r.left+r.width/2))/(r.width/2), dy=(e.clientY-(r.top+r.height/2))/(r.height/2);
+function tapAgentAt(cx,cy){
+  if(!walkMode)return;
+  const r=renderer.domElement.getBoundingClientRect();
+  mouseNDC.set(((cx-r.left)/r.width)*2-1,-((cy-r.top)/r.height)*2+1);
+  raycaster.setFromCamera(mouseNDC,camera);
+  const hits=raycaster.intersectObjects(pickMeshes,false);
+  if(hits.length){const A=hits[0].object.userData.agent; if(A&&A.def)askAgent(A);}
+}
+function bindZone(zoneId,stickId,onMove,onEnd){
+  const zone=document.getElementById(zoneId), stick=document.getElementById(stickId), knob=stick.firstElementChild;
+  let pid=null, ox=0, oy=0, t0=0, moved=false;
+  zone.addEventListener('pointerdown',e=>{
+    if(pid!==null)return;
+    pid=e.pointerId; ox=e.clientX; oy=e.clientY; t0=performance.now(); moved=false;
+    try{zone.setPointerCapture(pid);}catch(_){}
+    stick.style.left=(ox-62)+'px'; stick.style.top=(oy-62)+'px'; stick.style.display='block';
+    knob.style.transform='translate(-50%,-50%)';
+    onMove(0,0);
+    e.preventDefault();
+  });
+  zone.addEventListener('pointermove',e=>{
+    if(e.pointerId!==pid)return;
+    let dx=(e.clientX-ox)/62, dy=(e.clientY-oy)/62;
+    if(Math.abs(e.clientX-ox)+Math.abs(e.clientY-oy)>12)moved=true;
     const m=Math.hypot(dx,dy); if(m>1){dx/=m; dy/=m;}
     knob.style.transform='translate(calc(-50% + '+(dx*34)+'px), calc(-50% + '+(dy*34)+'px))';
     onMove(dx,dy);
-  };
-  el.addEventListener('pointerdown',e=>{
-    if(pid!==null)return;
-    pid=e.pointerId;
-    try{el.setPointerCapture(pid);}catch(_){}
-    move(e);
-    e.preventDefault();
   });
-  el.addEventListener('pointermove',e=>{if(e.pointerId===pid)move(e);});
   const end=e=>{
     if(e.pointerId!==pid)return;
-    pid=null; onEnd();
-    knob.style.transform='translate(-50%,-50%)';
+    pid=null; stick.style.display='none'; onEnd();
+    if(!moved&&performance.now()-t0<500)tapAgentAt(e.clientX,e.clientY);
   };
-  el.addEventListener('pointerup',end);
-  el.addEventListener('pointercancel',end);
+  zone.addEventListener('pointerup',end);
+  zone.addEventListener('pointercancel',end);
 }
-bindStick(joyEl,knobEl,(dx,dy)=>{joyDX=dx; joyDY=dy;},()=>{joyDX=joyDY=0;});
-bindStick(joyREl,knobREl,(dx,dy)=>{lookDX=dx; lookDY=dy;},()=>{lookDX=lookDY=0;});
+bindZone('zoneL','stickL',(dx,dy)=>{joyDX=dx; joyDY=dy;},()=>{joyDX=joyDY=0;});
+bindZone('zoneR','stickR',(dx,dy)=>{lookDX=dx; lookDY=dy;},()=>{lookDX=lookDY=0;});
 /* Стіни для колізій (коло r=0.45) */
 const WALLS=[
   {x1:-14,z1:-8,x2:-14,z2:8},{x1:26,z1:-8,x2:26,z2:8},
@@ -921,10 +932,11 @@ function setJournal(open){
   document.getElementById('jArrow').textContent=open?'▾':'▸';
 }
 document.getElementById('journalHead').onclick=()=>setJournal(journal.classList.contains('closed'));
+let agentsOpen=false;
 document.getElementById('btnAgents').onclick=e=>{
-  const p=document.getElementById('agentPanel');
-  p.style.display=p.style.display==='none'?'block':'none';
-  e.target.classList.toggle('on');
+  agentsOpen=!agentsOpen;
+  document.getElementById('agentPanel').style.display=agentsOpen?'block':'none';
+  e.target.classList.toggle('on',agentsOpen);
 };
 document.getElementById('btnPause').onclick=e=>{
   paused=!paused; e.target.textContent=paused?'▶ Старт':'⏸ Пауза'; e.target.classList.toggle('on',paused);
