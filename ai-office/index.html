@@ -37,6 +37,8 @@
   #acTasks li{margin:2px 0;}
   #joy{position:fixed;left:18px;bottom:76px;width:124px;height:124px;border-radius:50%;border:2px solid #22d3ee66;background:#0b0f1655;z-index:6;display:none;touch-action:none;}
   #joyKnob{position:absolute;left:50%;top:50%;width:54px;height:54px;border-radius:50%;background:#22d3ee44;border:2px solid #22d3ee;transform:translate(-50%,-50%);}
+  #joyR{position:fixed;right:18px;bottom:76px;width:124px;height:124px;border-radius:50%;border:2px solid #22d3ee66;background:#0b0f1655;z-index:6;display:none;touch-action:none;}
+  #joyKnobR{position:absolute;left:50%;top:50%;width:54px;height:54px;border-radius:50%;background:#22d3ee44;border:2px solid #22d3ee;transform:translate(-50%,-50%);}
 </style>
 <script type="importmap">
 {"imports":{
@@ -64,6 +66,7 @@
   <button id="btnSpeed">⏩ 1×</button>
 </div>
 <div id="joy"><div id="joyKnob"></div></div>
+<div id="joyR"><div id="joyKnobR"></div></div>
 <div id="hint">Миша: обертання · колесо: зум · права кнопка: панорама · клік по агенту — хто він</div>
 <script type="module">
 import * as THREE from 'three';
@@ -796,7 +799,7 @@ async function deliverStork(){
 
 /* ============ UI ============ */
 /* ============ ПРОГУЛЯНКА (WASD + огляд) ============ */
-let walkMode=false, walkYaw=0, walkPitch=0;
+let walkMode=false, walkYaw=0, walkPitch=0, bobT=0;
 const walkPos=new THREE.Vector3(), savedCam=new THREE.Vector3(), savedTgt=new THREE.Vector3();
 const keys={};
 addEventListener('keydown',e=>{keys[e.code]=true;
@@ -806,9 +809,12 @@ function setWalk(on){
   walkMode=on;
   document.getElementById('btnWalk').classList.toggle('on',on);
   controls.enabled=!on;
-  document.getElementById('joy').style.display=(on&&('ontouchstart'in window))?'block':'none';
+  const touch='ontouchstart'in window;
+  document.getElementById('joy').style.display=(on&&touch)?'block':'none';
+  document.getElementById('joyR').style.display=(on&&touch)?'block':'none';
   document.getElementById('hint').textContent=on
-    ?'WASD/стрілки — рух · Shift — біг · тягни — огляд · клік по агенту — хто він'
+    ?(touch?'Лівий стік — рух · правий — огляд · клік по агенту — хто він'
+           :'WASD/стрілки — рух · Shift — біг · тягни — огляд · клік по агенту — хто він')
     :'Миша: обертання · колесо: зум · права кнопка: панорама · клік по агенту — хто він';
   if(on){
     savedCam.copy(camera.position); savedTgt.copy(controls.target);
@@ -848,20 +854,43 @@ function handleTap(e){
   const hits=raycaster.intersectObjects(pickMeshes,false);
   if(hits.length){const A=hits[0].object.userData.agent; if(A&&A.def)askAgent(A);}
 }
-/* джойстик для сенсорних */
+/* джойстики для сенсорних: лівий — рух, правий — огляд */
 const joyEl=document.getElementById('joy'), knobEl=document.getElementById('joyKnob');
-let joyId=null, joyDX=0, joyDY=0;
-function joyMove(t){
-  const r=joyEl.getBoundingClientRect();
+const joyREl=document.getElementById('joyR'), knobREl=document.getElementById('joyKnobR');
+let joyId=null, joyDX=0, joyDY=0, lookId2=null, lookDX=0, lookDY=0;
+function stickMove(t,el,knob){
+  const r=el.getBoundingClientRect();
   let dx=(t.clientX-(r.left+r.width/2))/(r.width/2), dy=(t.clientY-(r.top+r.height/2))/(r.height/2);
   const m=Math.hypot(dx,dy); if(m>1){dx/=m; dy/=m;}
-  joyDX=dx; joyDY=dy;
-  knobEl.style.transform='translate(calc(-50% + '+(dx*34)+'px), calc(-50% + '+(dy*34)+'px))';
+  knob.style.transform='translate(calc(-50% + '+(dx*34)+'px), calc(-50% + '+(dy*34)+'px))';
+  return [dx,dy];
 }
-joyEl.addEventListener('touchstart',e=>{joyId=e.changedTouches[0].identifier; joyMove(e.changedTouches[0]); e.preventDefault();},{passive:false});
-joyEl.addEventListener('touchmove',e=>{for(const t of e.changedTouches)if(t.identifier===joyId)joyMove(t); e.preventDefault();},{passive:false});
-const joyEnd=e=>{for(const t of e.changedTouches)if(t.identifier===joyId){joyId=null; joyDX=joyDY=0; knobEl.style.transform='translate(-50%,-50%)';}};
-joyEl.addEventListener('touchend',joyEnd); joyEl.addEventListener('touchcancel',joyEnd);
+function bindStick(el,knob,isLook,onMove,onEnd){
+  el.addEventListener('touchstart',e=>{const t=e.changedTouches[0]; const[dx,dy]=stickMove(t,el,knob); onMove(t.identifier,dx,dy); e.preventDefault();},{passive:false});
+  el.addEventListener('touchmove',e=>{for(const t of e.changedTouches){const[dx,dy]=stickMove(t,el,knob); onMove(t.identifier,dx,dy);} e.preventDefault();},{passive:false});
+  const end=e=>{for(const t of e.changedTouches)onEnd(t.identifier); knob.style.transform='translate(-50%,-50%)';};
+  el.addEventListener('touchend',end); el.addEventListener('touchcancel',end);
+}
+bindStick(joyEl,knobEl,false,
+  (id,dx,dy)=>{if(joyId===null)joyId=id; if(id===joyId){joyDX=dx; joyDY=dy;}},
+  id=>{if(id===joyId){joyId=null; joyDX=joyDY=0;}});
+bindStick(joyREl,knobREl,true,
+  (id,dx,dy)=>{if(lookId2===null)lookId2=id; if(id===lookId2){lookDX=dx; lookDY=dy;}},
+  id=>{if(id===lookId2){lookId2=null; lookDX=lookDY=0;}});
+/* Стіни для колізій (коло r=0.45) */
+const WALLS=[
+  {x1:-14,z1:-8,x2:-14,z2:8},{x1:26,z1:-8,x2:26,z2:8},
+  {x1:-14,z1:-8,x2:6,z2:-8},{x1:8,z1:-8,x2:26,z2:-8},
+  {x1:6,z1:-8,x2:6,z2:-1.5},{x1:6,z1:1.5,x2:6,z2:8}];
+function collideWalls(p,r){
+  for(const w of WALLS){
+    const cx=w.x1===w.x2?w.x1:Math.max(w.x1,Math.min(w.x2,p.x));
+    const cz=w.z1===w.z2?w.z1:Math.max(w.z1,Math.min(w.z2,p.z));
+    let dx=p.x-cx,dz=p.z-cz,d=Math.hypot(dx,dz);
+    if(d<r){if(d<1e-4){dx=p.x-(w.x1+w.x2)/2;dz=p.z-(w.z1+w.z2)/2;d=Math.hypot(dx,dz)||1;}
+      p.x=cx+dx/d*r; p.z=cz+dz/d*r;}
+  }
+}
 
 /* ============ ЗАПИТАТИ АГЕНТА ============ */
 const STATE_TXT={work:'працює 💻',break:'на перерві ☕',toWork:'йде на місце 🚶',toBreak:'йде на перерву 🚶',idle:'очікує ⏳'};
@@ -943,21 +972,26 @@ function loop(){
   if(!paused&&storkQueue.length&&!storkBusy){storkIn-=dt; if(storkIn<=0){storkIn=20; deliverStork();}}
   /* прогулянка */
   if(walkMode){
+    if(Math.abs(lookDX)>0.12)walkYaw-=lookDX*2.6*dt;                 /* правий стік — огляд */
+    if(Math.abs(lookDY)>0.12)walkPitch=Math.max(-1.2,Math.min(1.2,walkPitch-lookDY*2*dt));
     const f=((keys.KeyW||keys.ArrowUp)?1:0)-((keys.KeyS||keys.ArrowDown)?1:0)-joyDY;
     const s=((keys.KeyD||keys.ArrowRight)?1:0)-((keys.KeyA||keys.ArrowLeft)?1:0)+joyDX;
-    if(f||s){
+    const moving=!!(f||s);
+    if(moving){
       const sp=(keys.ShiftLeft||keys.ShiftRight?5.5:3)*dt;
       const fx=Math.sin(walkYaw), fz=Math.cos(walkYaw);
-      let nx=walkPos.x+(fx*f-fz*s)*sp, nz=walkPos.z+(fz*f+fx*s)*sp;
-      nx=Math.max(-13.2,Math.min(25.2,nx)); nz=Math.max(-7.2,Math.min(7.2,nz));
-      if((walkPos.x-6)*(nx-6)<0&&Math.abs(nz-DOOR_Z)>1.4)nx=walkPos.x; /* перегородка — лише через двері */
-      for(const d of DESKS){const dx=nx-d.x,dz=nz-d.z,dst=Math.hypot(dx,dz);
-        if(dst<1.3&&dst>1e-4){nx=d.x+dx/dst*1.3; nz=d.z+dz/dst*1.3;}}
-      walkPos.x=nx; walkPos.z=nz;
+      const p={x:walkPos.x+(fx*f-fz*s)*sp, z:walkPos.z+(fz*f+fx*s)*sp};
+      p.x=Math.max(-30,Math.min(40,p.x)); p.z=Math.max(-7.4,Math.min(26,p.z)); /* вся карта */
+      collideWalls(p,0.45);
+      for(const d of DESKS){const dx=p.x-d.x,dz=p.z-d.z,dst=Math.hypot(dx,dz);
+        if(dst<1.3&&dst>1e-4){p.x=d.x+dx/dst*1.3; p.z=dz/dst*1.3;}}
+      walkPos.x=p.x; walkPos.z=p.z;
+      bobT+=dt*((keys.ShiftLeft||keys.ShiftRight)?11:8);
     }
-    camera.position.set(walkPos.x,1.7,walkPos.z);
+    const bobY=moving?Math.sin(bobT)*0.05:0;                          /* хода «живої людини» */
+    camera.position.set(walkPos.x,1.7+bobY,walkPos.z);
     const cp=Math.cos(walkPitch);
-    camera.lookAt(walkPos.x+Math.sin(walkYaw)*cp,1.7+Math.sin(walkPitch),walkPos.z+Math.cos(walkYaw)*cp);
+    camera.lookAt(walkPos.x+Math.sin(walkYaw)*cp,1.7+bobY+Math.sin(walkPitch),walkPos.z+Math.cos(walkYaw)*cp);
   }
   controls.update();
   renderer.render(scene,camera);
