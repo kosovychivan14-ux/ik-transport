@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Оливкова імперія — Kokos Agent</title>
+<style>
+:root{
+  --bg:#06080c; --bg2:#0b0f14; --card:#10151c;
+  --lime:#d7f924; --lime-dim:rgba(215,249,36,.12);
+  --text:#f2f5f0; --muted:#9aa39e; --line:rgba(255,255,255,.09);
+  --radius:18px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,Inter,Arial,sans-serif;
+  min-height:100vh;line-height:1.5}
+.dots{position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background-image:radial-gradient(rgba(255,255,255,.12) 1px, transparent 1.4px);
+  background-size:26px 26px;
+  mask-image:radial-gradient(ellipse 90% 60% at 50% 0%, #000 20%, transparent 100%);
+  -webkit-mask-image:radial-gradient(ellipse 90% 60% at 50% 0%, #000 20%, transparent 100%)}
+.topbar{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;max-width:720px;margin:0 auto}
+.topbar a{color:var(--muted);font-weight:700}
+.topbar .t{font-weight:900}
+.topbar .t span{color:var(--lime)}
+.hud{max-width:720px;margin:0 auto;padding:6px 16px;display:grid;
+  grid-template-columns:repeat(3,1fr);gap:10px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px}
+.stat small{display:block;color:var(--muted);font-size:11px;letter-spacing:1px;font-weight:700}
+.stat b{font-size:18px}
+.stat.cash b{color:var(--lime)}
+.hero{max-width:720px;margin:14px auto;padding:0 16px}
+.hero .pic{border-radius:var(--radius);overflow:hidden;border:1px solid var(--line);position:relative;min-height:170px;
+  background:url('../assets/olive-bg.webp') center/cover}
+.hero .pic .shade{position:absolute;inset:0;background:linear-gradient(180deg,transparent 20%,rgba(6,8,12,.9))}
+.hero .cap{position:absolute;left:18px;bottom:14px;right:18px}
+.hero .cap h1{font-size:26px;font-weight:900}
+.hero .cap p{color:var(--muted);font-size:14px}
+.season-line{max-width:720px;margin:0 auto;padding:4px 16px 0;display:flex;justify-content:space-between;align-items:center}
+.season-line h2{font-size:20px}
+.season-line .pill{background:var(--lime-dim);border:1px solid rgba(215,249,36,.4);color:var(--lime);
+  font-weight:800;border-radius:999px;padding:6px 14px;font-size:14px}
+.actions{max-width:720px;margin:0 auto;padding:14px 16px;display:grid;gap:12px}
+.act{display:flex;gap:14px;align-items:flex-start;text-align:left;width:100%;
+  background:var(--card);border:2px solid var(--line);border-radius:var(--radius);
+  padding:16px;color:var(--text);cursor:pointer;touch-action:manipulation;
+  transition:border-color .15s, transform .1s}
+.act:active{transform:scale(.99)}
+.act.sel{border-color:var(--lime);box-shadow:0 0 18px rgba(215,249,36,.25)}
+.act .ico{font-size:30px;line-height:1}
+.act .tx{flex:1}
+.act .tx b{font-size:16px;display:block;margin-bottom:2px}
+.act .tx p{color:var(--muted);font-size:13px}
+.act .price{font-weight:800;color:var(--lime);white-space:nowrap;font-size:14px}
+.act.owned{opacity:.55}
+.stepper{display:flex;align-items:center;gap:12px;margin-top:10px}
+.stepper button{width:44px;height:44px;border-radius:12px;border:1px solid var(--line);
+  background:var(--bg2);color:var(--text);font-size:22px;font-weight:800;cursor:pointer}
+.stepper b{font-size:18px;min-width:64px;text-align:center}
+.stepper small{color:var(--muted)}
+.bigbar{max-width:720px;margin:0 auto;padding:6px 16px 10px}
+.btn{width:100%;min-height:60px;border-radius:999px;border:0;cursor:pointer;
+  background:var(--lime);color:#0a0d02;font-weight:900;font-size:18px;
+  box-shadow:0 0 26px rgba(215,249,36,.35);touch-action:manipulation}
+.btn:active{transform:scale(.98)}
+.btn small{display:block;font-weight:700;font-size:13px;opacity:.75}
+.logwrap{max-width:720px;margin:0 auto;padding:10px 16px 120px}
+.logwrap h3{font-size:15px;color:var(--muted);letter-spacing:1px;margin-bottom:8px}
+#log{list-style:none;display:grid;gap:8px}
+#log li{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:10px 14px;font-size:14px}
+#log li b{color:var(--lime)}
+.ivan{position:fixed;left:0;right:0;bottom:0;z-index:30;
+  background:rgba(11,15,20,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  border-top:1px solid var(--line);padding:10px 16px calc(10px + env(safe-area-inset-bottom));
+  display:flex;gap:12px;align-items:center;max-width:720px;margin:0 auto}
+.ivan img{width:56px;height:56px;border-radius:50%;object-fit:cover;flex-shrink:0;
+  border:2px solid var(--lime);box-shadow:0 0 14px rgba(215,249,36,.4)}
+.ivan p{font-size:14px}
+.ivan p b{color:var(--lime)}
+.modal{position:fixed;inset:0;z-index:50;display:flex;align-items:flex-end;justify-content:center;
+  background:rgba(0,0,0,.6)}
+.modal.hidden{display:none}
+.sheet{background:var(--bg2);border:1px solid var(--line);border-radius:22px 22px 0 0;
+  width:100%;max-width:560px;max-height:88vh;overflow:auto;padding:26px 22px calc(26px + env(safe-area-inset-bottom))}
+.sheet h2{font-size:24px;margin-bottom:6px}
+.sheet .ev{font-size:44px;margin:8px 0}
+.sheet p{color:var(--muted);margin-bottom:8px}
+.sheet .rows{margin:14px 0;display:grid;gap:6px}
+.sheet .rows div{display:flex;justify-content:space-between;font-size:15px}
+.sheet .rows div b{font-variant-numeric:tabular-nums}
+.sheet .total{border-top:1px solid var(--line);padding-top:10px;font-size:18px}
+.sheet .total b{color:var(--lime)}
+.sheet .btn{margin-top:16px}
+.rating{font-size:20px;font-weight:900;color:var(--lime);margin-top:6px}
+@media(min-width:720px){.modal{align-items:center}.sheet{border-radius:22px}}
+</style>
+</head>
+<body>
+<div class="dots"></div>
+
+<div class="topbar">
+  <a href="../">← Ігри</a>
+  <div class="t">🫒 <span>Оливкова імперія</span></div>
+  <button id="restart" style="background:none;border:0;color:var(--muted);font-size:20px;cursor:pointer" title="Почати заново">↺</button>
+</div>
+
+<div class="hud">
+  <div class="stat cash"><small>ГОТІВКА</small><b id="hCash">—</b></div>
+  <div class="stat"><small>ДЕРЕВА</small><b id="hTrees">—</b></div>
+  <div class="stat"><small>ЗЕМЛЯ</small><b id="hLand">—</b></div>
+  <div class="stat"><small>НЕРУХОМІСТЬ</small><b id="hProps">—</b></div>
+  <div class="stat"><small>МІСЦЯ</small><b id="hSpots">—</b></div>
+  <div class="stat"><small>АПГРЕЙДИ</small><b id="hUp">—</b></div>
+</div>
+
+<div class="hero">
+  <div class="pic"><div class="shade"></div>
+    <div class="cap"><h1>Твій гай. Твої правила.</h1>
+    <p>10 сезонів, щоб перетворити €20 000 на оливкову імперію.</p></div>
+  </div>
+</div>
+
+<div class="season-line">
+  <h2 id="seasonTitle">Сезон 1</h2>
+  <span class="pill" id="seasonPill">обери дію</span>
+</div>
+
+<div class="actions" id="actions"></div>
+
+<div class="bigbar">
+  <button class="btn" id="endSeason">Завершити сезон →<small id="endSub">дія не обрана</small></button>
+</div>
+
+<div class="logwrap">
+  <h3>ЖУРНАЛ</h3>
+  <ul id="log"></ul>
+</div>
+
+<div class="ivan">
+  <img src="../assets/ivan.webp" alt="Іван">
+  <p id="ivanText"><b>Іван:</b> …</p>
+</div>
+
+<div class="modal hidden" id="modal">
+  <div class="sheet">
+    <div id="modalBody"></div>
+    <button class="btn" id="modalBtn">Далі →</button>
+  </div>
+</div>
+
+<script>
+"use strict";
+/* ============ КОНСТАНТИ ============ */
+const SEASONS = 10;
+const TREE_COST = 120, LAND_COST = 2000, PROP_COST = 5000;
+const IRR_COST = 3000, PRESS_COST = 4000;
+const TREE_INCOME = 30, PROP_RENT = 600, LAND_CAP = 50;
+const START_CASH = 20000;
+
+const EVENTS = [
+  {id:'drought', icon:'🏜️', name:'Посуха',
+   desc:'Спека висушила гай. Без зрошення втрачаєш 20% дерев.'},
+  {id:'harvest', icon:'🧺', name:'Врожайний рік',
+   desc:'Ідеальна погода! Дохід з дерев цього сезону ×2.'},
+  {id:'tourism', icon:'🧳', name:'Туристичний бум',
+   desc:'Натовпи туристів. Оренда нерухомості цього сезону ×2.'},
+  {id:'hail', icon:'🌨️', name:'Град',
+   desc:'Град пошкодив крони — втрачаєш 10% дерев.'},
+  {id:'subsidy', icon:'💶', name:'Субсидія ЄС',
+   desc:'Грант на розвиток фермерства: +€2 000.'},
+  {id:'calm', icon:'🌤️', name:'Спокійний сезон',
+   desc:'Нічого особливого — просто гарний сезон.'}
+];
+
+const TIPS = [
+  'Дерева — твій двигун: €30 з дерева щосезону. Сади рано, щоб встигли дати врожай.',
+  'Земля — це місця під дерева. Без неї садити нікуди.',
+  'Нерухомість дає стабільну оренду €600/сезон, навіть коли гай відпочиває.',
+  'Зрошення — страховка від посухи. Одна покупка — і спи спокійно.',
+  'Олійниця піднімає дохід з дерев у півтора раза. Рахуй сам.'
+];
+
+/* ============ СТАН ============ */
+let S = null;
+function newGame(){
+  S = {season:1, cash:START_CASH, trees:0, land:2, props:0,
+       irr:false, press:false, action:null, treeN:0, over:false, tip:0};
+  logClear();
+  ivanSay('Привіт! Я Іван. 10 сезонів — і подивимось, на що ти здатен. Почни з дерев: вони дають €30 щосезону.');
+  render();
+}
+function capacity(){ return S.land * LAND_CAP; }
+function freeSpots(){ return capacity() - S.trees; }
+function maxTrees(){ return Math.max(0, Math.min(Math.floor(S.cash / TREE_COST), freeSpots())); }
+function fmt(n){
+  n = Math.round(n);
+  const neg = n < 0;
+  let s = String(Math.abs(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+  return (neg ? '−€' : '€') + s;
+}
+
+/* ============ РЕНДЕР ============ */
+const $ = id => document.getElementById(id);
+function render(){
+  $('hCash').textContent = fmt(S.cash);
+  $('hTrees').textContent = S.trees;
+  $('hLand').textContent = S.land + ' (' + capacity() + ')';
+  $('hProps').textContent = S.props;
+  $('hSpots').textContent = freeSpots();
+  const ups = [];
+  if (S.irr) ups.push('💧'); if (S.press) ups.push('🫗');
+  $('hUp').textContent = ups.length ? ups.join(' ') : '—';
+  $('seasonTitle').textContent = 'Сезон ' + S.season + ' / ' + SEASONS;
+  $('seasonPill').textContent = S.season === SEASONS ? 'фінальний!' : 'обери дію';
+  renderActions();
+  const eb = $('endSeason'), sub = $('endSub');
+  if (!S.action){
+    sub.textContent = 'дія не обрана';
+  } else if (S.action === 'trees'){
+    sub.textContent = S.treeN > 0
+      ? 'садимо ' + S.treeN + ' дерев (−' + fmt(S.treeN * TREE_COST).slice(1) + ')'
+      : 'обери кількість дерев';
+    eb.disabled = S.treeN <= 0;
+  } else {
+    const names = {land:'купуємо землю', prop:'купуємо нерухомість',
+      irr:'ставимо зрошення', press:'будуємо олійницю', skip:'відпочиваємо'};
+    sub.textContent = names[S.action];
+    eb.disabled = false;
+  }
+}
+function actionDef(id){
+  const defs = {
+    trees:{icon:'🌱', name:'Садити дерева', price:'€120 / дерево',
+      desc:'Дохід €30 з дерева щосезону, починаючи з наступного.'},
+    land:{icon:'🏞️', name:'Купити землю', price:fmt(LAND_COST),
+      desc:'+50 місць під дерева. Зараз вільно: ' + freeSpots() + '.'},
+    prop:{icon:'🏠', name:'Купити нерухомість', price:fmt(PROP_COST),
+      desc:'Оренда €600 щосезону. Стабільний дохід без сюрпризів.'},
+    irr:{icon:'💧', name:'Зрошення', price:fmt(IRR_COST),
+      desc:'Разова покупка. Посуха забирає 5% дерев замість 20%.'},
+    press:{icon:'🫗', name:'Олійниця', price:fmt(PRESS_COST),
+      desc:'Разова покупка. Дохід з дерев ×1,5 назавжди.'},
+    skip:{icon:'⏭️', name:'Пропустити сезон', price:'€0',
+      desc:'Зберегти гроші. Іноді найкраща дія — ніякої дії.'}
+  };
+  return defs[id];
+}
+function renderActions(){
+  const box = $('actions');
+  box.innerHTML = '';
+  ['trees','land','prop','irr','press','skip'].forEach(id => {
+    const d = actionDef(id);
+    const owned = (id === 'irr' && S.irr) || (id === 'press' && S.press);
+    const afford = id === 'trees' ? maxTrees() > 0
+      : id === 'land' ? S.cash >= LAND_COST
+      : id === 'prop' ? S.cash >= PROP_COST
+      : id === 'irr' ? (!S.irr && S.cash >= IRR_COST)
+      : id === 'press' ? (!S.press && S.cash >= PRESS_COST)
+      : true;
+    const b = document.createElement('button');
+    b.className = 'act' + (S.action === id ? ' sel' : '') + (owned ? ' owned' : '');
+    b.disabled = owned || !afford;
+    b.style.opacity = (owned || !afford) ? '.45' : '1';
+    let extra = '';
+    if (id === 'trees' && S.action === 'trees' && !owned && afford){
+      extra = '<div class="stepper">' +
+        '<button data-step="-10">−10</button><button data-step="-1">−</button>' +
+        '<b>' + S.treeN + '</b>' +
+        '<button data-step="1">+</button><button data-step="10">+10</button>' +
+        '<small>макс: ' + maxTrees() + '</small></div>';
+    }
+    if (owned) extra = '<p style="color:var(--lime);font-size:13px;margin-top:6px">✓ уже куплено</p>';
+    b.innerHTML = '<div class="ico">' + d.icon + '</div>' +
+      '<div class="tx"><b>' + d.name + '</b><p>' + d.desc + '</p>' + extra + '</div>' +
+      '<div class="price">' + d.price + '</div>';
+    b.addEventListener('click', e => {
+      const st = e.target.closest('[data-step]');
+      if (st){ stepTrees(parseInt(st.dataset.step, 10)); e.stopPropagation(); return; }
+      selectAction(id);
+    });
+    box.appendChild(b);
+  });
+}
+function stepTrees(d){
+  S.treeN = Math.max(0, Math.min(maxTrees(), S.treeN + d));
+  render();
+}
+function selectAction(id){
+  if (S.action === id){ S.action = null; }
+  else {
+    S.action = id;
+    if (id === 'trees' && S.treeN === 0) S.treeN = Math.min(10, maxTrees());
+  }
+  render();
+}
+function log(html){
+  const li = document.createElement('li');
+  li.innerHTML = html;
+  $('log').prepend(li);
+}
+function logClear(){ $('log').innerHTML = ''; }
+function ivanSay(t){ $('ivanText').innerHTML = '<b>Іван:</b> ' + t; }
+
+/* ============ СЕЗОН ============ */
+function drawEvent(){
+  if (Math.random() < 0.30) return EVENTS[5]; // спокійний
+  const pool = EVENTS.slice(0, 5);
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+function doAction(){
+  const a = S.action;
+  if (a === 'trees' && S.treeN > 0){
+    S.cash -= S.treeN * TREE_COST;
+    S.trees += S.treeN;
+    return 'Посаджено дерев: <b>' + S.treeN + '</b> (−' + fmt(S.treeN * TREE_COST).slice(1) + ')';
+  }
+  if (a === 'land'){ S.cash -= LAND_COST; S.land++; return 'Куплено землю: <b>+50 місць</b>'; }
+  if (a === 'prop'){ S.cash -= PROP_COST; S.props++; return 'Куплено нерухомість: <b>+1</b>'; }
+  if (a === 'irr'){ S.cash -= IRR_COST; S.irr = true; return 'Встановлено <b>зрошення</b> 💧'; }
+  if (a === 'press'){ S.cash -= PRESS_COST; S.press = true; return 'Побудовано <b>олійницю</b> 🫗'; }
+  return 'Сезон пропущено — гроші збережено.';
+}
+function applyEvent(ev){
+  let note = '';
+  if (ev.id === 'drought' && S.trees > 0){
+    const lost = Math.floor(S.trees * (S.irr ? 0.05 : 0.20));
+    S.trees -= lost;
+    note = 'Втрачено дерев: <b>' + lost + '</b>' + (S.irr ? ' (зрошення помʼякшило удар)' : '');
+    if (!S.irr) ivanSay('Посуха вдарила по гаю! Зрошення за €3 000 врятувало б більшість дерев.');
+  } else if (ev.id === 'hail' && S.trees > 0){
+    const lost = Math.floor(S.trees * 0.10);
+    S.trees -= lost;
+    note = 'Град пошкодив: втрачено дерев <b>' + lost + '</b>.';
+  } else if (ev.id === 'subsidy'){
+    S.cash += 2000;
+    note = 'Отримано грант: <b>+€2 000</b>.';
+    ivanSay('Грант — це подарунок долі. Вклади його в те, що приносить дохід.');
+  } else if (ev.id === 'harvest'){
+    ivanSay('Врожайний рік! Збирай подвійний дохід з дерев.');
+  } else if (ev.id === 'tourism'){
+    ivanSay('Туристичний бум — оренда подвоєна. Нерухомість зараз золото.');
+  }
+  return note;
+}
+function seasonIncome(ev){
+  const treeRate = TREE_INCOME * (S.press ? 1.5 : 1) * (ev.id === 'harvest' ? 2 : 1);
+  const propRate = PROP_RENT * (ev.id === 'tourism' ? 2 : 1);
+  const fromTrees = Math.round(S.trees * treeRate);
+  const fromProps = S.props * propRate;
+  return {fromTrees, fromProps, total: fromTrees + fromProps};
+}
+function endSeason(){
+  if (S.over) return;
+  if (S.action === 'trees' && S.treeN <= 0){
+    ivanSay('Ти обрав посадку, але кількість — нуль. Додай дерев або обери іншу дію.');
+    return;
+  }
+  const actionNote = doAction();
+  const ev = drawEvent();
+  const evNote = applyEvent(ev);
+  const inc = seasonIncome(ev);
+  S.cash += inc.total;
+  log('<b>Сезон ' + S.season + ':</b> ' + ev.icon + ' ' + ev.name + ' · дохід ' + fmt(inc.total));
+  showReport(ev, evNote, actionNote, inc);
+}
+function showReport(ev, evNote, actionNote, inc){
+  const last = S.season >= SEASONS;
+  let h = '<div class="ev">' + ev.icon + '</div>';
+  h += '<h2>' + ev.name + '</h2><p>' + ev.desc + '</p>';
+  if (evNote) h += '<p style="color:var(--text)">' + evNote + '</p>';
+  h += '<div class="rows">';
+  h += '<div><span>' + actionDef(S.action || 'skip').name + '</span><b>' + actionNote.replace(/<[^>]+>/g, '') + '</b></div>';
+  h += '<div><span>Дохід з дерев</span><b>+' + fmt(inc.fromTrees).slice(1) + '</b></div>';
+  h += '<div><span>Оренда</span><b>+' + fmt(inc.fromProps).slice(1) + '</b></div>';
+  h += '<div class="total"><span>Готівка</span><b>' + fmt(S.cash) + '</b></div>';
+  h += '</div>';
+  $('modalBody').innerHTML = h;
+  $('modalBtn').textContent = last ? 'До фіналу →' : 'Сезон ' + (S.season + 1) + ' →';
+  $('modalBtn').onclick = () => {
+    $('modal').classList.add('hidden');
+    if (last) finish(); else nextSeason();
+  };
+  $('modal').classList.remove('hidden');
+  render();
+}
+function nextSeason(){
+  S.season++;
+  S.action = null; S.treeN = 0;
+  S.tip = (S.tip + 1) % TIPS.length;
+  ivanSay(TIPS[S.tip]);
+  if (S.season === SEASONS) ivanSay('Останній сезон! Викладись на повну — далі підсумки.');
+  render();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+function finish(){
+  S.over = true;
+  const treeVal = S.trees * 60, landVal = S.land * 1500, propVal = S.props * 4000;
+  const total = Math.round(S.cash + treeVal + landVal + propVal);
+  let rating, comment;
+  if (total < 22000){ rating = '🌱 Новачок'; comment = 'Гай вижив — уже добре. Спробуй садити раніше й більше.'; }
+  else if (total < 35000){ rating = '🚜 Фермер'; comment = 'Міцне господарство. Наступного разу додай олійницю раніше.'; }
+  else if (total < 55000){ rating = '💼 Підприємець'; comment = 'Сильний результат! Капітал працює як треба.'; }
+  else { rating = '👑 Оливковий магнат'; comment = 'Бездоганна гра. Гай, земля, нерухомість — усе в плюсі.'; }
+  ivanSay(comment);
+  let h = '<div class="ev">🏆</div><h2>Фінал: ' + fmt(total) + '</h2>';
+  h += '<div class="rating">' + rating + '</div>';
+  h += '<div class="rows">';
+  h += '<div><span>Готівка</span><b>' + fmt(S.cash) + '</b></div>';
+  h += '<div><span>Дерева (' + S.trees + ' × €60)</span><b>' + fmt(treeVal) + '</b></div>';
+  h += '<div><span>Земля (' + S.land + ' × €1 500)</span><b>' + fmt(landVal) + '</b></div>';
+  h += '<div><span>Нерухомість (' + S.props + ' × €4 000)</span><b>' + fmt(propVal) + '</b></div>';
+  h += '<div class="total"><span>Разом</span><b>' + fmt(total) + '</b></div></div>';
+  h += '<p>Старт був з ' + fmt(START_CASH) + '. Приріст: <b style="color:var(--lime)">' +
+    (total >= START_CASH ? '+' : '−') + fmt(Math.abs(total - START_CASH)).slice(1) + '</b>.</p>';
+  $('modalBody').innerHTML = h;
+  $('modalBtn').textContent = '↺ Грати знову';
+  $('modalBtn').onclick = () => { $('modal').classList.add('hidden'); newGame(); };
+  $('modal').classList.remove('hidden');
+  render();
+}
+
+/* ============ ІНІТ ============ */
+$('endSeason').addEventListener('click', endSeason);
+$('restart').addEventListener('click', () => {
+  if (S && !S.over && !confirm('Почати гру заново?')) return;
+  $('modal').classList.add('hidden');
+  newGame();
+});
+if (document.readyState === 'loading')
+  document.addEventListener('DOMContentLoaded', newGame);
+else newGame();
+
+/* API для тестів */
+window.__game = {get S(){return S;}, newGame, selectAction, stepTrees,
+  setTreeN:n=>{S.treeN=n;}, endSeason, nextSeason, finish,
+  modalNext:()=>$('modalBtn').click()};
+</script>
+</body>
+</html>

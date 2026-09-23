@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Бот під контролем — Kokos Agent</title>
+<style>
+:root{
+  --bg:#06080c; --bg2:#0b0f14; --card:#10151c;
+  --blue:#38bdf8; --blue-dim:rgba(56,189,248,.12);
+  --lime:#d7f924; --red:#f87171;
+  --text:#f2f5f0; --muted:#9aa39e; --line:rgba(255,255,255,.09);
+  --radius:18px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,Inter,Arial,sans-serif;
+  min-height:100vh;line-height:1.5}
+.dots{position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background-image:radial-gradient(rgba(255,255,255,.12) 1px, transparent 1.4px);
+  background-size:26px 26px;
+  mask-image:radial-gradient(ellipse 90% 60% at 50% 0%, #000 20%, transparent 100%);
+  -webkit-mask-image:radial-gradient(ellipse 90% 60% at 50% 0%, #000 20%, transparent 100%)}
+.topbar{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;max-width:720px;margin:0 auto}
+.topbar a{color:var(--muted);font-weight:700}
+.topbar .t{font-weight:900}
+.topbar .t span{color:var(--blue)}
+.topbar .icobtn{background:none;border:0;color:var(--muted);font-size:20px;cursor:pointer}
+.wrap{max-width:720px;margin:0 auto;padding:0 16px 130px}
+.hero-pic{border-radius:var(--radius);overflow:hidden;border:1px solid var(--line);
+  position:relative;min-height:150px;background:url('../assets/bot-bg.webp') center/cover;margin:6px 0 16px}
+.hero-pic .shade{position:absolute;inset:0;background:linear-gradient(180deg,transparent 10%,rgba(6,8,12,.92))}
+.hero-pic .cap{position:absolute;left:18px;bottom:14px;right:18px}
+.hero-pic .cap h1{font-size:24px;font-weight:900}
+.hero-pic .cap p{color:var(--muted);font-size:14px}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:20px;margin-bottom:14px}
+.panel h2{font-size:19px;margin-bottom:4px}
+.panel .hint{color:var(--muted);font-size:14px;margin-bottom:16px}
+.alloc{margin-bottom:14px}
+.alloc .row{display:flex;justify-content:space-between;font-weight:700;margin-bottom:6px}
+.alloc .row b{font-variant-numeric:tabular-nums}
+.alloc .row b.t{color:var(--blue)} .alloc .row b.s{color:var(--lime)} .alloc .row b.r{color:var(--muted)}
+input[type=range]{width:100%;height:44px;accent-color:var(--blue);cursor:pointer;touch-action:pan-x}
+input[type=range].s{accent-color:var(--lime)} input[type=range].r{accent-color:#8b9490}
+.presets{display:flex;gap:10px;flex-wrap:wrap;margin:6px 0 4px}
+.presets button{flex:1;min-width:120px;min-height:48px;border-radius:14px;cursor:pointer;
+  background:var(--bg2);border:1px solid var(--line);color:var(--text);font-weight:700;font-size:14px}
+.presets button.on{border-color:var(--blue);box-shadow:0 0 12px rgba(56,189,248,.3)}
+.sumline{display:flex;justify-content:space-between;color:var(--muted);font-size:14px;margin-top:8px}
+.sumline b{color:var(--text)}
+.btn{width:100%;min-height:60px;border-radius:999px;border:0;cursor:pointer;
+  background:var(--blue);color:#04121c;font-weight:900;font-size:18px;
+  box-shadow:0 0 26px rgba(56,189,248,.35);touch-action:manipulation;margin-top:10px}
+.btn:active{transform:scale(.98)}
+.btn:disabled{opacity:.45;box-shadow:none}
+.btn small{display:block;font-weight:700;font-size:13px;opacity:.75}
+.hud2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px}
+.stat small{display:block;color:var(--muted);font-size:11px;letter-spacing:1px;font-weight:700}
+.stat b{font-size:19px;font-variant-numeric:tabular-nums}
+.stat.eq b{color:var(--blue)}
+.stat.dd b.neg{color:var(--red)}
+.timerbar{height:10px;background:var(--bg2);border:1px solid var(--line);border-radius:99px;overflow:hidden;margin-bottom:12px}
+.timerbar i{display:block;height:100%;background:linear-gradient(90deg,var(--blue),var(--lime));width:100%}
+canvas.chart{width:100%;height:170px;display:block;background:var(--bg2);
+  border:1px solid var(--line);border-radius:14px;margin-bottom:12px}
+.cap2{font-size:12px;color:var(--muted);letter-spacing:1px;font-weight:700;margin:2px 2px 6px}
+.event-banner{border-radius:14px;padding:14px 16px;margin-bottom:12px;display:none;
+  border:1px solid;font-weight:700}
+.event-banner.warn{display:block;background:rgba(215,249,36,.08);border-color:rgba(215,249,36,.5);color:var(--lime)}
+.event-banner.live{display:block;background:rgba(248,113,113,.08);border-color:rgba(248,113,113,.5);color:#ffb4b4}
+.event-banner small{display:block;font-weight:400;color:var(--muted);margin-top:4px}
+.fxbar{position:relative;display:inline-block;background:var(--blue-dim);
+  border:1px solid rgba(56,189,248,.4);color:var(--blue);
+  font-size:12px;font-weight:800;border-radius:99px;padding:5px 12px;margin:0 6px 8px 0}
+.fxbar.off{display:none}
+.reactions{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:6px}
+.react{position:relative;overflow:hidden;border-radius:16px;border:2px solid var(--line);
+  background:var(--card);color:var(--text);cursor:pointer;min-height:96px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+  font-weight:800;font-size:14px;touch-action:manipulation;padding:8px 4px}
+.react .e{font-size:26px}
+.react small{color:var(--muted);font-size:11px;font-weight:600}
+.react.cd{opacity:.55}
+.react .cdover{position:absolute;inset:0;background:rgba(6,8,12,.72);
+  display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;color:var(--blue)}
+.react.hot{border-color:var(--lime);box-shadow:0 0 16px rgba(215,249,36,.45);animation:pulse 1s infinite}
+@keyframes pulse{50%{box-shadow:0 0 26px rgba(215,249,36,.7)}}
+.ivan{position:fixed;left:0;right:0;bottom:0;z-index:30;
+  background:rgba(11,15,20,.93);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  border-top:1px solid var(--line);padding:10px 16px calc(10px + env(safe-area-inset-bottom));
+  display:flex;gap:12px;align-items:center;max-width:720px;margin:0 auto}
+.ivan img{width:56px;height:56px;border-radius:50%;object-fit:cover;flex-shrink:0;
+  border:2px solid var(--blue);box-shadow:0 0 14px rgba(56,189,248,.45)}
+.ivan p{font-size:14px}
+.ivan p b{color:var(--blue)}
+.modal{position:fixed;inset:0;z-index:50;display:flex;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.65)}
+.modal.hidden{display:none}
+.sheet{background:var(--bg2);border:1px solid var(--line);border-radius:22px 22px 0 0;width:100%;
+  max-width:560px;max-height:88vh;overflow:auto;padding:26px 22px calc(26px + env(safe-area-inset-bottom))}
+.sheet h2{font-size:24px;margin-bottom:6px}
+.sheet p{color:var(--muted);margin-bottom:8px}
+.sheet .rows{margin:14px 0;display:grid;gap:6px}
+.sheet .rows div{display:flex;justify-content:space-between;font-size:15px}
+.sheet .rows div b{font-variant-numeric:tabular-nums}
+.sheet .total{border-top:1px solid var(--line);padding-top:10px;font-size:18px}
+.sheet .total b{color:var(--blue)}
+.sheet .btn{margin-top:16px}
+.rating{font-size:20px;font-weight:900;color:var(--blue);margin:6px 0}
+@media(min-width:720px){.modal{align-items:center}.sheet{border-radius:22px}}
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+<div class="dots"></div>
+
+<div class="topbar">
+  <a href="../">← Ігри</a>
+  <div class="t">🤖 <span>Бот під контролем</span></div>
+  <button class="icobtn" id="muteBtn" title="Звук">🔊</button>
+</div>
+
+<div class="wrap">
+  <!-- ============ ЕКРАН НАЛАШТУВАННЯ ============ -->
+  <div id="setup">
+    <div class="hero-pic"><div class="shade"></div>
+      <div class="cap"><h1>Ти — ризик-менеджер</h1>
+      <p>2,5 хвилини живого ринку. Розподіли капітал — і втримай його.</p></div>
+    </div>
+    <div class="panel">
+      <h2>Розподіл капіталу</h2>
+      <p class="hint">Тренд — агресивно йде за рухом · Скальпінг — збирає шум у флеті · Резерв — тихо лежить під матрацом.</p>
+      <div class="alloc">
+        <div class="row"><span>📈 Тренд</span><b class="t" id="vT">40%</b></div>
+        <input type="range" id="sT" min="0" max="100" value="40" step="5">
+      </div>
+      <div class="alloc">
+        <div class="row"><span>⚡ Скальпінг</span><b class="s" id="vS">30%</b></div>
+        <input type="range" class="s" id="sS" min="0" max="100" value="30" step="5">
+      </div>
+      <div class="alloc">
+        <div class="row"><span>🛟 Резерв</span><b class="r" id="vR">30%</b></div>
+        <input type="range" class="r" id="sR" min="0" max="100" value="30" step="5">
+      </div>
+      <div class="presets">
+        <button data-p="20,20,60">🐢 Консервативний</button>
+        <button data-p="40,30,30" class="on">⚖️ Збалансований</button>
+        <button data-p="60,30,10">🚀 Агресивний</button>
+      </div>
+      <div class="sumline"><span>Стартовий капітал</span><b>€10 000</b></div>
+      <button class="btn" id="startBtn">Запустити симуляцію →<small>ринок не чекає</small></button>
+    </div>
+  </div>
+
+  <!-- ============ ЕКРАН СИМУЛЯЦІЇ ============ -->
+  <div id="live" class="hidden">
+    <div class="hud2">
+      <div class="stat eq"><small>КАПІТАЛ</small><b id="hEq">€10 000</b></div>
+      <div class="stat"><small>P&amp;L</small><b id="hPnl">€0</b></div>
+      <div class="stat dd"><small>ПРОСАДКА</small><b id="hDd">0%</b></div>
+      <div class="stat"><small>ЦІНА</small><b id="hPrice">100.00</b></div>
+    </div>
+    <div class="timerbar"><i id="tbar"></i></div>
+    <div id="fxrow"></div>
+    <p class="cap2">ЦІНА · LIVE</p>
+    <canvas class="chart" id="priceChart" width="640" height="170"></canvas>
+    <p class="cap2">КРИВА КАПІТАЛУ</p>
+    <canvas class="chart" id="eqChart" width="640" height="170"></canvas>
+    <div class="event-banner" id="evBanner"></div>
+    <div class="reactions">
+      <button class="react" id="bProtect"><span class="e">🛡</span>Захист<small>кулдаун 30с</small><span class="cdover hidden"></span></button>
+      <button class="react" id="bLever"><span class="e">📉</span>Менше плече<small>кулдаун 40с</small><span class="cdover hidden"></span></button>
+      <button class="react" id="bPause"><span class="e">⏸</span>Пауза<small>кулдаун 45с</small><span class="cdover hidden"></span></button>
+    </div>
+    <p class="hint" style="color:var(--muted);font-size:13px">Реагуй на події вчасно: правильна кнопка підсвічується. Промах або запізнення — мінус до капіталу.</p>
+  </div>
+</div>
+
+<div class="ivan">
+  <img src="../assets/ivan.webp" alt="Іван">
+  <p id="ivanText"><b>Іван:</b> …</p>
+</div>
+
+<div class="modal hidden" id="modal">
+  <div class="sheet">
+    <div id="modalBody"></div>
+    <button class="btn" id="modalBtn">↺ Грати знову</button>
+  </div>
+</div>
+
+<script>
+"use strict";
+/* ============ КОНСТАНТИ ============ */
+const DUR = 150, TICK_MS = 250, START_EQ = 10000;
+const CD = {protect:30, lever:40, pause:45};
+const FX_DUR = {protect:10, lever:15, pause:8};
+const EVENT_TYPES = {
+  spike:   {icon:'🌊', name:'Різкий рух ринку',
+             warn:'Бачу сплеск волатильності — готуй 🛡 Захист!',
+             desc:'Волатильність ×3 на 12 секунд. Контр: 🛡 Захист.',
+             counter:'protect', dmg:0.025},
+  crash:   {icon:'💥', name:'Флеш-креш',
+             warn:'Ціна летить униз — тисни 📉 Менше плече!',
+             desc:'Обвал ціни. Контр: 📉 Менше плече.',
+             counter:'lever', dmg:0.03},
+  whipsaw: {icon:'🌀', name:'Хибний сигнал',
+             warn:'Ринок смикається — вмикай ⏸ Паузу!',
+             desc:'Серія хибних розворотів. Контр: ⏸ Пауза.',
+             counter:'pause', dmg:0.015}
+};
+const $ = id => document.getElementById(id);
+function fmt(n){
+  n = Math.round(n);
+  const neg = n < 0;
+  let s = String(Math.abs(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+  return (neg ? '−€' : '€') + s;
+}
+
+/* ============ ЗВУК ============ */
+let AC = null, muted = false;
+function beep(f, d){
+  if (muted) return;
+  try{
+    AC = AC || new (window.AudioContext || window.webkitAudioContext)();
+    const o = AC.createOscillator(), g = AC.createGain();
+    o.frequency.value = f; o.type = 'sine';
+    g.gain.setValueAtTime(0.08, AC.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, AC.currentTime + d);
+    o.connect(g); g.connect(AC.destination);
+    o.start(); o.stop(AC.currentTime + d);
+  }catch(e){/* без звуку — не біда */}
+}
+$('muteBtn').addEventListener('click', () => {
+  muted = !muted;
+  $('muteBtn').textContent = muted ? '🔇' : '🔊';
+});
+
+/* ============ СТАН ============ */
+let S = null;
+function newGame(){
+  if (S && S.timer) clearInterval(S.timer);
+  S = {phase:'setup', wT:40, wS:30, wR:30, timer:null};
+  $('setup').classList.remove('hidden');
+  $('live').classList.add('hidden');
+  $('modal').classList.add('hidden');
+  syncSliders();
+  ivanSay('Привіт, я Іван. Розподіли капітал між стратегіями й тисни «Запустити». Далі — 2,5 хвилини живого ринку.');
+}
+function ivanSay(t){ $('ivanText').innerHTML = '<b>Іван:</b> ' + t; }
+
+/* ============ СЛАЙДЕРИ ============ */
+function syncSliders(){
+  $('sT').value = S.wT; $('sS').value = S.wS; $('sR').value = S.wR;
+  $('vT').textContent = S.wT + '%';
+  $('vS').textContent = S.wS + '%';
+  $('vR').textContent = S.wR + '%';
+}
+function rebalance(changed, val){
+  val = Math.max(0, Math.min(100, val));
+  const keys = ['wT','wS','wR'].filter(k => k !== changed);
+  const others = keys.map(k => S[k]);
+  const sumOthers = others[0] + others[1];
+  let rest = 100 - val;
+  if (sumOthers === 0){ S[keys[0]] = Math.round(rest/2); S[keys[1]] = rest - S[keys[0]]; }
+  else {
+    S[keys[0]] = Math.round(rest * others[0] / sumOthers);
+    S[keys[1]] = rest - S[keys[0]];
+  }
+  S[changed] = val;
+  syncSliders();
+}
+[['sT','wT'],['sS','wS'],['sR','wR']].forEach(([id, key]) => {
+  $(id).addEventListener('input', e => {
+    document.querySelectorAll('.presets button').forEach(b => b.classList.remove('on'));
+    rebalance(key, parseInt(e.target.value, 10));
+  });
+});
+document.querySelectorAll('.presets button').forEach(b => {
+  b.addEventListener('click', () => {
+    document.querySelectorAll('.presets button').forEach(x => x.classList.remove('on'));
+    b.classList.add('on');
+    const [t,s,r] = b.dataset.p.split(',').map(Number);
+    S.wT = t; S.wS = s; S.wR = r;
+    syncSliders();
+  });
+});
+
+/* ============ СИМУЛЯЦІЯ ============ */
+function startSim(){
+  S.phase = 'live';
+  S.t = 0; S.equity = START_EQ; S.peak = START_EQ; S.maxDD = 0;
+  S.price = 100; S.regime = 'flat'; S.vol = 0.004;
+  S.tickN = 0; S.candles = []; S.cur = null; S.hist = [];
+  S.handled = 0; S.missed = 0;
+  S.warn = null; S.active = null;
+  S.fx = {protect:0, lever:0, pause:0};
+  S.cd = {protect:0, lever:0, pause:0};
+  S.nextEvent = 18; S.halfTold = false; S.crashT = 0; S.whipT = 0;
+  $('setup').classList.add('hidden');
+  $('live').classList.remove('hidden');
+  $('evBanner').className = 'event-banner';
+  ivanSay('Поїхали! Слідкуй за банером подій — я підкажу, яку кнопку тиснути.');
+  beep(520, .15);
+  S.timer = setInterval(tick, TICK_MS);
+  draw();
+}
+function regimeDrift(){
+  if (S.crashT > 0) return -0.003;
+  if (S.regime === 'bull') return 0.0007;
+  if (S.regime === 'bear') return -0.0007;
+  return 0;
+}
+function maybeRegime(){
+  if (S.whipT > 0){ // хибний сигнал: смикання
+    if (S.tickN % 8 === 0) S.regime = ['bull','bear','flat'][Math.floor(Math.random()*3)];
+    return;
+  }
+  if (Math.random() < 0.008){
+    const r = Math.random();
+    S.regime = r < 0.35 ? 'bull' : r < 0.7 ? 'bear' : 'flat';
+  }
+}
+function maybeEvents(){
+  // попередження
+  if (!S.warn && !S.active && S.t >= S.nextEvent - 5 && S.t < S.nextEvent){
+    const types = Object.keys(EVENT_TYPES);
+    const type = types[Math.floor(Math.random() * types.length)];
+    S.warn = {type, until: S.nextEvent};
+    const E = EVENT_TYPES[type];
+    showBanner('warn', '⚠️ За 5 секунд: ' + E.icon + ' ' + E.name + '<small>' + E.desc + '</small>');
+    ivanSay(E.warn);
+    beep(660, .2);
+  }
+  // активація
+  if (S.warn && S.t >= S.warn.until){
+    const type = S.warn.type;
+    S.warn = null;
+    S.active = {type, until: S.t + 10};
+    if (type === 'spike') S.vol = 0.012;
+    if (type === 'crash') S.crashT = 6;
+    if (type === 'whipsaw') S.whipT = 8;
+    const E = EVENT_TYPES[type];
+    showBanner('live', E.icon + ' ' + E.name + ' — реагуй!<small>' + E.desc + '</small>');
+    document.querySelectorAll('.react').forEach(b => b.classList.remove('hot'));
+    $({protect:'bProtect', lever:'bLever', pause:'bPause'}[E.counter]).classList.add('hot');
+    beep(440, .3);
+  }
+  // прострочка
+  if (S.active && S.t >= S.active.until){
+    const type = S.active.type;
+    S.active = null;
+    S.missed++;
+    damage(type, true);
+    hideBanner();
+    document.querySelectorAll('.react').forEach(b => b.classList.remove('hot'));
+    ivanSay('Запізно! Подія вдарила по капіталу. Наступного разу реагуй швидше.');
+    beep(220, .35);
+    S.nextEvent = S.t + 25 + Math.random() * 10;
+  }
+  if (S.vol > 0.004 && (!S.active || S.active.type !== 'spike')) S.vol = 0.004;
+}
+function damage(type, full){
+  const E = EVENT_TYPES[type];
+  S.equity *= (1 - E.dmg * (full ? 1 : 0.4));
+}
+function showBanner(cls, html){
+  const b = $('evBanner');
+  b.className = 'event-banner ' + cls;
+  b.innerHTML = html;
+}
+function hideBanner(){ $('evBanner').className = 'event-banner'; }
+function tick(){
+  if (!S || S.phase !== 'live') return;
+  S.t += TICK_MS / 1000;
+  S.tickN++;
+  maybeRegime();
+  maybeEvents();
+  if (S.crashT > 0) S.crashT -= TICK_MS / 1000;
+  if (S.whipT > 0) S.whipT -= TICK_MS / 1000;
+  // ціна
+  const drift = regimeDrift();
+  const noise = (Math.random() * 2 - 1) * S.vol;
+  S.price *= (1 + drift + noise);
+  pushCandle(S.price);
+  // дохід стратегій
+  const rT = drift * 1.6 * (S.fx.lever > 0 ? 0.5 : 1) - 0.00008;
+  const rS = Math.abs(noise) * 0.7 - Math.abs(drift) * 1.0 - 0.00006;
+  const rR = 0.0001;
+  let r = (S.wT * rT + S.wS * rS + S.wR * rR) / 100;
+  if (S.fx.pause > 0) r = 0;
+  else if (r < 0 && S.fx.protect > 0) r *= 0.5;
+  S.equity *= (1 + r);
+  S.hist.push(S.equity);
+  if (S.hist.length > 600) S.hist.shift();
+  // просадка
+  if (S.equity > S.peak) S.peak = S.equity;
+  const dd = (S.peak - S.equity) / S.peak * 100;
+  if (dd > S.maxDD) S.maxDD = dd;
+  // кулдауни й ефекти
+  ['protect','lever','pause'].forEach(k => {
+    if (S.cd[k] > 0) S.cd[k] = Math.max(0, S.cd[k] - TICK_MS / 1000);
+    if (S.fx[k] > 0) S.fx[k] = Math.max(0, S.fx[k] - TICK_MS / 1000);
+  });
+  if (!S.halfTold && S.t >= DUR / 2){
+    S.halfTold = true;
+    ivanSay(S.maxDD > 5
+      ? 'Половина шляху, але просадка вже ' + S.maxDD.toFixed(1) + '% — тримай руку на кнопках!'
+      : 'Половина шляху — політ нормальний. Не розслабляйся, ринок підступний.');
+  }
+  draw();
+  if (S.t >= DUR) finish();
+}
+function pushCandle(price){
+  if (!S.cur) S.cur = {o:price, h:price, l:price, c:price, n:0};
+  S.cur.h = Math.max(S.cur.h, price);
+  S.cur.l = Math.min(S.cur.l, price);
+  S.cur.c = price; S.cur.n++;
+  if (S.cur.n >= 8){
+    S.candles.push(S.cur);
+    if (S.candles.length > 42) S.candles.shift();
+    S.cur = null;
+  }
+}
+function press(btn){
+  if (!S || S.phase !== 'live') return;
+  if (S.cd[btn] > 0){ ivanSay('Кнопка ще на кулдауні — зачекай.'); return; }
+  const names = {protect:'🛡 Захист', lever:'📉 Менше плече', pause:'⏸ Пауза'};
+  if (S.active && EVENT_TYPES[S.active.type].counter === btn){
+    // влучання
+    S.fx[btn] = FX_DUR[btn];
+    S.cd[btn] = CD[btn];
+    S.handled++;
+    damage(S.active.type, false);
+    const type = S.active.type;
+    S.active = null;
+    if (type === 'spike') S.vol = 0.004;
+    S.nextEvent = S.t + 25 + Math.random() * 10;
+    hideBanner();
+    document.querySelectorAll('.react').forEach(b => b.classList.remove('hot'));
+    ivanSay('Влучно! ' + names[btn] + ' помʼякшив удар. Так тримати.');
+    beep(880, .2);
+  } else if (S.active){
+    // не та кнопка
+    S.missed++;
+    damage(S.active.type, true);
+    const type = S.active.type;
+    S.active = null;
+    if (type === 'spike') S.vol = 0.004;
+    S.nextEvent = S.t + 25 + Math.random() * 10;
+    hideBanner();
+    document.querySelectorAll('.react').forEach(b => b.classList.remove('hot'));
+    ivanSay('Не та кнопка! Я ж підказував. Капітал отримав по шапці.');
+    beep(220, .35);
+  } else {
+    ivanSay('Зараз спокійно — бережи кулдауни для справжніх подій.');
+  }
+  draw();
+}
+
+/* ============ МАЛЮВАННЯ ============ */
+function draw(){
+  if (!S || S.phase !== 'live') return;
+  $('hEq').textContent = fmt(S.equity);
+  const pnl = S.equity - START_EQ;
+  const pe = $('hPnl');
+  pe.textContent = (pnl >= 0 ? '+' : '−') + fmt(Math.abs(pnl)).slice(1);
+  pe.style.color = pnl >= 0 ? 'var(--lime)' : 'var(--red)';
+  const de = $('hDd');
+  de.textContent = S.maxDD.toFixed(1) + '%';
+  de.className = S.maxDD > 3 ? 'neg' : '';
+  $('hPrice').textContent = S.price.toFixed(2);
+  $('tbar').style.width = Math.max(0, (1 - S.t / DUR) * 100) + '%';
+  // ефекти
+  const fx = [];
+  if (S.fx.protect > 0) fx.push('🛡 ' + Math.ceil(S.fx.protect) + 'с');
+  if (S.fx.lever > 0) fx.push('📉 ' + Math.ceil(S.fx.lever) + 'с');
+  if (S.fx.pause > 0) fx.push('⏸ ' + Math.ceil(S.fx.pause) + 'с');
+  $('fxrow').innerHTML = fx.map(x => '<span class="fxbar">' + x + '</span>').join('');
+  // кулдауни
+  [['bProtect','protect'],['bLever','lever'],['bPause','pause']].forEach(([id, k]) => {
+    const b = $(id), ov = b.querySelector('.cdover');
+    if (S.cd[k] > 0){
+      b.classList.add('cd');
+      ov.classList.remove('hidden');
+      ov.textContent = Math.ceil(S.cd[k]);
+    } else {
+      b.classList.remove('cd');
+      ov.classList.add('hidden');
+    }
+  });
+  drawPrice();
+  drawEquity();
+}
+function drawPrice(){
+  const c = $('priceChart'), x = c.getContext('2d');
+  const W = c.width, H = c.height;
+  x.clearRect(0, 0, W, H);
+  const cs = S.candles;
+  if (cs.length < 2) return;
+  let mn = Infinity, mx = -Infinity;
+  cs.forEach(k => { mn = Math.min(mn, k.l); mx = Math.max(mx, k.h); });
+  const pad = (mx - mn) * 0.15 || 1; mn -= pad; mx += pad;
+  const y = v => H - (v - mn) / (mx - mn) * H;
+  const bw = W / 42;
+  cs.forEach((k, i) => {
+    const cx = i * bw + bw / 2;
+    const up = k.c >= k.o;
+    x.strokeStyle = up ? '#38bdf8' : '#f87171';
+    x.fillStyle = up ? '#38bdf8' : '#f87171';
+    x.lineWidth = 1.5;
+    x.beginPath(); x.moveTo(cx, y(k.h)); x.lineTo(cx, y(k.l)); x.stroke();
+    const bwh = Math.max(2, bw * 0.6);
+    x.fillRect(cx - bwh/2, y(Math.max(k.o,k.c)), bwh, Math.max(1, Math.abs(y(k.o)-y(k.c))));
+  });
+}
+function drawEquity(){
+  const c = $('eqChart'), x = c.getContext('2d');
+  const W = c.width, H = c.height;
+  x.clearRect(0, 0, W, H);
+  const h = S.hist;
+  if (h.length < 2) return;
+  let mn = Math.min(...h, START_EQ), mx = Math.max(...h, START_EQ);
+  const pad = (mx - mn) * 0.15 || 1; mn -= pad; mx += pad;
+  const y = v => H - (v - mn) / (mx - mn) * H;
+  x.strokeStyle = 'rgba(255,255,255,.15)';
+  x.lineWidth = 1;
+  x.beginPath(); x.moveTo(0, y(START_EQ)); x.lineTo(W, y(START_EQ)); x.stroke();
+  const grad = x.createLinearGradient(0, 0, 0, H);
+  grad.addColorStop(0, 'rgba(215,249,36,.35)');
+  grad.addColorStop(1, 'rgba(215,249,36,0)');
+  x.beginPath();
+  h.forEach((v, i) => {
+    const px = i / 599 * W;
+    i ? x.lineTo(px, y(v)) : x.moveTo(px, y(v));
+  });
+  x.strokeStyle = '#d7f924'; x.lineWidth = 2; x.stroke();
+  x.lineTo((h.length-1)/599*W, H); x.lineTo(0, H); x.closePath();
+  x.fillStyle = grad; x.fill();
+}
+
+/* ============ ФІНАЛ ============ */
+function finish(){
+  if (S.phase !== 'live') return;
+  S.phase = 'done';
+  clearInterval(S.timer);
+  document.querySelectorAll('.react').forEach(b => b.classList.remove('hot'));
+  hideBanner();
+  const penalty = S.maxDD * 30;
+  const score = Math.round(S.equity - penalty);
+  let rating, comment;
+  if (score < 9500){ rating = '🫠 Паніка на ринку'; comment = 'Капітал пішов у мінус. Наступного разу реагуй на події швидше.'; }
+  else if (score < 10500){ rating = '⚖️ Ризик-менеджер'; comment = 'Втримався на плаву. Непогано для першого разу.'; }
+  else if (score < 12000){ rating = '🧊 Холодна голова'; comment = 'Впевнена робота: події відбиті, просадка під контролем.'; }
+  else { rating = '🏆 Легенда деску'; comment = 'Бездоганно! Бот під повним контролем.'; }
+  ivanSay(comment);
+  let h = '<div style="font-size:44px;margin:8px 0">🏁</div>';
+  h += '<h2>Симуляцію завершено</h2>';
+  h += '<div class="rating">' + rating + '</div>';
+  h += '<div class="rows">';
+  h += '<div><span>Фінальний капітал</span><b>' + fmt(S.equity) + '</b></div>';
+  h += '<div><span>Макс. просадка</span><b>' + S.maxDD.toFixed(1) + '%</b></div>';
+  h += '<div><span>Штраф за просадку</span><b>−' + fmt(penalty).slice(1) + '</b></div>';
+  h += '<div><span>Подій відбито / пропущено</span><b>' + S.handled + ' / ' + S.missed + '</b></div>';
+  h += '<div class="total"><span>Підсумок</span><b>' + fmt(score) + '</b></div></div>';
+  h += '<p>Розподіл був: тренд ' + S.wT + '%, скальпінг ' + S.wS + '%, резерв ' + S.wR + '%.</p>';
+  $('modalBody').innerHTML = h;
+  $('modal').classList.remove('hidden');
+  draw();
+}
+$('startBtn').addEventListener('click', startSim);
+$('bProtect').addEventListener('click', () => press('protect'));
+$('bLever').addEventListener('click', () => press('lever'));
+$('bPause').addEventListener('click', () => press('pause'));
+$('modalBtn').addEventListener('click', () => { newGame(); });
+
+if (document.readyState === 'loading')
+  document.addEventListener('DOMContentLoaded', newGame);
+else newGame();
+
+/* API для тестів */
+window.__game = {get S(){return S;}, newGame, startSim, tick, press,
+  setAlloc:(t,s,r)=>{S.wT=t;S.wS=s;S.wR=r;}, finish,
+  forceEvent:type=>{S.nextEvent=S.t; S.warn=null;}};
+</script>
+</body>
+</html>
