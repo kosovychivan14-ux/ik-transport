@@ -9,7 +9,9 @@
   #stage{position:fixed;inset:0;}
   #title{position:fixed;top:10px;left:50%;transform:translateX(-50%);color:#67e8f9;font-size:18px;font-weight:700;letter-spacing:3px;text-shadow:0 0 12px #22d3ee88;pointer-events:none;z-index:5;}
   #journal{position:fixed;top:10px;left:10px;width:250px;max-height:40vh;overflow:hidden;background:#0b0f16cc;border:1px solid #22d3ee55;border-radius:10px;padding:8px 10px;color:#c9d4e3;font-size:12px;z-index:5;backdrop-filter:blur(4px);}
-  #journal h4{margin:0 0 6px;color:#67e8f9;font-size:12px;letter-spacing:1px;}
+  #journal h4{margin:0 0 6px;color:#67e8f9;font-size:12px;letter-spacing:1px;cursor:pointer;user-select:none;}
+  #journal.closed #log{display:none;}
+  #journal.closed h4{margin:0;}
   #journal div{margin:2px 0;opacity:.9;}
   #journal .t{color:#22d3ee;}
   #agentPanel{position:fixed;top:10px;right:10px;width:300px;max-height:70vh;overflow-y:auto;background:#0b0f16cc;border:1px solid #22d3ee55;border-radius:10px;padding:8px;z-index:5;backdrop-filter:blur(4px);}
@@ -36,14 +38,13 @@
 <body>
 <div id="stage"></div>
 <div id="title">🥥 AI AGENTS HOME · 3D</div>
-<div id="journal"><h4>📜 ЖУРНАЛ</h4><div id="log"></div></div>
+<div id="journal" class="closed"><h4 id="journalHead">📜 ЖУРНАЛ <span id="jArrow">▸</span></h4><div id="log"></div></div>
 <div id="agentPanel"><h4>📋 АГЕНТИ</h4><div id="agentRows"></div></div>
 <div id="controls">
   <button id="btnStork">🪶 Лелека!</button>
   <button id="btnAgents">📋 Агенти</button>
   <button id="btnPause">⏸ Пауза</button>
   <button id="btnSpeed">⏩ 1×</button>
-  <button id="btnRoof">🏠 Дах</button>
 </div>
 <div id="hint">Миша: обертання · колесо: зум · права кнопка: панорама</div>
 <script type="module">
@@ -192,11 +193,7 @@ box(0.3,WALL_H-2.5,DOOR_W,M.wall,6,(WALL_H+2.5)/2,DOOR_Z);                      
 /* Дверний портал — ціанова рамка */
 const doorGlow=box(0.1,2.5,DOOR_W+0.5,new THREE.MeshBasicMaterial({color:0x22d3ee,transparent:true,opacity:.25}),6,1.25,DOOR_Z,world,false);
 doorGlow.material.side=THREE.DoubleSide;
-/* Стеля (за замовчуванням прихована — вид «ляльковий будиночок»; кнопка «Дах» вмикає) */
-const ceilings=[
-box(HALL.x1-HALL.x0,0.2,HALL.z1-HALL.z0,new THREE.MeshStandardMaterial({color:0x11161d,roughness:.9}),(HALL.x0+HALL.x1)/2,4.4,0),
-box(LOUNGE.x1-LOUNGE.x0,0.2,LOUNGE.z1-LOUNGE.z0,new THREE.MeshStandardMaterial({color:0x151009,roughness:.9}),(LOUNGE.x0+LOUNGE.x1)/2,4.4,0)];
-ceilings.forEach(c=>c.visible=false);
+/* Даху немає — дивимось на офіс згори, як на ляльковий будиночок */
 /* Шестикутні лампи */
 function hexLamp(x,z){
   const g=new THREE.Group(); g.position.set(x,4.4,z);
@@ -780,12 +777,13 @@ async function deliverStork(){
 
 /* ============ UI ============ */
 document.getElementById('btnStork').onclick=deliverStork;
-document.getElementById('btnRoof').onclick=e=>{
-  const on=!ceilings[0].visible;
-  ceilings.forEach(c=>c.visible=on);
-  e.target.classList.toggle('on',on);
-  log(on?'🏠 дах показано':'🏠 дах приховано — вид зверху');
-};
+/* Журнал: згорнути/розгорнути тиком по заголовку */
+const journal=document.getElementById('journal');
+function setJournal(open){
+  journal.classList.toggle('closed',!open);
+  document.getElementById('jArrow').textContent=open?'▾':'▸';
+}
+document.getElementById('journalHead').onclick=()=>setJournal(journal.classList.contains('closed'));
 document.getElementById('btnAgents').onclick=e=>{
   const p=document.getElementById('agentPanel');
   p.style.display=p.style.display==='none'?'block':'none';
