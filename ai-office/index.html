@@ -854,29 +854,37 @@ function handleTap(e){
   const hits=raycaster.intersectObjects(pickMeshes,false);
   if(hits.length){const A=hits[0].object.userData.agent; if(A&&A.def)askAgent(A);}
 }
-/* джойстики для сенсорних: лівий — рух, правий — огляд */
+/* джойстики: лівий — рух, правий — огляд (Pointer Events: стабільно на iOS/Android/десктопі) */
 const joyEl=document.getElementById('joy'), knobEl=document.getElementById('joyKnob');
 const joyREl=document.getElementById('joyR'), knobREl=document.getElementById('joyKnobR');
-let joyId=null, joyDX=0, joyDY=0, lookId2=null, lookDX=0, lookDY=0;
-function stickMove(t,el,knob){
-  const r=el.getBoundingClientRect();
-  let dx=(t.clientX-(r.left+r.width/2))/(r.width/2), dy=(t.clientY-(r.top+r.height/2))/(r.height/2);
-  const m=Math.hypot(dx,dy); if(m>1){dx/=m; dy/=m;}
-  knob.style.transform='translate(calc(-50% + '+(dx*34)+'px), calc(-50% + '+(dy*34)+'px))';
-  return [dx,dy];
+let joyDX=0, joyDY=0, lookDX=0, lookDY=0;
+function bindStick(el,knob,onMove,onEnd){
+  let pid=null;
+  const move=e=>{
+    const r=el.getBoundingClientRect();
+    let dx=(e.clientX-(r.left+r.width/2))/(r.width/2), dy=(e.clientY-(r.top+r.height/2))/(r.height/2);
+    const m=Math.hypot(dx,dy); if(m>1){dx/=m; dy/=m;}
+    knob.style.transform='translate(calc(-50% + '+(dx*34)+'px), calc(-50% + '+(dy*34)+'px))';
+    onMove(dx,dy);
+  };
+  el.addEventListener('pointerdown',e=>{
+    if(pid!==null)return;
+    pid=e.pointerId;
+    try{el.setPointerCapture(pid);}catch(_){}
+    move(e);
+    e.preventDefault();
+  });
+  el.addEventListener('pointermove',e=>{if(e.pointerId===pid)move(e);});
+  const end=e=>{
+    if(e.pointerId!==pid)return;
+    pid=null; onEnd();
+    knob.style.transform='translate(-50%,-50%)';
+  };
+  el.addEventListener('pointerup',end);
+  el.addEventListener('pointercancel',end);
 }
-function bindStick(el,knob,isLook,onMove,onEnd){
-  el.addEventListener('touchstart',e=>{const t=e.changedTouches[0]; const[dx,dy]=stickMove(t,el,knob); onMove(t.identifier,dx,dy); e.preventDefault();},{passive:false});
-  el.addEventListener('touchmove',e=>{for(const t of e.changedTouches){const[dx,dy]=stickMove(t,el,knob); onMove(t.identifier,dx,dy);} e.preventDefault();},{passive:false});
-  const end=e=>{for(const t of e.changedTouches)onEnd(t.identifier); knob.style.transform='translate(-50%,-50%)';};
-  el.addEventListener('touchend',end); el.addEventListener('touchcancel',end);
-}
-bindStick(joyEl,knobEl,false,
-  (id,dx,dy)=>{if(joyId===null)joyId=id; if(id===joyId){joyDX=dx; joyDY=dy;}},
-  id=>{if(id===joyId){joyId=null; joyDX=joyDY=0;}});
-bindStick(joyREl,knobREl,true,
-  (id,dx,dy)=>{if(lookId2===null)lookId2=id; if(id===lookId2){lookDX=dx; lookDY=dy;}},
-  id=>{if(id===lookId2){lookId2=null; lookDX=lookDY=0;}});
+bindStick(joyEl,knobEl,(dx,dy)=>{joyDX=dx; joyDY=dy;},()=>{joyDX=joyDY=0;});
+bindStick(joyREl,knobREl,(dx,dy)=>{lookDX=dx; lookDY=dy;},()=>{lookDX=lookDY=0;});
 /* Стіни для колізій (коло r=0.45) */
 const WALLS=[
   {x1:-14,z1:-8,x2:-14,z2:8},{x1:26,z1:-8,x2:26,z2:8},
