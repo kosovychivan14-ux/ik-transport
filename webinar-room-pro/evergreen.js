@@ -175,16 +175,18 @@
     if (!box) return;
     var div = document.createElement('div');
     div.className = 'msg' + (cls ? ' ' + cls : '');
-    var strong = document.createElement('strong');
-    strong.className = 'msg__name';
-    strong.textContent = name;
+    if (name) {
+      var strong = document.createElement('strong');
+      strong.className = 'msg__name';
+      strong.textContent = name;
+      div.appendChild(strong);
+    }
     var span = document.createElement('span');
     span.textContent = text;
     var time = document.createElement('span');
     time.className = 'msg__time';
     var n = new Date();
     time.textContent = pad(n.getHours()) + ':' + pad(n.getMinutes());
-    div.appendChild(strong);
     div.appendChild(span);
     div.appendChild(time);
     box.appendChild(div);
@@ -281,12 +283,32 @@
     viewers = P ? P.count() : viewers;
     paintViewers();
     var verb = p.f ? 'приєдналась' : 'приєднався';
-    addChatMsg('', p.flag + ' ' + p.name + ' · ' + p.country + ' ' + verb, 'msg--sys');
+    var text = p.flag + ' ' + p.name + ' · ' + p.country + ' ' + verb;
+    addChatMsg('', text, 'msg--sys');
+    showJoinToast(text);
+  }
+  // спливаючий тост на сцені: видно приєднання, навіть не дивлячись у чат
+  var toastBox = null;
+  function showJoinToast(text) {
+    var stage = $('state-live');
+    if (!stage) return;
+    if (!toastBox) {
+      toastBox = document.createElement('div');
+      toastBox.className = 'join-toasts';
+      toastBox.id = 'join-toasts';
+      stage.appendChild(toastBox);
+    }
+    var t = document.createElement('div');
+    t.className = 'join-toast';
+    t.textContent = text;
+    toastBox.appendChild(t);
+    while (toastBox.children.length > 3) toastBox.removeChild(toastBox.firstChild);
+    setTimeout(function () { if (t.parentNode) t.parentNode.removeChild(t); }, 4200);
   }
   function paintViewers() {
     var v = Math.max(60, viewers);
     var el1 = $('viewers'); if (el1) el1.textContent = v;
-    var el2 = $('chat-online'); if (el2) el2.textContent = Math.max(40, v - Math.floor(Math.random() * 25));
+    var el2 = $('chat-online'); if (el2) el2.textContent = v;
     var el3 = $('eg-watchers-n'); if (el3) el3.textContent = v;
     var el4 = $('eg-sched-viewers'); if (el4) el4.textContent = v;
   }
@@ -299,7 +321,7 @@
         for (var i = 0; i < n; i++) P.joinOne();
       }
       joinLoop();
-    }, 9000 + Math.random() * 16000);
+    }, 7000 + Math.random() * 9000);
   })();
 
   /* ============ сесія ============ */

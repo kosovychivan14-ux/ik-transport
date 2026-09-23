@@ -601,3 +601,23 @@ button.live-watchers:focus-visible{outline:2px solid var(--lime);outline-offset:
 .p-row__main span{font-size:11.5px;color:var(--muted)}
 .p-row__dot{width:8px;height:8px;border-radius:50%;background:#3ddc84;box-shadow:0 0 8px #3ddc84;flex-shrink:0}
 .p-empty{color:var(--muted);text-align:center;padding:30px 10px;font-size:13.5px}
+
+/* спливаючі тости приєднання на сцені ефіру */
+#state-live{position:relative}
+.join-toasts{
+  position:absolute;left:14px;bottom:14px;z-index:8;
+  display:flex;flex-direction:column;gap:8px;pointer-events:none;max-width:75%;
+}
+.join-toast{
+  font-size:12.5px;color:var(--text);
+  background:rgba(4,6,10,.82);border:1px solid var(--lime-line);border-radius:999px;
+  padding:8px 16px;box-shadow:0 8px 24px rgba(0,0,0,.45);
+  animation:toastin .35s cubic-bezier(.2,.9,.3,1.2), toastout .4s ease 3.6s forwards;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+@keyframes toastin{from{opacity:0;transform:translateY(14px) scale(.94)}to{opacity:1;transform:none}}
+@keyframes toastout{to{opacity:0;transform:translateY(8px)}}
+@media (max-width:640px){
+  .join-toasts{left:10px;bottom:10px;max-width:86%}
+  .join-toast{font-size:11px;padding:7px 13px}
+}

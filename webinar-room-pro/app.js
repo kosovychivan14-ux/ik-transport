@@ -188,6 +188,7 @@
   /* ---------- глядачі ---------- */
   var viewers = 240 + Math.floor(Math.random() * 140);
   function tickViewers() {
+    if (window.WRP_PARTICIPANTS) return; // учасниками керує participants.js + evergreen
     if (window.EVERGREEN && window.EVERGREEN.drivesViewers) return; // лічильник веде evergreen
     viewers = Math.max(120, Math.min(900, viewers + Math.floor(Math.random() * 17) - 8));
     $('viewers').textContent = viewers;
