@@ -33,6 +33,11 @@
   if (!profile) {
     showQual();
     document.body.style.overflow = 'hidden';
+    // міні-ап: підставляємо ім'я з Telegram, щоб не вводити вручну
+    if (window.TG_USER_NAME) {
+      var qn = $('qual-name'); if (qn && !qn.value) qn.value = window.TG_USER_NAME;
+      var qs = $('qual-source'); if (qs && !qs.value) qs.value = 'Telegram';
+    }
   }
   var qualForm = $('qual-form');
   if (qualForm) qualForm.addEventListener('submit', function (e) {

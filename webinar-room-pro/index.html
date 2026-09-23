@@ -383,6 +383,27 @@
   <div class="p-drawer__list" id="p-list"></div>
 </aside>
 
+<!-- Telegram Mini App: повноекранний режим + ім'я глядача з Telegram -->
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script>
+(function () {
+  var tg = (window.Telegram && window.Telegram.WebApp) ? window.Telegram.WebApp : null;
+  if (!tg) return;
+  try {
+    tg.ready();
+    tg.expand();
+    if (typeof tg.disableVerticalSwipes === 'function') tg.disableVerticalSwipes();
+    if (typeof tg.setHeaderColor === 'function') tg.setHeaderColor('#06080c');
+    if (typeof tg.setBackgroundColor === 'function') tg.setBackgroundColor('#06080c');
+    var u = tg.initDataUnsafe && tg.initDataUnsafe.user;
+    if (u) {
+      var nm = [u.first_name, u.last_name].filter(Boolean).join(' ');
+      if (nm) window.TG_USER_NAME = nm;
+    }
+    window.TG_WEBAPP = true;
+  } catch (e) { /* звичайний браузер — ігноруємо */ }
+})();
+</script>
 <script src="config.js?v=6"></script>
 <script src="participants.js?v=6"></script>
 <script src="evergreen.js?v=6"></script>
