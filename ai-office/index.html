@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Дім AI-агентів — 3D-офіс</title>
+<style>
+  :root{
+    --e:cubic-bezier(.22,1,.36,1);
+    --ink:#f2f5f7; --dim:#9fb0ba;
+    --glass:rgba(16,22,28,.72);
+    --accent:#22d3ee;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{width:100%;height:100%;overflow:hidden;background:#0b0e12;color:var(--ink);
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    touch-action:none;overscroll-behavior:none;position:fixed;inset:0}
+  #scene{position:fixed;inset:0;z-index:1;display:block}
+  /* ---------- UI overlay ---------- */
+  #ui{position:fixed;inset:0;z-index:2;pointer-events:none}
+  #ui .pe{pointer-events:auto}
+  #topbar{position:absolute;top:calc(10px + env(safe-area-inset-top));left:12px;right:12px;
+    display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+  .pill{background:var(--glass);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+    border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:10px 14px;
+    box-shadow:0 8px 28px rgba(0,0,0,.45)}
+  #brand h1{font-size:17px;font-weight:700;letter-spacing:.01em}
+  #brand p{font-size:12px;color:var(--dim);margin-top:2px}
+  #brand .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#4ade80;
+    margin-right:6px;box-shadow:0 0 8px #4ade80;animation:blink 2.4s infinite}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
+  #controls{display:flex;gap:8px}
+  .btn{pointer-events:auto;cursor:pointer;border:1px solid rgba(255,255,255,.14);
+    background:linear-gradient(180deg,rgba(255,255,255,.14),transparent 45%),rgba(20,28,36,.78);
+    color:var(--ink);font-size:14px;font-weight:600;border-radius:14px;padding:10px 14px;
+    backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+    box-shadow:0 6px 20px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.18);
+    transition:transform .18s var(--e),box-shadow .18s var(--e);white-space:nowrap}
+  .btn:active{transform:scale(.95)}
+  .btn.active{background:linear-gradient(180deg,rgba(255,255,255,.2),transparent 45%),
+    rgba(34,211,238,.28);border-color:rgba(34,211,238,.55);
+    box-shadow:0 0 18px rgba(34,211,238,.35),inset 0 1px 0 rgba(255,255,255,.2)}
+  /* hint bar */
+  #hint{position:absolute;left:50%;transform:translateX(-50%);
+    bottom:calc(14px + env(safe-area-inset-bottom));font-size:12.5px;color:var(--dim);
+    background:var(--glass);border:1px solid rgba(255,255,255,.1);border-radius:999px;
+    padding:8px 16px;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+    max-width:92vw;text-align:center;transition:opacity .4s}
+  /* agent card */
+  #card{position:absolute;left:50%;transform:translate(-50%,120%);bottom:calc(14px + env(safe-area-inset-bottom));
+    width:min(400px,calc(100vw - 24px));background:rgba(14,19,25,.92);
+    border:1px solid rgba(255,255,255,.14);border-radius:20px;padding:18px;
+    backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+    box-shadow:0 18px 60px rgba(0,0,0,.6);transition:transform .38s var(--e);pointer-events:auto}
+  #card.show{transform:translate(-50%,0)}
+  #card .row{display:flex;align-items:center;gap:10px}
+  #card .eye{width:14px;height:14px;border-radius:50%;flex:none}
+  #card h2{font-size:17px;font-weight:700}
+  #card .sched{font-size:13px;color:var(--dim);margin-top:6px}
+  #card .resp{font-size:14px;margin-top:8px;line-height:1.45}
+  #card .status{display:inline-block;margin-top:10px;font-size:12.5px;font-weight:700;
+    padding:5px 12px;border-radius:999px}
+  #card .status.work{background:rgba(74,222,128,.16);color:#4ade80;border:1px solid rgba(74,222,128,.4)}
+  #card .status.rest{background:rgba(251,191,36,.14);color:#fbbf24;border:1px solid rgba(251,191,36,.4)}
+  #cardClose{position:absolute;top:10px;right:10px;width:32px;height:32px;border-radius:50%;
+    border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06);color:var(--ink);
+    font-size:16px;cursor:pointer}
+  /* joystick visuals */
+  .stick{position:fixed;z-index:3;width:120px;height:120px;border-radius:50%;
+    border:2px solid rgba(255,255,255,.35);background:rgba(255,255,255,.07);
+    backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);
+    pointer-events:none;transform:translate(-50%,-50%)}
+  .stick .knob{position:absolute;left:50%;top:50%;width:52px;height:52px;border-radius:50%;
+    background:radial-gradient(circle at 35% 30%,rgba(255,255,255,.85),rgba(160,200,215,.55));
+    box-shadow:0 4px 14px rgba(0,0,0,.5);transform:translate(-50%,-50%)}
+  .stick .tag{position:absolute;left:50%;top:-20px;transform:translateX(-50%);
+    font-size:10px;letter-spacing:.14em;color:rgba(255,255,255,.65);font-weight:700}
+  /* loading */
+  #loader{position:fixed;inset:0;z-index:10;background:#0b0e12;display:flex;flex-direction:column;
+    gap:14px;align-items:center;justify-content:center;transition:opacity .6s}
+  #loader.done{opacity:0;pointer-events:none}
+  #loader .spin{width:44px;height:44px;border-radius:50%;border:3px solid rgba(255,255,255,.15);
+    border-top-color:var(--accent);animation:sp 1s linear infinite}
+  @keyframes sp{to{transform:rotate(360deg)}}
+  #loader p{font-size:14px;color:var(--dim)}
+  /* help overlay */
+  #help{position:fixed;inset:0;z-index:9;background:rgba(5,8,11,.8);display:none;
+    align-items:center;justify-content:center;padding:20px;pointer-events:auto}
+  #help.show{display:flex}
+  #help .sheet{background:#12181f;border:1px solid rgba(255,255,255,.12);border-radius:20px;
+    padding:22px;max-width:420px;font-size:14px;line-height:1.7}
+  #help h3{font-size:17px;margin-bottom:10px}
+  #help b{color:var(--accent)}
+  #helpClose{margin-top:14px;width:100%}
+  @media (max-width:560px){
+    #brand h1{font-size:15px} #brand p{font-size:11px}
+    .btn{font-size:13px;padding:9px 11px}
+  }
+</style>
+</head>
+<body>
+<canvas id="scene"></canvas>
+<div id="ui">
+  <div id="topbar">
+    <div class="pill pe" id="brand">
+      <h1>🏠 Дім AI-агентів</h1>
+      <p><span class="dot"></span><span id="onlineCount">14</span> агентів на зміні</p>
+    </div>
+    <div id="controls">
+      <button class="btn pe" id="btnWalk">🚶 Гуляти</button>
+      <button class="btn pe" id="btnHelp">❓</button>
+    </div>
+  </div>
+  <div id="hint">Тягни, щоб оглянути офіс · тисни на робота, щоб дізнатися хто він</div>
+  <div id="card">
+    <button id="cardClose">✕</button>
+    <div class="row"><span class="eye" id="cardEye"></span><h2 id="cardName"></h2></div>
+    <div class="sched" id="cardSched"></div>
+    <div class="resp" id="cardResp"></div>
+    <div><span class="status" id="cardStatus"></span></div>
+  </div>
+</div>
+<div id="help">
+  <div class="sheet">
+    <h3>❓ Як користуватися</h3>
+    <div>🔭 <b>Огляд:</b> тягни пальцем/мишею, щоб обертати. Колесо або щипок — зум. Тисни на робота — побачиш його картку.</div>
+    <div style="margin-top:8px">🚶 <b>Прогулянка:</b> на комп'ютері — <b>WASD</b> або стрілки для руху, тягни мишею для огляду. На телефоні — <b>два джойстики</b>: лівий — рух, правий — огляд. Вони з'являються там, де торкнешся.</div>
+    <div style="margin-top:8px">🕊️ Лелека регулярно привозить нових агентів на круглий майданчик.</div>
+    <button class="btn" id="helpClose">Зрозуміло</button>
+  </div>
+</div>
+<div id="loader"><div class="spin"></div><p>Будуємо офіс…</p></div>
+
+<script type="module">
+let THREE;
+try { THREE = await import('./vendor/three.module.js'); }
+catch(e){ THREE = await import('https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js'); }
+
+const qs = new URLSearchParams(location.search);
+const STILL = qs.has('still');                 // ?still — заморожений кадр для скріншотів
+const isTouchDevice = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+
+/* ================= ДАНІ: 14 реальних агентів (звірено з cron.list 2026-09-24) ================= */
+const AGENTS = [
+  {id:'agents-morning-report',        short:'Ранковий звіт',      sched:'Щодня о 09:45',      resp:'Ранковий звіт усіх агентів — що працює, що ні', color:0xffb020},
+  {id:'daily-briefing',               short:'Брифінг',            sched:'Щодня о 09:23',      resp:'Щоденний брифінг: головне за день',               color:0x22d3ee},
+  {id:'threads-morning-viral-digest', short:'Threads-дайджест',   sched:'Щодня о 07:23',      resp:'Ранковий дайджест вірусних постів Threads',      color:0xa78bfa},
+  {id:'viral-digest-daily',           short:'Дайджест вірусності',sched:'Щодня о 11:23',      resp:'Щоденний дайджест вірусності для Креативів',      color:0xf472b6},
+  {id:'instagram-watch-artemnesterenko', short:'IG-моніторинг',   sched:'Щодня о 09:23',      resp:'Нові пости @artemnesterenko в Instagram',         color:0xfb923c},
+  {id:'budget-daily-watch',           short:'Бюджет-контроль',    sched:'Щодня о 08:23',      resp:'Щоденний контроль витрат на платні API',          color:0x4ade80},
+  {id:'budget-monthly-ask',           short:'Місячний бюджет',    sched:'1-го числа о 09:23', resp:'Щомісячний запит бюджету на API',                 color:0xa3e635},
+  {id:'api-keys-watch',               short:'API-ключі',          sched:'Щодня о 08:23',      resp:'Нагадування про API-ключі: списання, статуси',    color:0xfacc15},
+  {id:'tg-inbox-watch',               short:'TG-вхідні',          sched:'Кожні 10 хвилин',    resp:'Перевірка вхідних повідомлень Telegram',          color:0x60a5fa},
+  {id:'content-pipeline-watch',       short:'Контент-вотчер',     sched:'Щодня о 08:23',      resp:'Вотчер контент-пайплайна: що заплановано',        color:0x2dd4bf},
+  {id:'github-watch-webinar',         short:'GitHub-вотчер',      sched:'Щогодини',           resp:'Нові репозиторії webinar / k-transport',          color:0xf87171},
+  {id:'reels-research-weekly',        short:'Ресерч рілсів',      sched:'Щопонеділка о 08:23',resp:'Ресерч вірусних тем для рілсів',                  color:0xc084fc},
+  {id:'manager-followup',             short:'Менеджер',           sched:'Щодня о 09:23',      resp:'Менеджерський follow-up по задачах',              color:0x818cf8},
+  {id:'memory-nightly-sweep',         short:'Пам’ять',            sched:'Щодня о 23:23',      resp:'Нічна вичавка пам’яті в дайджест',                color:0x38bdf8},
+];
+
+/* ================= СЦЕНА ================= */
+const canvas = document.getElementById('scene');
+const renderer = new THREE.WebGLRenderer({canvas, antialias:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio||1, 2));
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.05;
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x0b0e12);
+scene.fog = new THREE.Fog(0x0b0e12, 34, 70);
+
+const camera = new THREE.PerspectiveCamera(46, 1, 0.1, 200);
+
+scene.add(new THREE.HemisphereLight(0xdfeaf2, 0x2a2118, 0.85));
+const sun = new THREE.DirectionalLight(0xfff1dd, 1.15);
+sun.position.set(14, 20, 10);
+scene.add(sun);
+const lampLight1 = new THREE.PointLight(0xffd9a0, 28, 16, 1.8); lampLight1.position.set(-6, 5.2, -2); scene.add(lampLight1);
+const lampLight2 = new THREE.PointLight(0xffd9a0, 22, 16, 1.8); lampLight2.position.set(9, 5.2, 0);  scene.add(lampLight2);
+const cyanGlow  = new THREE.PointLight(0x22d3ee, 14, 12, 1.8); cyanGlow.position.set(-6, 3.4, -9);  scene.add(cyanGlow);
+
+/* ---------- canvas-хелпери ---------- */
+function makeCanvas(w, h, draw){
+  const c = document.createElement('canvas'); c.width = w; c.height = h;
+  draw(c.getContext('2d'), w, h);
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace;
+  t.anisotropy = 4; return t;
+}
+function roundRect(ctx,x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath();
+}
+// м'яка тінь-пляма (дешево і красиво, без shadow maps)
+const blobTex = makeCanvas(128,128,(ctx,w,h)=>{
+  const g=ctx.createRadialGradient(64,64,6,64,64,62);
+  g.addColorStop(0,'rgba(0,0,0,.5)'); g.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=g; ctx.fillRect(0,0,w,h);
+});
+
+/* ---------- підлога: тепле дерево ---------- */
+const floorTex = makeCanvas(512,512,(ctx,w,h)=>{
+  ctx.fillStyle = '#a97c4c'; ctx.fillRect(0,0,w,h);
+  for(let r=0;r<8;r++){
+    const y=r*64;
+    ctx.fillStyle = `rgba(${120+Math.random()*30|0},${80+Math.random()*20|0},${40+Math.random()*14|0},0.25)`;
+    ctx.fillRect(0,y,w,64);
+    ctx.fillStyle = 'rgba(60,38,20,0.55)'; ctx.fillRect(0,y,w,3);
+    // прожилки
+    ctx.strokeStyle='rgba(90,58,30,0.25)'; ctx.lineWidth=1.5;
+    for(let i=0;i<5;i++){ ctx.beginPath();
+      const yy=y+8+Math.random()*48; ctx.moveTo(0,yy);
+      ctx.bezierCurveTo(w*0.3,yy+6*(Math.random()-.5),w*0.6,yy+6*(Math.random()-.5),w,yy);
+      ctx.stroke(); }
+    ctx.fillStyle='rgba(60,38,20,0.6)';
+    ctx.fillRect(Math.random()*w|0, y, 3, 64); // стик дощок
+  }
+});
+floorTex.wrapS = floorTex.wrapT = THREE.RepeatWrapping; floorTex.repeat.set(5,4);
+const floor = new THREE.Mesh(
+  new THREE.PlaneGeometry(30,22),
+  new THREE.MeshStandardMaterial({map:floorTex, roughness:.8, metalness:.05})
+);
+floor.rotation.x = -Math.PI/2; scene.add(floor);
+// темна основа-платформа під підлогою (край «лялькового будиночка»)
+const baseSlab = new THREE.Mesh(
+  new THREE.BoxGeometry(31.4, 1.2, 23.4),
+  new THREE.MeshStandardMaterial({color:0x1c222b, roughness:.6, metalness:.4})
+);
+baseSlab.position.y = -0.65; scene.add(baseSlab);
+
+/* ---------- стіни: тепле дерево + темний хром (даху НЕМАЄ) ---------- */
+const wallMat  = new THREE.MeshStandardMaterial({color:0x8a6a44, roughness:.75});
+const trimMat  = new THREE.MeshStandardMaterial({color:0x232a33, roughness:.35, metalness:.8});
+const backWall = new THREE.Mesh(new THREE.BoxGeometry(30,5.4,0.5), wallMat);
+backWall.position.set(0,2.7,-11); scene.add(backWall);
+const leftWall = new THREE.Mesh(new THREE.BoxGeometry(0.5,5.4,22), wallMat);
+leftWall.position.set(-15,2.7,0); scene.add(leftWall);
+// хромовані плінтуси
+for(const [w,h,d,x,y,z] of [[30,.3,.7,0,.15,-11],[.7,.3,22,-15,.15,0]]){
+  const t=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),trimMat); t.position.set(x,y,z); scene.add(t);
+}
+
+/* ---------- вивіска на стіні ---------- */
+const signTex = makeCanvas(1024,220,(ctx,w,h)=>{
+  ctx.clearRect(0,0,w,h);
+  ctx.fillStyle='#f5efe2'; ctx.font='700 96px system-ui,-apple-system,sans-serif';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.shadowColor='rgba(255,220,150,.8)'; ctx.shadowBlur=26;
+  ctx.fillText('Дім AI-агентів', w/2, h/2-28);
+  ctx.shadowBlur=0; ctx.fillStyle='#67e8f9'; ctx.font='600 34px system-ui,sans-serif';
+  ctx.fillText('A G E N T   O P S   ·   M A I N   H A L L', w/2, h/2+58);
+});
+const sign = new THREE.Mesh(new THREE.PlaneGeometry(8,1.72),
+  new THREE.MeshBasicMaterial({map:signTex, transparent:true}));
+sign.position.set(-14.68,3.7,-2); sign.rotation.y=Math.PI/2; scene.add(sign);
+
+/* ---------- вікно з нічним містом (над лаунжем) ---------- */
+const cityTex = makeCanvas(512,320,(ctx,w,h)=>{
+  const g=ctx.createLinearGradient(0,0,0,h);
+  g.addColorStop(0,'#0d1626'); g.addColorStop(.62,'#1b2b4a'); g.addColorStop(.63,'#0a0f1c'); g.addColorStop(1,'#05070d');
+  ctx.fillStyle=g; ctx.fillRect(0,0,w,h);
+  // місяць
+  ctx.fillStyle='#f4f1de'; ctx.beginPath(); ctx.arc(410,62,26,0,7); ctx.fill();
+  ctx.fillStyle='rgba(244,241,222,.25)'; ctx.beginPath(); ctx.arc(410,62,44,0,7); ctx.fill();
+  // будинки
+  let x=0;
+  while(x<w){ const bw=26+Math.random()*44, bh=60+Math.random()*130;
+    ctx.fillStyle='#0b1220'; ctx.fillRect(x,h-bh,bw,bh);
+    ctx.fillStyle='rgba(255,214,140,.85)';
+    for(let wy=h-bh+8; wy<h-8; wy+=14) for(let wx=x+5; wx<x+bw-6; wx+=12)
+      if(Math.random()<.42) ctx.fillRect(wx,wy,6,8);
+    x+=bw+3; }
+});
+const winFrame = new THREE.Mesh(new THREE.BoxGeometry(8.6,5,0.3), trimMat);
+winFrame.position.set(8.5,2.9,-10.75); scene.add(winFrame);
+const winGlass = new THREE.Mesh(new THREE.PlaneGeometry(8,4.4),
+  new THREE.MeshBasicMaterial({map:cityTex}));
+winGlass.position.set(8.5,2.9,-10.58); scene.add(winGlass);
+
+/* ---------- великі голографічні дашборди на стіні ---------- */
+function dashTexture(title, accent){
+  return makeCanvas(512,300,(ctx,w,h)=>{
+    ctx.fillStyle='rgba(8,18,26,.92)'; roundRect(ctx,4,4,w-8,h-8,18); ctx.fill();
+    ctx.strokeStyle=accent; ctx.lineWidth=3; roundRect(ctx,4,4,w-8,h-8,18); ctx.stroke();
+    ctx.fillStyle=accent; ctx.font='700 30px system-ui,sans-serif'; ctx.textAlign='left';
+    ctx.fillText(title, 26, 52);
+    // стовпчики
+    for(let i=0;i<14;i++){ const bh=30+Math.random()*140;
+      ctx.fillStyle=accent+'55'; ctx.fillRect(30+i*32, 250-bh, 20, bh); }
+    // лінія графіка
+    ctx.strokeStyle='#fff'; ctx.lineWidth=3; ctx.beginPath();
+    for(let i=0;i<=20;i++){ const px=300+i*10, py=200-Math.sin(i*.7)*40-Math.random()*20;
+      i?ctx.lineTo(px,py):ctx.moveTo(px,py); }
+    ctx.stroke();
+    ctx.fillStyle='#fff'; ctx.font='600 22px system-ui,sans-serif';
+    ctx.fillText('SYNC 99.8%', 300, 60);
+  });
+}
+const holos=[];
+function addHolo(x,y,z,w2,title,accent){
+  const m=new THREE.Mesh(new THREE.PlaneGeometry(w2,w2*0.586),
+    new THREE.MeshBasicMaterial({map:dashTexture(title,accent),transparent:true,opacity:.92,side:THREE.DoubleSide}));
+  m.position.set(x,y,z); scene.add(m); holos.push(m); return m;
+}
+addHolo(-11,2.75,-10.65,4.6,'NODES','#22d3ee');
+addHolo(-5.4,2.75,-10.65,4.6,'TASKS','#a78bfa');
+addHolo(0.2,2.75,-10.65,4.6,'SYNC','#4ade80');
+
+/* ---------- шестикутні світильники (висять без стелі — стилізація) ---------- */
+const lampGroup=new THREE.Group(); scene.add(lampGroup);
+function hexLamp(x,z){
+  const g=new THREE.Group();
+  const frame=new THREE.Mesh(new THREE.CylinderGeometry(.8,.8,.18,6), trimMat);
+  g.add(frame);
+  const glowDisc=new THREE.Mesh(new THREE.CircleGeometry(.66,6),
+    new THREE.MeshBasicMaterial({color:0xffe3b0}));
+  glowDisc.rotation.x=Math.PI/2; glowDisc.position.y=-.1; g.add(glowDisc);
+  // тепле сяйво під лампою
+  const halo=new THREE.Mesh(new THREE.PlaneGeometry(3.2,3.2),
+    new THREE.MeshBasicMaterial({map:blobTex,transparent:true,opacity:.35,
+      color:0xffc37a,depthWrite:false,blending:THREE.AdditiveBlending}));
+  halo.rotation.x=-Math.PI/2; halo.position.y=-1.4; g.add(halo);
+  const rod=new THREE.Mesh(new THREE.CylinderGeometry(.045,.045,1.6,8), trimMat);
+  rod.position.y=.9; g.add(rod);
+  g.position.set(x,6.4,z); lampGroup.add(g);
+}
+hexLamp(-8,-3); hexLamp(-2,-3); hexLamp(9,0); hexLamp(8,7.5);
+
+/* ---------- столи в головному залі ---------- */
+const deskMat  = new THREE.MeshStandardMaterial({color:0x2b333d, roughness:.35, metalness:.75});
+const woodDark = new THREE.MeshStandardMaterial({color:0x6e5233, roughness:.7});
+const desks=[]; // {x,z,r}
+function makeDesk(x,z){
+  const g=new THREE.Group();
+  const top=new THREE.Mesh(new THREE.BoxGeometry(2.4,.14,1.2), deskMat);
+  top.position.y=.95; g.add(top);
+  for(const [lx,lz] of [[-1.05,-.45],[1.05,-.45],[-1.05,.45],[1.05,.45]]){
+    const leg=new THREE.Mesh(new THREE.BoxGeometry(.1,.95,.1), woodDark);
+    leg.position.set(lx,.48,lz); g.add(leg);
+  }
+  // голографічний монітор
+  const monTex=makeCanvas(256,160,(ctx,w,h)=>{
+    ctx.fillStyle='rgba(6,16,24,.9)'; ctx.fillRect(0,0,w,h);
+    ctx.strokeStyle='rgba(103,232,249,.9)'; ctx.lineWidth=4; ctx.strokeRect(3,3,w-6,h-6);
+    ctx.fillStyle='#67e8f9';
+    for(let i=0;i<8;i++) ctx.fillRect(16,20+i*17, 40+Math.random()*180, 8);
+    ctx.strokeStyle='#fff'; ctx.lineWidth=2; ctx.beginPath();
+    for(let i=0;i<=12;i++){ const px=16+i*19, py=120-Math.random()*40;
+      i?ctx.lineTo(px,py):ctx.moveTo(px,py);} ctx.stroke();
+  });
+  const mon=new THREE.Mesh(new THREE.PlaneGeometry(1.5,.94),
+    new THREE.MeshBasicMaterial({map:monTex,transparent:true,opacity:.9,side:THREE.DoubleSide}));
+  mon.position.set(0,1.75,-.3); mon.rotation.x=-.12; g.add(mon); holos.push(mon);
+  const stand=new THREE.Mesh(new THREE.BoxGeometry(.08,.5,.08), trimMat);
+  stand.position.set(0,1.25,-.34); g.add(stand);
+  // клавіатура
+  const kb=new THREE.Mesh(new THREE.BoxGeometry(.9,.05,.32),
+    new THREE.MeshStandardMaterial({color:0x151b22,roughness:.5}));
+  kb.position.set(0,1.05,.15); g.add(kb);
+  g.position.set(x,0,z); scene.add(g);
+  desks.push({x,z,r:1.7});
+  return g;
+}
+
+/* ---------- лаунж: дивани, столики, килим ---------- */
+const sofaMat = new THREE.MeshStandardMaterial({color:0x7fa3a8, roughness:.85});
+function makeSofa(x,z,ry){
+  const g=new THREE.Group();
+  const seat=new THREE.Mesh(new THREE.BoxGeometry(3.4,.55,1.3), sofaMat); seat.position.y=.45; g.add(seat);
+  const back=new THREE.Mesh(new THREE.BoxGeometry(3.4,1,.35), sofaMat); back.position.set(0,1.05,-.5); g.add(back);
+  for(const sx of [-1.55,1.55]){ const arm=new THREE.Mesh(new THREE.BoxGeometry(.35,.85,1.3), sofaMat);
+    arm.position.set(sx,.72,0); g.add(arm); }
+  for(const px of [-1,-.33,.33,1]){ const pil=new THREE.Mesh(new THREE.BoxGeometry(.6,.55,.22),
+    new THREE.MeshStandardMaterial({color:0x94b8bd,roughness:.9})); pil.position.set(px,1,-.38); pil.rotation.z=(px%2?.06:-.06); g.add(pil); }
+  g.position.set(x,0,z); g.rotation.y=ry; scene.add(g);
+}
+makeSofa(9,-2.6,0); makeSofa(9,2.9,Math.PI);
+function coffeeTable(x,z){
+  const g=new THREE.Group();
+  const top=new THREE.Mesh(new THREE.CylinderGeometry(1,.9,.09,20), woodDark);
+  top.position.y=.5; g.add(top);
+  const leg=new THREE.Mesh(new THREE.CylinderGeometry(.09,.12,.5,10), trimMat);
+  leg.position.y=.25; g.add(leg);
+  // чашки
+  for(const [cx,cz] of [[-.4,.2],[.35,-.25]]){
+    const cup=new THREE.Mesh(new THREE.CylinderGeometry(.09,.07,.14,12),
+      new THREE.MeshStandardMaterial({color:0xf2ede2,roughness:.4}));
+    cup.position.set(cx,.62,cz); g.add(cup);
+  }
+  g.position.set(x,0,z); scene.add(g);
+}
+coffeeTable(9,0.15);
+const rugTex=makeCanvas(256,256,(ctx,w,h)=>{
+  ctx.fillStyle='#28424a'; ctx.fillRect(0,0,w,h);
+  ctx.strokeStyle='rgba(214,178,106,.7)'; ctx.lineWidth=6;
+  ctx.beginPath(); ctx.arc(128,128,100,0,7); ctx.stroke();
+  ctx.beginPath(); ctx.arc(128,128,64,0,7); ctx.stroke();
+});
+const rug=new THREE.Mesh(new THREE.CircleGeometry(3.4,28),
+  new THREE.MeshStandardMaterial({map:rugTex,roughness:.95}));
+rug.rotation.x=-Math.PI/2; rug.position.set(9,.012,0.15); scene.add(rug);
+
+/* ---------- рослини ---------- */
+function makePlant(x,z,s=1){
+  const g=new THREE.Group();
+  const pot=new THREE.Mesh(new THREE.CylinderGeometry(.32*s,.26*s,.5*s,12),
+    new THREE.MeshStandardMaterial({color:0xa9603c,roughness:.8}));
+  pot.position.y=.25*s; g.add(pot);
+  const leafMat=new THREE.MeshStandardMaterial({color:0x3f7d44,roughness:.9});
+  for(let i=0;i<4;i++){
+    const blob=new THREE.Mesh(new THREE.IcosahedronGeometry((.34+Math.random()*.2)*s,1), leafMat);
+    blob.position.set((Math.random()-.5)*.5*s,(0.85+Math.random()*.5)*s,(Math.random()-.5)*.5*s);
+    blob.scale.y=.8; g.add(blob);
+  }
+  g.position.set(x,0,z); scene.add(g);
+}
+makePlant(-13.6,-9.4,1.2); makePlant(-13.6,9.4,1); makePlant(13.4,-9.4,1.1); makePlant(4.4,8.8,.9); makePlant(-1,8.8,.8);
+
+/* ---------- майданчик доставки лелеки ---------- */
+const pad=new THREE.Group();
+const padRing=new THREE.Mesh(new THREE.RingGeometry(1.3,1.6,40),
+  new THREE.MeshBasicMaterial({color:0x22d3ee,transparent:true,opacity:.8,side:THREE.DoubleSide}));
+padRing.rotation.x=-Math.PI/2; padRing.position.y=.02; pad.add(padRing);
+const padDisc=new THREE.Mesh(new THREE.CircleGeometry(1.3,40),
+  new THREE.MeshStandardMaterial({color:0x1a222c,roughness:.5,metalness:.4}));
+padDisc.rotation.x=-Math.PI/2; padDisc.position.y=.015; pad.add(padDisc);
+pad.position.set(8.6,0,7.6); scene.add(pad);
+
+/* ================= РОБОТИ ================= */
+const whiteMat = new THREE.MeshStandardMaterial({color:0xf4f6f8, roughness:.32, metalness:.08});
+const jointMat = new THREE.MeshStandardMaterial({color:0x222a33, roughness:.4, metalness:.75});
+function addBlob(parent, r=0.9){
+  const m=new THREE.Mesh(new THREE.PlaneGeometry(r*2,r*2),
+    new THREE.MeshBasicMaterial({map:blobTex,transparent:true,depthWrite:false}));
+  m.rotation.x=-Math.PI/2; m.position.y=.02; parent.add(m);
+}
+function labelSprite(text, colorHex){
+  const css='#'+colorHex.toString(16).padStart(6,'0');
+  const tex=makeCanvas(512,112,(ctx,w,h)=>{
+    ctx.fillStyle='rgba(10,15,20,.82)'; roundRect(ctx,6,10,w-12,h-20,26); ctx.fill();
+    ctx.strokeStyle='rgba(255,255,255,.25)'; ctx.lineWidth=2; roundRect(ctx,6,10,w-12,h-20,26); ctx.stroke();
+    ctx.fillStyle=css; ctx.beginPath(); ctx.arc(52,h/2,17,0,7); ctx.fill();
+    ctx.fillStyle='#fff'; ctx.font='600 40px system-ui,sans-serif'; ctx.textAlign='left'; ctx.textBaseline='middle';
+    // обрізаємо довгі назви
+    let t=text; ctx.fillText(t, 84, h/2+2);
+  });
+  const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,transparent:true,depthWrite:false}));
+  sp.scale.set(2.5,0.55,1); return sp;
+}
+
+function makeRobot(agent){
+  const g=new THREE.Group();
+  const eyeMat=new THREE.MeshBasicMaterial({color:agent.color});
+  // тулуб
+  const torso=new THREE.Mesh(new THREE.CapsuleGeometry(.4,.5,6,14), whiteMat);
+  torso.position.y=.95; g.add(torso);
+  // голова
+  const headG=new THREE.Group();
+  const head=new THREE.Mesh(new THREE.SphereGeometry(.33,20,16), whiteMat); headG.add(head);
+  const visor=new THREE.Mesh(new THREE.BoxGeometry(.46,.2,.12),
+    new THREE.MeshStandardMaterial({color:0x141a21,roughness:.25,metalness:.3}));
+  visor.position.set(0,.02,.27); headG.add(visor);
+  for(const ex of [-.11,.11]){
+    const eye=new THREE.Mesh(new THREE.SphereGeometry(.05,10,10), eyeMat);
+    eye.position.set(ex,.02,.33); headG.add(eye);
+  }
+  const ant=new THREE.Mesh(new THREE.CylinderGeometry(.02,.02,.3,6), jointMat);
+  ant.position.y=.42; headG.add(ant);
+  const antTip=new THREE.Mesh(new THREE.SphereGeometry(.045,8,8), eyeMat);
+  antTip.position.y=.58; headG.add(antTip);
+  headG.position.y=1.62; g.add(headG);
+  // плечі/руки
+  const arms={};
+  for(const s of [-1,1]){
+    const sh=new THREE.Mesh(new THREE.SphereGeometry(.13,10,10), jointMat);
+    sh.position.set(.5*s,1.28,0); g.add(sh);
+    const armG=new THREE.Group(); armG.position.set(.5*s,1.28,0);
+    const upper=new THREE.Mesh(new THREE.CapsuleGeometry(.1,.34,4,10), whiteMat);
+    upper.position.y=-.24; armG.add(upper);
+    const foreG=new THREE.Group(); foreG.position.y=-.48;
+    const fore=new THREE.Mesh(new THREE.CapsuleGeometry(.09,.3,4,10), whiteMat);
+    fore.position.y=-.2; foreG.add(fore);
+    const hand=new THREE.Mesh(new THREE.SphereGeometry(.1,10,10), jointMat);
+    hand.position.y=-.4; foreG.add(hand);
+    armG.add(foreG); g.add(armG);
+    arms[s<0?'L':'R']={armG,foreG};
+  }
+  // ноги
+  const legs={};
+  for(const s of [-1,1]){
+    const hip=new THREE.Mesh(new THREE.SphereGeometry(.12,10,10), jointMat);
+    hip.position.set(.2*s,.62,0); g.add(hip);
+    const legG=new THREE.Group(); legG.position.set(.2*s,.62,0);
+    const leg=new THREE.Mesh(new THREE.CapsuleGeometry(.11,.4,4,10), whiteMat);
+    leg.position.y=-.3; legG.add(leg);
+    g.add(legG); legs[s<0?'L':'R']=legG;
+  }
+  // табличка
+  const label=labelSprite(agent.short, agent.color);
+  label.position.y=2.25; g.add(label);
+  addBlob(g, .95);
+  g.traverse(o=>{o.userData.agentId=agent.id;});
+  return {group:g, headG, arms, legs, label, agent, eyeMat,
+    mode:'desk', walkT:0, from:new THREE.Vector3(), to:new THREE.Vector3(), wait:0};
+}
+
+/* розстановка: 10 за столами, 4 у лаунжі */
+const robots=[];
+const deskSpots=[];
+for(let r=0;r<2;r++) for(let i=0;i<5;i++){
+  const x=-11+i*3, z=r===0?-4.5:0.5;
+  makeDesk(x,z);
+  deskSpots.push({x, z:z+1.05, ry:Math.PI}); // робот сидить за столом, дивиться на -z (до стіни)
+}
+const loungeSpots=[
+  {x:7.7,z:-1.1,ry:Math.PI/2.4},{x:10.3,z:-1.1,ry:-Math.PI/2.4},
+  {x:7.7,z:1.4,ry:Math.PI/1.7},{x:10.3,z:1.4,ry:-Math.PI/1.7},
+];
+AGENTS.forEach((ag,i)=>{
+  const r=makeRobot(ag);
+  if(i<10){
+    const s=deskSpots[i];
+    r.group.position.set(s.x,0,s.z); r.group.rotation.y=s.ry;
+    r.home={x:s.x,z:s.z,ry:s.ry}; r.mode='desk';
+    // стілець
+    const stool=new THREE.Mesh(new THREE.CylinderGeometry(.32,.32,.12,14), trimMat);
+    stool.position.set(s.x,.55,s.z); scene.add(stool);
+    const sleg=new THREE.Mesh(new THREE.CylinderGeometry(.06,.08,.55,8), trimMat);
+    sleg.position.set(s.x,.27,s.z); scene.add(sleg);
+    r.group.position.y=.12; // сидить вище
+  } else {
+    const s=loungeSpots[i-10];
+    r.group.position.set(s.x,0,s.z); r.group.rotation.y=s.ry;
+    r.home={x:s.x,z:s.z,ry:s.ry}; r.mode='rest';
+    // чашка в руці (умовно біля робота)
+    const cup=new THREE.Mesh(new THREE.CylinderGeometry(.08,.06,.13,10),
+      new THREE.MeshStandardMaterial({color:0xf2ede2,roughness:.4}));
+    cup.position.set(.55,.75,.35); r.group.add(cup);
+  }
+  scene.add(r.group); robots.push(r);
+});
+
+/* ротація «на перерву»: кожні ~50с один роботяга йде в лаунж, інший повертається */
+let breakTimer = 26;
+const loungeFree=[{x:8.6,z:-1.2},{x:9.4,z:1.5},{x:8.2,z:1.2}];
+function updateBreaks(dt, t){
+  breakTimer-=dt;
+  if(breakTimer>0 || STILL) return;
+  breakTimer=45+Math.random()*20;
+  const workers=robots.filter(r=>r.mode==='desk');
+  const resters=robots.filter(r=>r.mode==='rest'&&r.home&&r.deskHome);
+  if(!workers.length) return;
+  const w=workers[Math.random()*workers.length|0];
+  // знайти вільне місце в лаунжі
+  const spot=loungeFree[Math.random()*loungeFree.length|0];
+  w.deskHome={...w.home};
+  w.home={x:spot.x+(Math.random()-.5), z:spot.z+(Math.random()-.5), ry:Math.random()*6.28};
+  w.mode='toRest'; w.walkT=0;
+  w.from.copy(w.group.position); w.to.set(w.home.x,0,w.home.z);
+  if(resters.length){
+    const b=resters[Math.random()*resters.length|0];
+    b.home={...b.deskHome}; b.mode='toDesk'; b.walkT=0;
+    b.from.copy(b.group.position); b.to.set(b.home.x,.12,b.home.z);
+  }
+}
+function updateWalking(r, dt, t, arriveMode){
+  const dist=r.from.distanceTo(r.to);
+  const speed=1.6;
+  r.walkT+=dt*speed/dist;
+  const k=Math.min(r.walkT,1);
+  const e=k*k*(3-2*k);
+  r.group.position.lerpVectors(r.from,r.to,e);
+  r.group.position.y=Math.abs(Math.sin(t*9))*.06 + (arriveMode==='desk'?.12*(e): r.from.y*(1-e));
+  const dir=new THREE.Vector3().subVectors(r.to,r.from);
+  if(dir.lengthSq()>.001) r.group.rotation.y=Math.atan2(dir.x,dir.z);
+  r.legs.L.rotation.x=Math.sin(t*10)*.55; r.legs.R.rotation.x=-Math.sin(t*10)*.55;
+  r.arms.L.armG.rotation.x=-.3; r.arms.R.armG.rotation.x=-.3;
+  if(k>=1){ r.mode=arriveMode; r.group.rotation.y=r.home.ry;
+    r.legs.L.rotation.x=r.legs.R.rotation.x=0; }
+}
+/* анімація робота за станом */
+function animateRobot(r, dt, t){
+  const g=r.group;
+  if(r.mode==='toRest') updateWalking(r,dt,t,'rest');
+  else if(r.mode==='toDesk') updateWalking(r,dt,t,'desk');
+  else if(r.mode==='desk'){
+    // друкує
+    const b=Math.sin(t*7+r.agent.color)*.5+.5;
+    r.arms.L.foreG.rotation.x=-.9-b*.15; r.arms.R.foreG.rotation.x=-.9-(1-b)*.15;
+    r.arms.L.armG.rotation.x=-.35; r.arms.R.armG.rotation.x=-.35;
+    r.headG.rotation.y=Math.sin(t*.7+r.agent.color)*.18;
+    r.headG.rotation.x=Math.sin(t*1.1)*.06+.08;
+  } else { // rest — п'є каву
+    const sip=(Math.sin(t*.9+r.agent.color)+1)/2;
+    r.headG.rotation.x=-.12+Math.max(0,Math.sin(t*.9+r.agent.color))*.22;
+    r.arms.R.armG.rotation.x=-.5-sip*.35;
+    r.arms.R.foreG.rotation.x=-.7;
+    r.arms.L.armG.rotation.x=-.15;
+    r.headG.rotation.y=Math.sin(t*.4)*.3;
+  }
+  // пульс очей
+  const p=.75+Math.sin(t*3+r.agent.color)*.25;
+  r.eyeMat.color.setHex(r.agent.color).multiplyScalar(p);
+}
+
+/* ================= ЛЕЛЕКА ================= */
+const stork=new THREE.Group();
+{
+  const wmat=new THREE.MeshStandardMaterial({color:0xf7f5ef,roughness:.6});
+  const body=new THREE.Mesh(new THREE.CapsuleGeometry(.32,.9,6,12), wmat);
+  body.rotation.z=Math.PI/2; stork.add(body);
+  const neck=new THREE.Mesh(new THREE.CylinderGeometry(.09,.11,.8,8), wmat);
+  neck.position.set(.6,.35,0); neck.rotation.z=-.5; stork.add(neck);
+  const beak=new THREE.Mesh(new THREE.ConeGeometry(.09,.5,8),
+    new THREE.MeshStandardMaterial({color:0xe8823a,roughness:.5}));
+  beak.rotation.z=-Math.PI/2-.35; beak.position.set(1.05,.62,0); stork.add(beak);
+  for(const s of [-1,1]){
+    const leg=new THREE.Mesh(new THREE.CylinderGeometry(.035,.035,.9,6),
+      new THREE.MeshStandardMaterial({color:0xe8823a}));
+    leg.position.set(-.3,-.55,.18*s); leg.rotation.x=.25; stork.add(leg);
+  }
+}
+const wingGeo=new THREE.BoxGeometry(.95,.05,1.9);
+const wingMat=new THREE.MeshStandardMaterial({color:0xefece2,roughness:.6,side:THREE.DoubleSide});
+const wingL=new THREE.Mesh(wingGeo,wingMat);
+const wingR=new THREE.Mesh(wingGeo,wingMat);
+const wingLP=new THREE.Group(), wingRP=new THREE.Group();
+wingL.position.set(0,0,-.95); wingLP.position.set(0,.25,0); wingLP.add(wingL);
+wingR.position.set(0,0,.95);  wingRP.position.set(0,.25,0); wingRP.add(wingR);
+stork.add(wingLP,wingRP);
+// вузлик з новим агентом
+const bundle=new THREE.Group();
+const bundleBot=new THREE.Mesh(new THREE.CapsuleGeometry(.2,.3,4,10), whiteMat);
+bundle.add(bundleBot);
+const bundleGlow=new THREE.Mesh(new THREE.SphereGeometry(.42,12,12),
+  new THREE.MeshBasicMaterial({color:0x22d3ee,transparent:true,opacity:.28}));
+bundle.add(bundleGlow);
+bundle.position.set(0,-.85,0); stork.add(bundle);
+scene.add(stork);
+
+const storkState={phase:'circle', t:0, angle:0, deliverAt:18};
+function updateStork(dt,t){
+  const s=storkState;
+  wingLP.rotation.x=Math.sin(t*7)*.55; wingRP.rotation.x=-Math.sin(t*7)*.55;
+  if(STILL){ stork.position.set(6,8.5,6); stork.rotation.y=-.7; return; }
+  if(s.phase==='circle'){
+    s.angle+=dt*.22; s.t+=dt;
+    const R=13.5;
+    stork.position.set(Math.cos(s.angle)*R, 8.6+Math.sin(t*.8)*.5, Math.sin(s.angle)*R*.78);
+    stork.rotation.y=-s.angle;
+    if(s.t>s.deliverAt){ s.phase='descend'; s.t=0;
+      s.from=stork.position.clone(); }
+  } else if(s.phase==='descend'){
+    s.t+=dt; const k=Math.min(s.t/4,1), e=k*k*(3-2*k);
+    stork.position.lerpVectors(s.from,new THREE.Vector3(8.6,3.4,7.6),e);
+    if(k>=1){ s.phase='drop'; s.t=0; bundle.visible=true; }
+  } else if(s.phase==='drop'){
+    s.t+=dt;
+    bundle.position.y-=.9*dt;
+    stork.position.y=3.4+Math.sin(t*3)*.12;
+    if(bundle.position.y<=-2.4){
+      bundle.visible=false; s.phase='ascend'; s.t=0;
+      s.from=stork.position.clone(); spawnDelivered();
+    }
+  } else if(s.phase==='ascend'){
+    s.t+=dt; const k=Math.min(s.t/3.5,1), e=k*k*(3-2*k);
+    const R=13.5, ax=Math.cos(s.angle)*R, az=Math.sin(s.angle)*R*.78;
+    stork.position.lerpVectors(s.from,new THREE.Vector3(ax,8.6,az),e);
+    if(k>=1){ s.phase='circle'; s.t=0; s.deliverAt=30+Math.random()*25; }
+  }
+  // кільце майданчика пульсує коли лелека близько
+  const d=stork.position.distanceTo(new THREE.Vector3(8.6,0,7.6));
+  padRing.material.opacity=.45+Math.max(0,1-d/14)*.5;
+  const ps=1+Math.sin(t*4)*.06*(1+Math.max(0,1-d/14)*2);
+  padRing.scale.set(ps,ps,1);
+}
+// «доставлений» міні-робот на майданчику
+let delivered=null, deliveredT=0;
+function spawnDelivered(){
+  if(delivered) scene.remove(delivered);
+  const g=new THREE.Group();
+  const b=new THREE.Mesh(new THREE.CapsuleGeometry(.24,.36,4,10), whiteMat);
+  b.position.y=.55; g.add(b);
+  const ey=new THREE.Mesh(new THREE.SphereGeometry(.06,8,8),
+    new THREE.MeshBasicMaterial({color:0x22d3ee}));
+  ey.position.set(0,.85,.2); g.add(ey);
+  addBlob(g,.5);
+  g.position.set(8.6,0,7.6); scene.add(g);
+  delivered=g; deliveredT=0;
+}
+
+/* ================= РОБОПЕС ================= */
+const dog=new THREE.Group();
+{
+  const bmat=new THREE.MeshStandardMaterial({color:0xdfe5ea,roughness:.4,metalness:.25});
+  const body=new THREE.Mesh(new THREE.CapsuleGeometry(.26,.7,6,12), bmat);
+  body.rotation.z=Math.PI/2; body.position.y=.62; dog.add(body);
+  const head=new THREE.Mesh(new THREE.BoxGeometry(.34,.3,.3), bmat);
+  head.position.set(.62,.86,0); dog.add(head);
+  const eyeM=new THREE.MeshBasicMaterial({color:0x22d3ee});
+  for(const s of [-1,1]){ const e=new THREE.Mesh(new THREE.SphereGeometry(.045,8,8),eyeM);
+    e.position.set(.78,.92,.1*s); dog.add(e); }
+  const earM=new THREE.Mesh(new THREE.BoxGeometry(.1,.22,.06), jointMat);
+  for(const s of [-1,1]){ const ear=earM.clone(); ear.position.set(.5,1.05,.12*s); dog.add(ear); }
+  const tail=new THREE.Mesh(new THREE.CylinderGeometry(.04,.02,.5,6), jointMat);
+  tail.position.set(-.55,.75,0); tail.rotation.z=.9; dog.add(tail); dog.userData.tail=tail;
+}
+dog.userData.legs=[];
+for(const [lx,lz] of [[.35,-.16],[.35,.16],[-.35,-.16],[-.35,.16]]){
+  const lg=new THREE.Group(); lg.position.set(lx,.5,lz);
+  const leg=new THREE.Mesh(new THREE.CylinderGeometry(.07,.06,.5,8), jointMat);
+  leg.position.y=-.25; lg.add(leg); dog.add(lg); dog.userData.legs.push(lg);
+}
+addBlob(dog,.7); scene.add(dog);
+const dogWay=[new THREE.Vector3(6,0,4.5),new THREE.Vector3(11.5,0,4.8),
+  new THREE.Vector3(12,0,-3.5),new THREE.Vector3(6.5,0,-4.2),new THREE.Vector3(9,0,0.5)];
+let dogIdx=1, dogPos=dogWay[0].clone();
+function updateDog(dt,t){
+  if(STILL){ dog.position.copy(dogWay[4]); return; }
+  const target=dogWay[dogIdx];
+  const d=new THREE.Vector3().subVectors(target,dogPos);
+  const dist=d.length();
+  if(dist<.3){ dogIdx=(dogIdx+1)%dogWay.length;
+    dog.userData.pauseUntil=t+1+Math.random()*2.5; return; }
+  if(t<(dog.userData.pauseUntil||0)){
+    dog.userData.tail.rotation.x=Math.sin(t*10)*.4; return; }
+  d.normalize();
+  dogPos.addScaledVector(d,1.5*dt);
+  dog.position.copy(dogPos);
+  dog.rotation.y=Math.atan2(d.x,d.z)-Math.PI/2;
+  const sw=Math.sin(t*11)*.5;
+  dog.userData.legs[0].rotation.z=sw; dog.userData.legs[3].rotation.z=sw;
+  dog.userData.legs[1].rotation.z=-sw; dog.userData.legs[2].rotation.z=-sw;
+  dog.userData.tail.rotation.x=Math.sin(t*6)*.5;
+}
+
+/* ================= КАМЕРИ ТА КЕРУВАННЯ ================= */
+let mode='orbit'; // 'orbit' | 'walk'
+// --- орбіта ---
+const orbit={theta:STILL?0.85:0.6, phi:1.02, radius:fitRadius(), target:new THREE.Vector3(0,1.2,0),
+  auto:true, idleT:0};
+function applyOrbit(){
+  const sp=Math.sin(orbit.phi), x=orbit.radius*sp*Math.cos(orbit.theta),
+        y=orbit.radius*Math.cos(orbit.phi), z=orbit.radius*sp*Math.sin(orbit.theta);
+  camera.position.set(orbit.target.x+x, Math.max(y,3.2), orbit.target.z+z);
+  camera.lookAt(orbit.target);
+}
+// --- прогулянка ---
+const walk={pos:new THREE.Vector3(-6,1.7,8), yaw:2.5, pitch:-0.06,
+  keys:{}, joyMove:{x:0,y:0}, joyLookActive:false};
+function applyWalk(){
+  camera.position.copy(walk.pos);
+  const d=new THREE.Vector3(-Math.sin(walk.yaw)*Math.cos(walk.pitch),
+    Math.sin(walk.pitch), -Math.cos(walk.yaw)*Math.cos(walk.pitch));
+  camera.lookAt(walk.pos.clone().add(d));
+}
+function collide(p){
+  p.x=Math.max(-13.6,Math.min(13.6,p.x));
+  p.z=Math.max(-9.6,Math.min(9.6,p.z));
+  for(const d of desks){
+    const dx=p.x-d.x, dz=p.z-d.z, dist=Math.hypot(dx,dz);
+    if(dist<d.r && dist>1e-4){ p.x=d.x+dx/dist*d.r; p.z=d.z+dz/dist*d.r; }
+  }
+}
+function updateWalk(dt){
+  const k=walk.keys, jx=walk.joyMove.x, jy=walk.joyMove.y;
+  let mx=(k['KeyD']||k['ArrowRight']?1:0)-(k['KeyA']||k['ArrowLeft']?1:0)+jx;
+  let mz=(k['KeyW']||k['ArrowUp']?1:0)-(k['KeyS']||k['ArrowDown']?1:0)-jy;
+  const len=Math.hypot(mx,mz); if(len>1){mx/=len;mz/=len;}
+  const sp=(k['ShiftLeft']||k['ShiftRight'])?7:3.6;
+  const sin=Math.sin(walk.yaw), cos=Math.cos(walk.yaw);
+  walk.pos.x+=(mx*cos-mz*sin)*sp*dt;
+  walk.pos.z+=(-mx*sin-mz*cos)*sp*dt;
+  // м'яке погойдування камери при русі
+  walk.bob=(walk.bob||0)+dt*9*len;
+  walk.pos.y=1.7+Math.sin(walk.bob)*.035*Math.min(len,1);
+  collide(walk.pos);
+}
+
+/* ---------- десктоп: клавіатура + drag-огляд ---------- */
+addEventListener('keydown',e=>{
+  if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code)) e.preventDefault();
+  walk.keys[e.code]=true;
+  if(e.code==='KeyF') toggleMode();
+});
+addEventListener('keyup',e=>{walk.keys[e.code]=false;});
+
+/* drag: орбіта в режимі огляду, огляд головою в прогулянці */
+let dragId=null, lastPX=0, lastPY=0, downX=0, downY=0, downT=0;
+canvas.addEventListener('pointerdown',e=>{
+  if(e.pointerType==='touch') return; // тачі йдуть окремим трактом
+  dragId=e.pointerId; lastPX=downX=e.clientX; lastPY=downY=e.clientY; downT=e.timeStamp;
+  try{ canvas.setPointerCapture(e.pointerId); }catch(_){}
+});
+canvas.addEventListener('pointermove',e=>{
+  if(e.pointerId!==dragId) return;
+  const dx=e.clientX-lastPX, dy=e.clientY-lastPY; lastPX=e.clientX; lastPY=e.clientY;
+  if(mode==='orbit'){
+    orbit.theta-=dx*.005; orbit.phi=Math.max(.35,Math.min(1.35,orbit.phi-dy*.004));
+    orbit.auto=false; orbit.idleT=0;
+  } else {
+    walk.yaw-=dx*.0042; walk.pitch=Math.max(-1.1,Math.min(1.1,walk.pitch-dy*.0042));
+  }
+});
+canvas.addEventListener('pointerup',e=>{
+  if(e.pointerId!==dragId) return; dragId=null;
+  const moved=Math.hypot(e.clientX-downX,e.clientY-downY);
+  if(moved<9 && e.timeStamp-downT<600) handleTap(e.clientX,e.clientY);
+});
+canvas.addEventListener('wheel',e=>{
+  if(mode!=='orbit') return;
+  e.preventDefault();
+  orbit.radius=Math.max(13,Math.min(48,orbit.radius+e.deltaY*.03)); userZoomed=true;
+  orbit.auto=false; orbit.idleT=0;
+},{passive:false});
+
+/* ---------- МОБІЛЬНІ ДЖОЙСТИКИ (критичний шлях) ----------
+   Два ПЛАВАЮЧІ стіки: ліва половина екрана = рух, права = огляд.
+   Працюють ОДНОЧАСНО двома пальцями. iOS-фікси:
+   - gesturestart/gesturechange → preventDefault (блок pinch-зуму)
+   - touch-action:none + preventDefault на touchmove (passive:false)
+   - кожен палець ведеться за своїм touch.identifier у Map — ідентифікатори не губляться
+*/
+const sticks=new Map(); // identifier -> {kind:'move'|'look', base:div, knob:div, cx, cy, id}
+const STICK_R=60;
+function makeStickEl(kind,cx,cy){
+  const base=document.createElement('div'); base.className='stick';
+  base.style.left=cx+'px'; base.style.top=cy+'px';
+  base.innerHTML=`<div class="tag">${kind==='move'?'РУХ':'ОГЛЯД'}</div><div class="knob"></div>`;
+  document.body.appendChild(base);
+  return {base, knob:base.querySelector('.knob')};
+}
+// блокуємо системні жести iOS
+for(const ev of ['gesturestart','gesturechange','gestureend'])
+  document.addEventListener(ev,e=>e.preventDefault(),{passive:false});
+document.addEventListener('dblclick',e=>e.preventDefault(),{passive:false});
+
+canvas.addEventListener('touchstart',e=>{
+  e.preventDefault();
+  for(const t of e.changedTouches){
+    if(sticks.has(t.identifier)) continue;
+    const hasMove=[...sticks.values()].some(s=>s.kind==='move');
+    const hasLook=[...sticks.values()].some(s=>s.kind==='look');
+    let kind=null;
+    if(mode==='walk'){
+      if(t.clientX<innerWidth/2 && !hasMove) kind='move';
+      else if(!hasLook) kind='look';
+      else if(!hasMove) kind='move';
+    } else {
+      // в орбіті: один палець = обертання, два = щипок-зум
+      if(!hasMove) kind='move';
+    }
+    if(!kind) continue;
+    const el=makeStickEl(kind,t.clientX,t.clientY);
+    sticks.set(t.identifier,{kind,...el,cx:t.clientX,cy:t.clientY,id:t.identifier,
+      dx:0,dy:0,downX:t.clientX,downY:t.clientY,downT:e.timeStamp,moved:0});
+  }
+  // запам'ятати дистанцію для щипка в орбіті
+  if(mode==='orbit' && e.touches.length===2){
+    const a=e.touches[0], b=e.touches[1];
+    orbit._pinch=Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY);
+  }
+},{passive:false});
+
+canvas.addEventListener('touchmove',e=>{
+  e.preventDefault();
+  if(mode==='orbit'){
+    // щипок-зум двома пальцями
+    if(e.touches.length===2 && orbit._pinch){
+      const a=e.touches[0], b=e.touches[1];
+      const d=Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY);
+      orbit.radius=Math.max(13,Math.min(48,orbit.radius-(d-orbit._pinch)*.08)); userZoomed=true;
+      orbit._pinch=d; orbit.auto=false; orbit.idleT=0;
+      return;
+    }
+    // один палець — обертання
+    for(const t of e.changedTouches){
+      const s=sticks.get(t.identifier); if(!s) continue;
+      const dx=t.clientX-s.cx, dy=t.clientY-s.cy;
+      s.moved+=Math.abs(dx)+Math.abs(dy);
+      orbit.theta-=dx*.007; orbit.phi=Math.max(.35,Math.min(1.35,orbit.phi-dy*.005));
+      s.cx=t.clientX; s.cy=t.clientY;
+      orbit.auto=false; orbit.idleT=0;
+    }
+    return;
+  }
+  // walk: стіки
+  for(const t of e.changedTouches){
+    const s=sticks.get(t.identifier); if(!s) continue;
+    let dx=t.clientX-s.cx, dy=t.clientY-s.cy;
+    s.moved+=Math.abs(dx)+Math.abs(dy);
+    const len=Math.hypot(dx,dy);
+    if(len>STICK_R){ dx=dx/len*STICK_R; dy=dy/len*STICK_R; }
+    s.knob.style.transform=`translate(calc(-50% + ${dx}px),calc(-50% + ${dy}px))`;
+    if(s.kind==='move'){ walk.joyMove.x=dx/STICK_R; walk.joyMove.y=dy/STICK_R; }
+    else { walk.yaw-=dx*.0035; walk.pitch=Math.max(-1.1,Math.min(1.1,walk.pitch-dy*.0035));
+      // скидаємо базу, щоб правий стік працював як трекпад без меж
+      s.cx=t.clientX-dx*.35; s.cy=t.clientY-dy*.35;
+      s.base.style.left=s.cx+'px'; s.base.style.top=s.cy+'px';
+    }
+  }
+},{passive:false});
+
+function endTouch(e){
+  for(const t of e.changedTouches){
+    const s=sticks.get(t.identifier); if(!s) continue;
+    // тап (без руху) в будь-якому режимі — вибір робота
+    if(s.moved<14 && e.timeStamp-s.downT<600)
+      handleTap(s.downX,s.downY);
+    if(s.kind==='move'){ walk.joyMove.x=0; walk.joyMove.y=0; }
+    s.base.remove(); sticks.delete(t.identifier);
+  }
+  if(e.touches.length<2) orbit._pinch=0;
+}
+canvas.addEventListener('touchend',endTouch);
+canvas.addEventListener('touchcancel',endTouch);
+
+/* ---------- тап → картка агента ---------- */
+const ray=new THREE.Raycaster(), ptr=new THREE.Vector2();
+const card=document.getElementById('card');
+function handleTap(px,py){
+  ptr.x=(px/innerWidth)*2-1; ptr.y=-(py/innerHeight)*2+1;
+  ray.setFromCamera(ptr,camera);
+  const hits=ray.intersectObjects(robots.map(r=>r.group),true);
+  if(hits.length){
+    const ag=AGENTS.find(a=>a.id===hits[0].object.userData.agentId);
+    if(ag) showCard(ag);
+  } else card.classList.remove('show');
+}
+function showCard(ag){
+  const r=robots.find(r=>r.agent.id===ag.id);
+  document.getElementById('cardEye').style.background='#'+ag.color.toString(16).padStart(6,'0');
+  document.getElementById('cardEye').style.boxShadow=`0 0 10px #${ag.color.toString(16).padStart(6,'0')}`;
+  document.getElementById('cardName').textContent=ag.short;
+  document.getElementById('cardSched').textContent='🕐 '+ag.sched;
+  document.getElementById('cardResp').textContent=ag.resp;
+  const st=document.getElementById('cardStatus');
+  const working=r && (r.mode==='desk'||r.mode==='toDesk');
+  st.textContent=working?'● Працює':'● На перерві ☕';
+  st.className='status '+(working?'work':'rest');
+  card.classList.add('show');
+}
+document.getElementById('cardClose').onclick=()=>card.classList.remove('show');
+
+/* ---------- перемикання режимів ---------- */
+const btnWalk=document.getElementById('btnWalk'), hint=document.getElementById('hint');
+function toggleMode(){
+  mode=mode==='orbit'?'walk':'orbit';
+  btnWalk.textContent=mode==='orbit'?'🚶 Гуляти':'🔭 Огляд';
+  btnWalk.classList.toggle('active',mode==='walk');
+  card.classList.remove('show');
+  if(mode==='walk'){
+    // стартуємо біля входу, обличчям до робочого залу
+    walk.pos.set(-6,1.7,8); walk.yaw=-0.36; walk.pitch=-.05;
+    hint.textContent=isTouchDevice
+      ? 'Ліва половина — стік руху · права — стік огляду (одночасно!)'
+      : 'WASD / стрілки — рух · тягни мишею — огляд · F — вийти';
+  } else {
+    hint.textContent='Тягни, щоб оглянути офіс · тисни на робота, щоб дізнатися хто він';
+    walk.keys={}; walk.joyMove.x=walk.joyMove.y=0;
+    for(const [,s] of sticks){ s.base.remove(); } sticks.clear();
+  }
+}
+btnWalk.onclick=toggleMode;
+document.getElementById('btnHelp').onclick=()=>document.getElementById('help').classList.add('show');
+document.getElementById('helpClose').onclick=()=>document.getElementById('help').classList.remove('show');
+
+/* ---------- resize ---------- */
+function fitRadius(){ const a=innerWidth/innerHeight; return a>=1?27:Math.min(48,26/a); }
+let userZoomed=false;
+function resize(){
+  camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth,innerHeight);
+  if(!userZoomed && mode==='orbit') orbit.radius=fitRadius();
+}
+addEventListener('resize',resize); resize();
+
+/* ================= ГОЛОВНИЙ ЦИКЛ ================= */
+const clock=new THREE.Clock();
+let firstFrame=true;
+function loop(){
+  requestAnimationFrame(loop);
+  const dt=Math.min(clock.getDelta(),.05);
+  const t=STILL?12.5:clock.elapsedTime;
+
+  if(mode==='orbit'){
+    if(orbit.auto && !STILL){ orbit.theta+=dt*.07; }
+    else { orbit.idleT+=dt; if(orbit.idleT>5) orbit.auto=true; }
+    applyOrbit();
+  } else {
+    if(!STILL) updateWalk(dt);
+    applyWalk();
+  }
+
+  for(const r of robots) animateRobot(r, STILL?0:dt, t);
+  updateBreaks(STILL?0:dt, t);
+  updateStork(STILL?0:dt, t);
+  updateDog(STILL?0:dt, t);
+  if(delivered){
+    deliveredT+=dt;
+    delivered.rotation.y+=dt*.8;
+    delivered.position.y=Math.abs(Math.sin(t*2))*.08;
+    if(deliveredT>22 && !STILL){
+      delivered.scale.multiplyScalar(1-dt*1.4);
+      if(delivered.scale.x<.05){ scene.remove(delivered); delivered=null; }
+    }
+  }
+  // мерехтіння голограм
+  for(let i=0;i<holos.length;i++)
+    holos[i].material.opacity=.82+Math.sin(t*11+i*1.7)*.1;
+
+  renderer.render(scene,camera);
+  if(firstFrame){
+    firstFrame=false;
+    document.getElementById('loader').classList.add('done');
+    if(STILL) document.body.classList.add('still');
+  }
+}
+applyOrbit();
+loop();
+// Публічне API для тестів і майбутніх інтеграцій (напр. «деплой агента» з чату)
+window.officeAPI={
+  get mode(){return mode;},
+  toggleMode,
+  robotScreenPos(i){
+    const r=robots[i]; if(!r) return null;
+    const v=new THREE.Vector3(); r.group.getWorldPosition(v); v.y+=1.2; v.project(camera);
+    return {x:(v.x*.5+.5)*innerWidth, y:(-v.y*.5+.5)*innerHeight};
+  },
+  agentCount:robots.length,
+  // QA-хук: стан стіків/гравця для автоматизованих тестів мультитачу
+  _qa(){ return {
+    mode, yaw:walk.yaw,
+    player:{x:walk.pos.x, z:walk.pos.z},
+    sticks:[...sticks.values()].map(s=>({kind:s.kind, dx:+s.dx.toFixed(3), dy:+s.dy.toFixed(3)})),
+    domSticks:document.querySelectorAll('.stick').length,
+  }; },
+};
+// страховка: якщо WebGL впав — не лишати чорний екран вічно
+setTimeout(()=>{
+  if(firstFrame){
+    document.querySelector('#loader p').textContent='Не вдалося запустити 3D. Спробуй інший браузер.';
+  }
+},9000);
+</script>
+</body>
+</html>
