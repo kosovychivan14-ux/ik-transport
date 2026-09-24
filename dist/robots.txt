@@ -1,0 +1,17 @@
+User-agent: *
+Allow: /
+
+# AI-пошукові боти — дозволено сканування для цитування
+User-agent: GPTBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+Sitemap: https://ik-transport.vercel.app/sitemap.xml
