@@ -84,6 +84,10 @@ class KV:
     def smembers(self, key):
         return self._call("SMEMBERS", key) or []
 
+    def srem(self, key, *members):
+        if members:
+            self._call("SREM", key, *members)
+
     def rpush(self, key, *values):
         if values:
             self._call("RPUSH", key, *values)
@@ -109,11 +113,108 @@ def _reg_key(code):
     return "%sreg:%s" % (PREFIX, code.upper())
 
 
+class SupabaseKV:
+    """PostgREST-backed KV with the same interface as KV (stdlib only).
+
+    Table: kv_store(key text primary key, value jsonb).
+    Env: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY.
+    Values are wrapped as {"data": <value>} inside the jsonb column.
+    """
+
+    def __init__(self, url=None, key=None):
+        self.base = (url or os.environ.get("SUPABASE_URL", "")).rstrip("/")
+        self.sr = key or os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "")
+        if not self.base or not self.sr:
+            raise RuntimeError(
+                "SupabaseKV needs SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY")
+        self._table = self.base + "/rest/v1/kv_store"
+
+    def _req(self, method, query="", body=None, prefer=None):
+        headers = {"apikey": self.sr,
+                   "Authorization": "Bearer " + self.sr,
+                   "Content-Type": "application/json"}
+        if prefer:
+            headers["Prefer"] = prefer
+        req = urllib.request.Request(self._table + query, data=body,
+                                     headers=headers, method=method)
+        try:
+            with urllib.request.urlopen(req, timeout=15) as resp:
+                raw = resp.read().decode("utf-8")
+                return json.loads(raw) if raw.strip() else None
+        except urllib.error.HTTPError as e:
+            raise RuntimeError("Supabase HTTP %s: %s"
+                               % (e.code,
+                                  e.read().decode("utf-8", "replace")[:200]))
+
+    def get(self, key):
+        q = ("?key=eq." + urllib.parse.quote(key, safe="")
+             + "&select=value")
+        rows = self._req("GET", q)
+        if not rows:
+            return None
+        return (rows[0].get("value") or {}).get("data")
+
+    def set(self, key, value):
+        body = json.dumps({"key": key,
+                           "value": {"data": value}}).encode()
+        self._req("POST", "", body, prefer="resolution=merge-duplicates")
+
+    def delete(self, *keys):
+        if not keys:
+            return
+        in_list = "(" + ",".join(urllib.parse.quote(k, safe="")
+                                 for k in keys) + ")"
+        self._req("DELETE", "?key=in." + in_list)
+
+    def sadd(self, key, *members):
+        if not members:
+            return
+        cur = set(self.smembers(key))
+        cur.update(members)
+        self.set(key, sorted(cur))
+
+    def smembers(self, key):
+        return self.get(key) or []
+
+    def srem(self, key, *members):
+        if not members:
+            return
+        cur = set(self.smembers(key))
+        cur.difference_update(members)
+        self.set(key, sorted(cur))
+
+    def rpush(self, key, *values):
+        if not values:
+            return
+        cur = self.lrange(key)
+        cur.extend(values)
+        self.set(key, cur)
+
+    def lrange(self, key, start=0, stop=-1):
+        cur = self.get(key) or []
+        if stop < 0:
+            stop = len(cur) + 1 + stop
+        return cur[start:stop + 1]
+
+
+def default_backend():
+    """Supabase wins when configured, else Vercel KV/Upstash REST."""
+    if (os.environ.get("SUPABASE_URL")
+            and os.environ.get("SUPABASE_SERVICE_ROLE_KEY")):
+        return SupabaseKV()
+    if (os.environ.get("KV_REST_API_URL")
+            and os.environ.get("KV_REST_API_TOKEN")):
+        return KV()
+    raise RuntimeError(
+        "no storage configured: set SUPABASE_URL + "
+        "SUPABASE_SERVICE_ROLE_KEY (or KV_REST_API_URL + KV_REST_API_TOKEN)")
+
+
 class SecretKV:
     """SecretsStore-compatible interface backed by Vercel KV."""
 
     def __init__(self, kv=None):
-        self.kv = kv or KV()
+        self.kv = kv or default_backend()
         self._fernet = _fernet()
 
     def put(self, code, network, name, value):
@@ -130,6 +231,7 @@ class SecretKV:
 
     def delete(self, code, network, name):
         self.kv.delete(_sec_key(code, network, name))
+        self.kv.srem(_idx_key(code), "%s__%s" % (network, name))
 
     def list_names(self, code):
         return sorted(self.kv.smembers(_idx_key(code)))
@@ -140,6 +242,8 @@ class SecretKV:
         for n in names:
             net, name = n.split("__", 1)
             self.kv.delete(_sec_key(code, net, name))
+        if names:
+            self.kv.srem(_idx_key(code), *names)
         return len(names)
 
     # -- meta user_id <-> client mapping (data deletion) --
