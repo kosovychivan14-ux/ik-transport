@@ -6,14 +6,13 @@ import urllib.parse
 import urllib.request
 
 FB_GRAPH = "https://graph.facebook.com"
-FB_VERSION = "v21.0"
+FB_VERSION = "v23.0"
 FB_OAUTH = "https://www.facebook.com/" + FB_VERSION + "/dialog/oauth"
 
 SCOPES_PUBLISH = [
     "pages_show_list",
     "pages_read_engagement",
     "pages_manage_posts",
-    "publish_video",
     "instagram_business_basic",
     "instagram_business_content_publish",
 ]
