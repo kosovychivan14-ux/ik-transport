@@ -16,7 +16,7 @@ SCOPES_PUBLISH = [
     "instagram_basic",
     "instagram_content_publish",
 ]
-SCOPES_ADS = ["ads_read", "business_management"]
+SCOPES_ADS = ["ads_management", "business_management"]
 
 THREADS_OAUTH = "https://threads.net/oauth/authorize"
 THREADS_GRAPH = "https://graph.threads.net"
