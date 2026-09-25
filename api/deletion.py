@@ -14,7 +14,8 @@ import urllib.parse
 import uuid
 from http.server import BaseHTTPRequestHandler
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "_lib"))
+sys.path.insert(0, os.path.normpath(
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), "_lib")))
 import kv as kvmod
 
 DELETION_INFO = os.environ.get(
