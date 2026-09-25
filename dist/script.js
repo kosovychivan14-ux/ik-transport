@@ -71,6 +71,7 @@
         ? window.IKAttribution.eventDetail(location.search)
         : { destination: 'ivankosovych_bot' };
       if (typeof window.fbq === 'function') window.fbq('trackCustom', 'TelegramButtonClick', detail);
+      if (typeof window.fbq === 'function') window.fbq('track', 'Lead');
       window.dispatchEvent(new CustomEvent('TelegramButtonClick', { detail }));
     });
   });
