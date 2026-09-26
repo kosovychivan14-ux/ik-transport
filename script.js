@@ -65,7 +65,7 @@
   }
   document.querySelectorAll('[data-telegram]').forEach(link => {
     updateTelegramHref(link);
-    link.addEventListener('click', () => {
+    link.addEventListener('click', (e) => {
       updateTelegramHref(link);
       const detail = window.IKAttribution && typeof window.IKAttribution.eventDetail === 'function'
         ? window.IKAttribution.eventDetail(location.search)
@@ -73,6 +73,17 @@
       if (typeof window.fbq === 'function') window.fbq('trackCustom', 'TelegramButtonClick', detail);
       if (typeof window.fbq === 'function') window.fbq('track', 'Lead');
       window.dispatchEvent(new CustomEvent('TelegramButtonClick', { detail }));
+      // Прямий вхід у бота: спочатку пробуємо відкрити застосунок Telegram напряму
+      // (мінус сторінка-прокладка t.me з кнопкою «Send Message»). Мітка start зберігається.
+      const fallbackUrl = link.href;
+      let startParam = '6aaf338f263824642b010bea';
+      try { startParam = new URL(fallbackUrl).searchParams.get('start') || startParam; } catch (_) {}
+      const directUrl = 'tg://resolve?domain=ivankosovych_bot&start=' + encodeURIComponent(startParam);
+      e.preventDefault();
+      window.location.href = directUrl;
+      // Фолбек: якщо за 1.2 c застосунок не перехопив (Telegram не встановлено) —
+      // повертаємось до звичайного редіректу, щоб кнопка не була «мертвою».
+      setTimeout(() => { if (!document.hidden) window.location.href = fallbackUrl; }, 1200);
     });
   });
 })();
