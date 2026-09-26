@@ -597,7 +597,7 @@ section { padding: clamp(56px, 9vw, 110px) 0; position: relative; }
     <a href="#dostup">Доступ</a>
     <a href="#faq">Питання</a>
   </nav>
-  <a class="btn btn-small" href="https://t.me/ivankosovych_bot">До вебінару</a>
+  <a class="btn btn-small" href="tg://resolve?domain=ivankosovych_bot&amp;start=6aaf338f263824642b010bea">До вебінару</a>
 </header>
 
 <main id="top">
@@ -623,7 +623,7 @@ section { padding: clamp(56px, 9vw, 110px) 0; position: relative; }
           де можливості — і де ризики. Без обіцянок і без тиску.
         </p>
         <div class="hero-cta" data-hero style="--d:.35s">
-          <a class="btn btn-big" href="https://t.me/ivankosovych_bot">
+          <a class="btn btn-big" href="tg://resolve?domain=ivankosovych_bot&amp;start=6aaf338f263824642b010bea">
             <span class="btn-glow" aria-hidden="true"></span>
             <span class="btn-label">Отримати доступ у Telegram</span>
             <svg class="btn-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -797,7 +797,7 @@ section { padding: clamp(56px, 9vw, 110px) 0; position: relative; }
         </li>
       </ol>
       <div class="steps-cta reveal">
-        <a class="btn btn-big" href="https://t.me/ivankosovych_bot">
+        <a class="btn btn-big" href="tg://resolve?domain=ivankosovych_bot&amp;start=6aaf338f263824642b010bea">
           <span class="btn-glow" aria-hidden="true"></span>
           <span class="btn-label">Отримати доступ у Telegram</span>
           <svg class="btn-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -848,7 +848,7 @@ section { padding: clamp(56px, 9vw, 110px) 0; position: relative; }
         <p class="kicker kicker-center">Останній крок</p>
         <h2 id="final-title">Розберися спокійно —<br>до того, як вирішувати</h2>
         <p class="final-sub">П&rsquo;ять інструментів. Чесно про можливості. Чесно про ризики.</p>
-        <a class="btn btn-big" href="https://t.me/ivankosovych_bot">
+        <a class="btn btn-big" href="tg://resolve?domain=ivankosovych_bot&amp;start=6aaf338f263824642b010bea">
           <span class="btn-glow" aria-hidden="true"></span>
           <span class="btn-label">Отримати доступ у Telegram</span>
           <svg class="btn-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -1016,6 +1016,24 @@ section { padding: clamp(56px, 9vw, 110px) 0; position: relative; }
   }
 
   initDust();
+
+  /* ---------- Прямий вхід у бота: tg://resolve + фолбек ---------- */
+  /* Клік одразу відкриває @ivankosovych_bot у застосунку (лишається тільки «Start»).
+     Якщо за 1.2 с застосунок не перехопив (Telegram не встановлено) —
+     відкіт на звичайне https-посилання, кнопка ніколи не «мертва». */
+  (function directBotLinks() {
+    var START = '6aaf338f263824642b010bea';
+    var FALLBACK = 'https://t.me/ivankosovych_bot?start=' + encodeURIComponent(START);
+    doc.querySelectorAll('a[href^="tg://resolve"]').forEach(function (a) {
+      a.addEventListener('click', function (e) {
+        e.preventDefault();
+        window.location.href = a.href;
+        setTimeout(function () {
+          if (!doc.hidden) window.location.href = FALLBACK;
+        }, 1200);
+      });
+    });
+  })();
 
   /* ---------- Рік у футері ---------- */
   var yearEl = doc.querySelector('[data-year]');
