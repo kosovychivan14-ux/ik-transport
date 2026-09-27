@@ -76,7 +76,7 @@
       // Прямий вхід у бота: спочатку пробуємо відкрити застосунок Telegram напряму
       // (мінус сторінка-прокладка t.me з кнопкою «Send Message»). Мітка start зберігається.
       const fallbackUrl = link.href;
-      let startParam = '6aaf338f263824642b010bea';
+      let startParam = 'ads_mlm01';
       try { startParam = new URL(fallbackUrl).searchParams.get('start') || startParam; } catch (_) {}
       const directUrl = 'tg://resolve?domain=ivankosovych_bot&start=' + encodeURIComponent(startParam);
       e.preventDefault();
