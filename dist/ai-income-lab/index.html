@@ -46,12 +46,19 @@ img{display:block;max-width:100%}
 @media(max-width:640px){.hud-status{display:none}.brand-name{font-size:11px}}
 
 /* ---------- hero ---------- */
-.hero{position:relative;min-height:100svh;display:flex;flex-direction:column;justify-content:flex-end;overflow:hidden;padding-top:110px}
-#grid{position:absolute;inset:0;z-index:0}
-.hero-glow{position:absolute;z-index:0;width:60vw;height:60vw;right:-18vw;top:-14vw;border-radius:50%;
+.hero{position:relative;min-height:100svh;display:flex;flex-direction:column;justify-content:flex-end;overflow:hidden;padding-top:110px;background:#06080c}
+.hero-bg{position:absolute;inset:0;z-index:0}
+.hero-bg img{width:100%;height:100%;object-fit:cover;object-position:32% center}
+.hero-bg::after{content:"";position:absolute;inset:0;
+  background:linear-gradient(to top,#06080c 1%,transparent 26%),
+             linear-gradient(to left,rgba(6,8,12,.78) 0%,rgba(6,8,12,.30) 36%,transparent 62%)}
+#grid{position:absolute;inset:0;z-index:1}
+.hero-glow{position:absolute;z-index:1;width:60vw;height:60vw;right:-18vw;top:-14vw;border-radius:50%;
   background:radial-gradient(circle,rgba(215,249,36,.10),transparent 65%);pointer-events:none}
 .hero-glow.g2{left:-22vw;top:auto;bottom:-24vw;background:radial-gradient(circle,rgba(215,249,36,.06),transparent 65%)}
-.hero-in{position:relative;z-index:2;max-width:1440px;margin:0 auto;width:100%;padding:0 24px}
+.hero-in{position:relative;z-index:2;max-width:1440px;margin:0 auto;width:100%;padding:0 24px;
+  display:flex;justify-content:flex-end}
+.hero-copy{max-width:780px;width:100%}
 .term-line{font-family:var(--mono);font-size:12px;letter-spacing:.22em;color:var(--lime);margin-bottom:26px;
   display:flex;align-items:center;gap:12px}
 .term-line::before{content:"";width:34px;height:1px;background:var(--lime);display:inline-block}
@@ -64,10 +71,6 @@ img{display:block;max-width:100%}
 @keyframes riseUp{to{transform:translateY(0)}}
 .h-outline{color:transparent;-webkit-text-stroke:2px var(--ink)}
 .h-lime{color:var(--lime)}
-.photo-pill{display:inline-block;vertical-align:baseline;height:.82em;width:1.7em;border-radius:100px;overflow:hidden;
-  border:2px solid var(--lime);transform:translateY(.08em);margin:0 .12em;box-shadow:0 0 44px rgba(215,249,36,.28)}
-.photo-pill img{width:100%;height:100%;object-fit:cover;object-position:center 62%;transform:scale(1.12);animation:pillIn 1.2s cubic-bezier(.19,1,.22,1) .35s both}
-@keyframes pillIn{from{transform:scale(1.35)}to{transform:scale(1.12)}}
 .hero-sub{margin-top:30px;max-width:620px;font-size:clamp(1rem,1.6vw,1.25rem);line-height:1.7;color:var(--mut);
   opacity:0;animation:fadeUp .9s ease .55s forwards}
 @keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
@@ -166,6 +169,13 @@ footer{border-top:1px solid var(--line2)}
 .foot-note{font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--mut)}
 .foot-note b{color:var(--lime);font-weight:600}
 
+@media(max-width:820px){
+  .hero-bg img{object-position:22% center}
+  .hero-bg::after{background:linear-gradient(to top,#06080c 3%,rgba(6,8,12,.62) 46%,rgba(6,8,12,.28) 78%,rgba(6,8,12,.42) 100%)}
+  .hero-in{justify-content:flex-start}
+  .hero-copy{max-width:100%}
+}
+
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}
   .h-line>span{transform:none}.hero-sub,.hero-cta-row{opacity:1}.reveal{opacity:1;transform:none}
@@ -188,14 +198,16 @@ footer{border-top:1px solid var(--line2)}
 <main id="top">
 <!-- ============ HERO ============ -->
 <section class="hero">
+  <div class="hero-bg" aria-hidden="true"><img src="assets/hero-vanya-scene.png" alt=""></div>
   <canvas id="grid" aria-hidden="true"></canvas>
   <div class="hero-glow" aria-hidden="true"></div>
   <div class="hero-glow g2" aria-hidden="true"></div>
   <div class="hero-in">
+   <div class="hero-copy">
     <p class="term-line">&gt; ТЕРМІНАЛ ДОХОДУ // AI-SYSTEM v2.0</p>
     <h1 class="h-display">
       <span class="h-line"><span>AI-АГЕНТИ</span></span>
-      <span class="h-line"><span><span class="photo-pill" aria-hidden="true"><img src="assets/hero.jpg" alt=""></span><span class="h-outline">ДЛЯ</span></span></span>
+      <span class="h-line"><span class="h-outline">ДЛЯ</span></span>
       <span class="h-line"><span class="h-lime">ДОХОДУ</span></span>
     </h1>
     <p class="hero-sub">Будую дохід на автопілоті: інвестиції та партнерський маркетинг руками AI-агентів. Практика, розбори, закулісся — без води.</p>
@@ -206,6 +218,7 @@ footer{border-top:1px solid var(--line2)}
       </a>
       <span class="hero-note">практика // розбори // закулісся</span>
     </div>
+   </div>
   </div>
   <div class="marquee" aria-hidden="true">
     <div class="mq-track">
