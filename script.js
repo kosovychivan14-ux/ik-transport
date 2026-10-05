@@ -1,23 +1,5 @@
 (() => {
   'use strict';
-  const duration = 8 * 60 * 1000;
-  const deadline = Date.now() + duration;
-  const minutes = document.getElementById('minutes');
-  const seconds = document.getElementById('seconds');
-  const timer = document.querySelector('[role="timer"]');
-  let interval;
-  function renderCountdown() {
-    const remaining = Math.max(0, Math.ceil((deadline - Date.now()) / 1000));
-    const minuteValue = Math.floor(remaining / 60);
-    const secondValue = remaining % 60;
-    minutes.textContent = String(minuteValue).padStart(2, '0');
-    seconds.textContent = String(secondValue).padStart(2, '0');
-    timer.setAttribute('aria-label', `Зворотний відлік: ${minuteValue} хвилин ${secondValue} секунд`);
-    if (remaining === 0 && interval) clearInterval(interval);
-  }
-  renderCountdown();
-  interval = setInterval(renderCountdown, 1000);
-  document.addEventListener('visibilitychange', renderCountdown);
   document.getElementById('year').textContent = String(new Date().getFullYear());
   // Reveal only off-screen sections; the opening content never waits on animation.
   if ('IntersectionObserver' in window && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
@@ -69,16 +51,16 @@
       updateTelegramHref(link);
       const detail = window.IKAttribution && typeof window.IKAttribution.eventDetail === 'function'
         ? window.IKAttribution.eventDetail(location.search)
-        : { destination: 'ivankosovych_bot' };
+        : { destination: 'Ivankosovychwebinarbot' };
       if (typeof window.fbq === 'function') window.fbq('trackCustom', 'TelegramButtonClick', detail);
       if (typeof window.fbq === 'function') window.fbq('track', 'Lead');
       window.dispatchEvent(new CustomEvent('TelegramButtonClick', { detail }));
       // Прямий вхід у бота: спочатку пробуємо відкрити застосунок Telegram напряму
       // (мінус сторінка-прокладка t.me з кнопкою «Send Message»). Мітка start зберігається.
       const fallbackUrl = link.href;
-      let startParam = 'ads_mlm01';
+      let startParam = 'ads_video';
       try { startParam = new URL(fallbackUrl).searchParams.get('start') || startParam; } catch (_) {}
-      const directUrl = 'tg://resolve?domain=ivankosovych_bot&start=' + encodeURIComponent(startParam);
+      const directUrl = 'tg://resolve?domain=Ivankosovychwebinarbot&start=' + encodeURIComponent(startParam);
       e.preventDefault();
       window.location.href = directUrl;
       // Фолбек: якщо за 1.2 c застосунок не перехопив (Telegram не встановлено) —

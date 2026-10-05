@@ -5,7 +5,7 @@
 })(typeof globalThis !== 'undefined' ? globalThis : this, function () {
   'use strict';
 
-  const LAUNCH_URL = 'https://tg.pulse.is/ivankosovych_bot?start=6aaf338f263824642b010bea';
+  const LAUNCH_URL = 'https://t.me/Ivankosovychwebinarbot?start=ads_video';
   const UTM_KEYS = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'];
   const MAX_VALUE_LENGTH = 200;
   const MAX_MATCH_DATA_LENGTH = 500;
@@ -90,7 +90,7 @@
 
   function eventDetail(search) {
     const params = readParams(search);
-    const detail = { destination: 'ivankosovych_bot' };
+    const detail = { destination: 'Ivankosovychwebinarbot' };
     for (const key of UTM_KEYS) {
       const value = boundedValue(params.get(key));
       if (value) detail[key] = value;
