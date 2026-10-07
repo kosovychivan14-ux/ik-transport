@@ -31,21 +31,37 @@
     document.head.appendChild(script);
     fbq('init', META_PIXEL_ID); fbq('track', 'PageView'); fbq('track', 'ViewContent');
   }
-  // Кнопки Telegram — ПРЯМІ посилання в href, без прокладок (фікс 2026-10-07,
-  // рішення Vanya): раніше клік перехоплювався — preventDefault, спроба
-  // tg://resolve і фолбек через 1.2 с на https; на частині пристроїв це
-  // губило/гальмувало перехід. Тепер обробник лише фіксує подію кліку
-  // (піксель Lead / TelegramButtonClick) і НЕ втручається в перехід:
-  // браузер іде за href одразу. href у HTML уже прямий:
-  // https://t.me/Ivankosovychwebinarbot?start=ads_video
+  // Кнопки Telegram: клік одразу відкриває застосунок Telegram на екрані бота
+  // через tg://resolve. Статичний https-href лишається для копіювання посилання
+  // та випадку без JavaScript. Якщо застосунок не перехопив перехід і сторінка
+  // через 1.5 с досі видима й у фокусі, відкриваємо https-посилання як фолбек.
   document.querySelectorAll('[data-telegram]').forEach(link => {
-    link.addEventListener('click', () => {
+    link.addEventListener('click', event => {
       const detail = window.IKAttribution && typeof window.IKAttribution.eventDetail === 'function'
         ? window.IKAttribution.eventDetail(location.search)
         : { destination: 'Ivankosovychwebinarbot' };
       if (typeof window.fbq === 'function') window.fbq('trackCustom', 'TelegramButtonClick', detail);
       if (typeof window.fbq === 'function') window.fbq('track', 'Lead');
       window.dispatchEvent(new CustomEvent('TelegramButtonClick', { detail }));
+
+      let startParam = 'ads_video';
+      try {
+        startParam = new URL(link.href).searchParams.get('start') || startParam;
+      } catch (_) {
+        // Залишаємо ads_video, якщо поточний href не вдалося розібрати.
+      }
+
+      const encodedStart = encodeURIComponent(startParam);
+      const directUrl = 'tg://resolve?domain=Ivankosovychwebinarbot&start=' + encodedStart;
+      const fallbackUrl = 'https://t.me/Ivankosovychwebinarbot?start=' + encodedStart;
+
+      event.preventDefault();
+      window.location.href = directUrl;
+      window.setTimeout(() => {
+        if (document.visibilityState === 'visible' && document.hasFocus()) {
+          window.location.href = fallbackUrl;
+        }
+      }, 1500);
     });
   });
 })();
