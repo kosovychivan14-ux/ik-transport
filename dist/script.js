@@ -31,41 +31,21 @@
     document.head.appendChild(script);
     fbq('init', META_PIXEL_ID); fbq('track', 'PageView'); fbq('track', 'ViewContent');
   }
-  const landingTimestamp = Date.now();
-  function updateTelegramHref(link) {
-    if (!window.IKAttribution || typeof window.IKAttribution.buildLaunchUrl !== 'function') return;
-    try {
-      const href = window.IKAttribution.buildLaunchUrl({
-        search: location.search,
-        cookieString: document.cookie,
-        landingTimestamp
-      });
-      if (typeof href === 'string' && href) link.href = href;
-    } catch (_) {
-      // Keep the static Telegram URL when attribution storage is unavailable.
-    }
-  }
+  // Кнопки Telegram — ПРЯМІ посилання в href, без прокладок (фікс 2026-10-07,
+  // рішення Vanya): раніше клік перехоплювався — preventDefault, спроба
+  // tg://resolve і фолбек через 1.2 с на https; на частині пристроїв це
+  // губило/гальмувало перехід. Тепер обробник лише фіксує подію кліку
+  // (піксель Lead / TelegramButtonClick) і НЕ втручається в перехід:
+  // браузер іде за href одразу. href у HTML уже прямий:
+  // https://t.me/Ivankosovychwebinarbot?start=ads_video
   document.querySelectorAll('[data-telegram]').forEach(link => {
-    updateTelegramHref(link);
-    link.addEventListener('click', (e) => {
-      updateTelegramHref(link);
+    link.addEventListener('click', () => {
       const detail = window.IKAttribution && typeof window.IKAttribution.eventDetail === 'function'
         ? window.IKAttribution.eventDetail(location.search)
         : { destination: 'Ivankosovychwebinarbot' };
       if (typeof window.fbq === 'function') window.fbq('trackCustom', 'TelegramButtonClick', detail);
       if (typeof window.fbq === 'function') window.fbq('track', 'Lead');
       window.dispatchEvent(new CustomEvent('TelegramButtonClick', { detail }));
-      // Прямий вхід у бота: спочатку пробуємо відкрити застосунок Telegram напряму
-      // (мінус сторінка-прокладка t.me з кнопкою «Send Message»). Мітка start зберігається.
-      const fallbackUrl = link.href;
-      let startParam = 'ads_video';
-      try { startParam = new URL(fallbackUrl).searchParams.get('start') || startParam; } catch (_) {}
-      const directUrl = 'tg://resolve?domain=Ivankosovychwebinarbot&start=' + encodeURIComponent(startParam);
-      e.preventDefault();
-      window.location.href = directUrl;
-      // Фолбек: якщо за 1.2 c застосунок не перехопив (Telegram не встановлено) —
-      // повертаємось до звичайного редіректу, щоб кнопка не була «мертвою».
-      setTimeout(() => { if (!document.hidden) window.location.href = fallbackUrl; }, 1200);
     });
   });
 })();
