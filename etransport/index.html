@@ -1,0 +1,772 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>How Transport Rental Pays Its Owners — E-Transport</title>
+  <meta name="description" content="E-bikes, scooters, driverless cars and delivery drones are rented every day — and the rental pays the people who own a share of the fleet. How the model works — and how to register in the official E-Transport bot.">
+  <meta name="theme-color" content="#010101">
+  <meta name="color-scheme" content="dark">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23010101'/%3E%3Cpath d='M7 8h18v4H12v3h10v4H12v3h13v4H7z' fill='%2310B981'/%3E%3C/svg%3E">
+  <link rel="preload" href="assets/fonts/manrope-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+@font-face {
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 400 800;
+  font-display: swap;
+  src: url(assets/fonts/manrope-latin.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+:root{
+  color-scheme:dark;
+  --bg:#010101; --surface:rgba(6,10,14,.62); --text:#ffffff; --muted:rgba(255,255,255,.7);
+  --card:rgba(255,255,255,.6); --faint:rgba(255,255,255,.5);
+  --accent:#10B981; --accent-dark:#059669; --gold:#D4AF37; --gold-light:#E8CD70;
+  --line:rgba(16,185,129,.12); --ink:#010101;
+  font-family:Manrope,Arial,sans-serif;
+  background:var(--bg); color:var(--text);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0}
+a{color:inherit;text-decoration:none}
+a:focus-visible{outline:3px solid rgba(16,185,129,.6);outline-offset:6px}
+.wrap{width:min(1240px,calc(100% - 96px));margin-inline:auto}
+
+/* Header */
+.header{display:flex;justify-content:space-between;align-items:center;padding-block:24px;border-bottom:1px solid var(--line)}
+.brand{display:flex;gap:14px;align-items:center}
+.brand-mark{width:44px;height:44px;border-radius:12px;background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.45);display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',Manrope,Arial,sans-serif;font-size:1.45rem;font-weight:700;color:var(--accent);flex:0 0 auto}
+.brand-name{font-family:'Space Grotesk',Manrope,Arial,sans-serif;font-size:1.15rem;font-weight:700;letter-spacing:.02em;line-height:1.15}
+.brand-name span{color:var(--accent)}
+.brand-sub{font-size:.68rem;font-weight:600;letter-spacing:.22em;color:var(--faint);margin-top:3px}
+.header-actions{display:flex;align-items:center;gap:22px}
+.header-note{font-size:.875rem;color:var(--muted)}
+.header-cta{display:inline-flex;align-items:center;gap:8px;padding:11px 20px;border:1px solid rgba(16,185,129,.5);border-radius:9999px;color:var(--accent);font-size:.8rem;font-weight:600;transition:background .3s ease,transform .3s ease}
+.header-cta:hover{background:rgba(16,185,129,.1);transform:scale(1.04)}
+.header-cta svg{width:15px;height:15px;fill:var(--accent);flex:0 0 auto}
+
+/* Hero */
+.hero{position:relative;isolation:isolate;display:grid;grid-template-columns:1.08fr 1fr;gap:56px;padding-block:24px 56px;align-items:start;background:radial-gradient(640px 420px at 8% -4%,rgba(16,185,129,.28),transparent 62%),radial-gradient(720px 520px at 98% 104%,rgba(212,175,55,.16),transparent 62%);background-repeat:no-repeat}
+.hero:before{content:"";position:absolute;z-index:-1;pointer-events:none;inset:0;background-image:linear-gradient(rgba(16,185,129,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(16,185,129,.06) 1px,transparent 1px);background-size:60px 60px;-webkit-mask-image:radial-gradient(ellipse at 50% 38%,#000 25%,transparent 76%);mask-image:radial-gradient(ellipse at 50% 38%,#000 25%,transparent 76%)}
+.hero:after{content:"";position:absolute;z-index:-1;pointer-events:none;inset:0;background:linear-gradient(180deg,var(--bg),transparent 110px),linear-gradient(0deg,var(--bg),transparent 90px),linear-gradient(90deg,var(--bg),transparent 80px),linear-gradient(-90deg,var(--bg),transparent 80px)}
+.hero-copy{padding-top:32px}
+.eyebrow{font-size:.75rem;font-weight:500;letter-spacing:.35em;line-height:1.7;margin:0 0 24px;color:var(--accent);display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.eyebrow-line{height:1px;width:30px;background:var(--accent)}
+h1{font-size:clamp(2.7rem,5.2vw,4.4rem);line-height:1.05;letter-spacing:-.03em;font-weight:800;margin:0 0 27px}
+h1>span{color:var(--accent);text-shadow:0 0 30px rgba(16,185,129,.45)}
+.intro{font-size:1.05rem;color:var(--muted);line-height:1.7;max-width:520px;margin:0 0 30px}
+.intro strong{color:var(--text);font-weight:700}
+.signup{display:flex;gap:24px;align-items:center}
+.cta{position:relative;overflow:hidden;display:flex;justify-content:space-between;align-items:center;gap:22px;min-height:76px;padding:16px 32px;background:var(--accent);color:var(--ink);font-weight:600;font-size:1rem;border-radius:9999px;box-shadow:0 0 34px -8px rgba(16,185,129,.5);transition:transform .3s ease,box-shadow .3s ease;animation:cta-pulse 2.8s ease-out infinite}
+.cta:after{content:"";position:absolute;pointer-events:none;inset:-60% auto -60% -70%;width:45%;transform:rotate(20deg);background:linear-gradient(90deg,transparent,rgba(255,255,255,.4),transparent);transition:left .65s ease}
+.cta:hover,.cta:focus-visible{transform:scale(1.05);box-shadow:0 0 48px -6px rgba(16,185,129,.65)}
+.cta:hover:after,.cta:focus-visible:after{left:140%}
+.cta-label{display:flex;align-items:center;gap:13px;text-align:left}
+.cta-label svg{width:24px;height:24px;fill:var(--ink);flex:0 0 auto}
+.cta small{font-size:.8rem;font-weight:500;color:rgba(1,1,1,.66)}
+.cta-arrow{font-size:1.7rem;font-weight:400;transition:transform .25s ease}
+.cta:hover .cta-arrow{transform:translate(3px,-3px)}
+.signup-note{color:var(--faint);font-size:.75rem;line-height:1.6;margin:14px 0 0}
+.hero-stats{display:flex;gap:44px;margin-top:36px;flex-wrap:wrap}
+.hstat b{display:block;font-family:'Space Grotesk',Manrope,Arial,sans-serif;font-size:clamp(1.5rem,2.2vw,1.875rem);font-weight:700;letter-spacing:-.01em;color:var(--text);margin-bottom:6px}
+.hstat span{font-size:.875rem;line-height:1.5;color:var(--faint);display:block;max-width:190px}
+
+/* Hero fleet collage */
+.fleet{position:relative;margin:0;display:grid;grid-template-columns:1fr 1fr;gap:14px;padding-top:32px;will-change:transform}
+.fleet figure{margin:0;position:relative;overflow:hidden;border-radius:18px;border:1px solid var(--line);aspect-ratio:4/3;background:#0b0f0d}
+.fleet img{display:block;width:100%;height:100%;object-fit:cover;animation-duration:9s;animation-timing-function:ease-in-out;animation-iteration-count:infinite;animation-direction:alternate}
+.fleet figure:nth-child(1) img{animation-name:transport-drift;animation-duration:10s}
+.fleet figure:nth-child(2) img{animation-name:transport-glide;animation-duration:8s}
+.fleet figure:nth-child(3) img{animation-name:transport-drive}
+.fleet figure:nth-child(4) img{animation-name:transport-float;animation-duration:6s}
+.fleet figcaption{position:absolute;left:0;right:0;bottom:0;padding:26px 16px 12px;background:linear-gradient(transparent,rgba(4,8,6,.85));font-size:.82rem;font-weight:700;letter-spacing:.04em}
+.fleet-badge{grid-column:1/-1;display:flex;align-items:center;justify-content:center;gap:12px;padding:13px 18px;border-radius:14px;background:rgba(4,9,7,.88);border:1px solid rgba(16,185,129,.5);box-shadow:0 0 44px -14px rgba(16,185,129,.55);text-align:center}
+.fleet-badge b{font-family:'Space Grotesk',Manrope,Arial,sans-serif;font-size:1.15rem;font-weight:700;color:var(--accent);letter-spacing:-.01em}
+.fleet-badge span{font-size:.72rem;font-weight:600;letter-spacing:.14em;color:var(--muted)}
+
+/* Topics strip */
+.topics{border-top:1px solid;border-bottom:1px solid;border-image:linear-gradient(90deg,transparent,rgba(16,185,129,.4),transparent) 1;padding-block:26px;display:flex;justify-content:space-between;align-items:center;gap:20px;font-size:.9rem;font-weight:600}
+.topics>span:not(.topic-plus){flex:1;text-align:center}
+.topic-plus{color:var(--accent);font-size:1.3rem}
+
+/* Cities marquee */
+.cities-label{text-align:center;font-size:.75rem;font-weight:500;letter-spacing:.35em;color:var(--accent);margin:44px 0 18px}
+.marquee{overflow:hidden;padding-block:4px 10px;-webkit-mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)}
+.marquee-track{display:flex;width:max-content;animation:marquee 36s linear infinite}
+.marquee:hover .marquee-track{animation-play-state:paused}
+.marquee-group{display:flex;gap:12px;padding-right:12px}
+.city{display:inline-flex;align-items:center;gap:9px;padding:10px 20px;border-radius:9999px;border:1px solid rgba(16,185,129,.2);background:rgba(255,255,255,.02);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);font-size:.88rem;font-weight:600;white-space:nowrap;color:var(--text)}
+.city:before{content:"";width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 10px var(--accent);flex:0 0 auto}
+
+/* Sections */
+section.block{padding-block:80px}
+.section-heading .eyebrow{margin-bottom:20px}
+h2{font-size:clamp(2.1rem,3.6vw,3rem);line-height:1.25;letter-spacing:-.02em;font-weight:700;margin:0 0 20px}
+h2 span{color:var(--accent);text-shadow:0 0 30px rgba(16,185,129,.45)}
+h3{font-size:1.25rem;line-height:1.4;letter-spacing:-.015em;font-weight:700;margin:0 0 9px}
+.lede{font-size:1rem;line-height:1.7;color:var(--muted);max-width:640px;margin:0}
+
+/* Pain */
+.pain{display:grid;grid-template-columns:1fr 1.4fr;gap:90px}
+.pain ul{list-style:none;margin:0;padding:0}
+.pain li{position:relative;padding:22px 0 22px 36px;border-top:1px solid var(--line);font-size:1rem;line-height:1.55}
+.pain li:before{content:"✕";position:absolute;left:2px;color:#e08a8a;font-weight:700}
+.pain-answer{margin-top:26px;padding:24px 26px;background:var(--surface);border:1px solid var(--line);border-radius:16px;backdrop-filter:blur(16px) saturate(140%);-webkit-backdrop-filter:blur(16px) saturate(140%);font-size:1rem;line-height:1.7;color:var(--muted)}
+.pain-answer strong{color:var(--accent);font-weight:700}
+.contrast{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:8px}
+.contrast-card{padding:28px;border-radius:16px;background:var(--surface);border:1px solid var(--line);backdrop-filter:blur(16px) saturate(140%);-webkit-backdrop-filter:blur(16px) saturate(140%)}
+.contrast-card.good{border-color:rgba(16,185,129,.4);box-shadow:0 0 40px -12px rgba(16,185,129,.35)}
+.contrast-card h3{display:flex;align-items:center;gap:12px;font-size:1.15rem;margin-bottom:16px}
+.mark-x,.mark-v{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;font-size:.95rem;flex:0 0 auto}
+.mark-x{color:#e08a8a;border:1px solid rgba(224,138,138,.5)}
+.mark-v{color:var(--ink);background:var(--accent);font-weight:800}
+.contrast-card ul{list-style:none;margin:0;padding:0}
+.contrast-card li{position:relative;padding:11px 0;border-top:1px solid var(--line);font-size:.95rem;line-height:1.55;color:var(--card)}
+.contrast-card li:first-child{border-top:0;padding-top:2px}
+.contrast-card.good li{padding-left:30px}
+.contrast-card.good li:before{content:"✓";position:absolute;left:2px;color:var(--accent);font-weight:700}
+
+/* Steps */
+.step-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:36px}
+.step-grid article{min-height:220px;padding:28px;background:var(--surface);border:1px solid var(--line);border-radius:16px;backdrop-filter:blur(16px) saturate(140%);-webkit-backdrop-filter:blur(16px) saturate(140%)}
+.step-grid article>span{display:block;margin-bottom:44px;color:var(--accent);font-family:'Space Grotesk',Manrope,Arial,sans-serif;font-size:.85rem;font-weight:700;letter-spacing:.12em}
+.step-grid p{margin:0;color:var(--card);font-size:.95rem;line-height:1.65}
+.route{margin-top:44px}
+.route-label{font-size:.75rem;font-weight:500;letter-spacing:.35em;color:var(--accent);margin:0 0 20px}
+.route-steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:18px;align-items:stretch}
+.route-steps li{display:flex;gap:16px;align-items:flex-start;padding:22px;background:var(--surface);border:1px solid var(--line);border-radius:16px;backdrop-filter:blur(16px) saturate(140%);-webkit-backdrop-filter:blur(16px) saturate(140%)}
+.route-steps li>span{font-family:'Space Grotesk',Manrope,Arial,sans-serif;font-weight:700;color:var(--accent);font-size:1rem;padding-top:2px}
+.route-steps h3{font-size:1.05rem;margin-bottom:6px}
+.route-steps p{margin:0;color:var(--card);font-size:.9rem;line-height:1.55}
+.route-steps li.route-arrow{background:none;border:0;border-radius:0;padding:0;backdrop-filter:none;-webkit-backdrop-filter:none;display:flex;align-items:center;justify-content:center;color:var(--accent);font-size:1.5rem}
+
+/* Transport blocks */
+.showcase-heading{display:grid;grid-template-columns:1.35fr 1fr;gap:70px;align-items:end;margin-bottom:34px}
+.showcase-heading h2{margin-bottom:0}
+.showcase-heading>p{max-width:480px;margin:0 0 4px;color:var(--muted);font-size:1rem;line-height:1.7}
+.transport-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
+.transport-card{overflow:hidden;background:var(--surface);border:1px solid var(--line);border-radius:16px;backdrop-filter:blur(16px) saturate(140%);-webkit-backdrop-filter:blur(16px) saturate(140%);box-shadow:0 0 40px -12px rgba(16,185,129,.35);transition:transform .35s ease,border-color .35s ease,box-shadow .35s ease}
+.transport-card:hover{transform:translateY(-5px);border-color:rgba(16,185,129,.45);box-shadow:0 0 55px -10px rgba(16,185,129,.55)}
+.transport-image{position:relative;overflow:hidden;aspect-ratio:4/3;background:#0b0f0d}
+.transport-image:after{content:"";position:absolute;inset:auto 0 0;height:38%;background:linear-gradient(transparent,rgba(10,15,12,.72));pointer-events:none}
+.transport-image img{display:block;width:100%;height:100%;object-fit:cover;animation-duration:9s;animation-timing-function:ease-in-out;animation-iteration-count:infinite;animation-direction:alternate}
+.transport-card[data-transport="car"] .transport-image img{animation-name:transport-drive}
+.transport-card[data-transport="drone"] .transport-image img{animation-name:transport-float;animation-duration:6s}
+.transport-card[data-transport="bike"] .transport-image img{animation-name:transport-drift;animation-duration:10s}
+.transport-card[data-transport="scooter"] .transport-image img{animation-name:transport-glide;animation-duration:8s}
+.transport-copy{display:flex;gap:22px;padding:23px 24px 25px}
+.transport-copy>span{padding-top:4px;color:var(--accent);font-size:.75rem;letter-spacing:.12em}
+.transport-copy p{margin:0 0 14px;color:var(--card);font-size:.92rem;line-height:1.6}
+.transport-copy p:last-child{margin-bottom:0}
+.fact{border-top:1px solid var(--line);padding-top:14px;font-size:.92rem;line-height:1.6;color:var(--muted)}
+.fact b{display:block;color:var(--accent);font-size:.68rem;font-weight:700;letter-spacing:.14em;margin-bottom:6px}
+.fact strong{color:var(--text);font-weight:700}
+.source-note{margin:22px 0 0;font-size:.8rem;line-height:1.6;color:var(--muted)}
+
+/* Income math */
+.calc{margin-top:36px;border:1px solid var(--line);background:var(--surface);border-radius:16px;overflow:hidden;backdrop-filter:blur(16px) saturate(140%);-webkit-backdrop-filter:blur(16px) saturate(140%);box-shadow:0 0 40px -12px rgba(16,185,129,.35)}
+.calc-row{display:grid;grid-template-columns:230px 1fr;gap:28px;padding:24px 28px;border-top:1px solid var(--line)}
+.calc-row:first-child{border-top:0}
+.calc-tag{font-size:.72rem;font-weight:700;letter-spacing:.13em;color:var(--accent);padding-top:4px}
+.calc-row p{margin:0;color:var(--card);line-height:1.65;font-size:.98rem}
+.calc-row p strong{color:var(--text);font-weight:700}
+.bars{margin-top:20px;display:flex;flex-direction:column;gap:12px}
+.bar-row{display:grid;grid-template-columns:210px 1fr;gap:16px;align-items:center}
+.bar-row>span{font-size:.85rem;color:var(--muted)}
+.bar{height:10px;border-radius:9999px;background:rgba(255,255,255,.06);overflow:hidden}
+.bar i{display:block;height:100%;border-radius:9999px;transform:scaleX(0);transform-origin:left;transition:transform 1.15s cubic-bezier(.22,.8,.3,1)}
+.bar i.bar-green{background:linear-gradient(90deg,var(--accent),var(--accent-dark))}
+.bar i.bar-gold{background:linear-gradient(90deg,rgba(212,175,55,.6),rgba(212,175,55,.3))}
+.calc.in .bar i{transform:scaleX(1)}
+.calc.in .bar-row:nth-child(2) i{transition-delay:.18s}
+.calc.in .bar-row:nth-child(3) i{transition-delay:.36s}
+.bars-note{font-size:.78rem;color:var(--faint);margin:2px 0 0}
+
+/* Pool principle */
+.pool-grid{display:grid;grid-template-columns:1fr 1.4fr;gap:90px}
+.check-list{list-style:none;margin:0;padding:0}
+.check-list li{position:relative;padding:22px 0 22px 36px;border-top:1px solid var(--line);font-size:1rem;line-height:1.55}
+.check-list li:before{content:"✓";position:absolute;left:2px;color:var(--accent);font-weight:700}
+.pool-text{font-size:1rem;line-height:1.75;color:var(--muted);margin:0 0 8px}
+.pool-text strong{color:var(--text);font-weight:700}
+
+/* Protection */
+.guard-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:36px}
+.guard-grid article{min-height:210px;padding:26px;background:var(--surface);border:1px solid var(--line);border-radius:16px;backdrop-filter:blur(16px) saturate(140%);-webkit-backdrop-filter:blur(16px) saturate(140%)}
+.guard-grid article>span{display:block;margin-bottom:36px;color:var(--accent);font-family:'Space Grotesk',Manrope,Arial,sans-serif;font-size:.85rem;font-weight:700;letter-spacing:.12em}
+.guard-grid p{margin:0;color:var(--card);font-size:.92rem;line-height:1.6}
+
+/* Participation formats */
+.scenario-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:36px}
+.scenario{padding:30px;background:var(--surface);border:1px solid var(--line);border-radius:16px;backdrop-filter:blur(16px) saturate(140%);-webkit-backdrop-filter:blur(16px) saturate(140%);box-shadow:0 0 40px -12px rgba(16,185,129,.35)}
+.scenario.featured{border-color:rgba(212,175,55,.5);box-shadow:0 0 40px -12px rgba(212,175,55,.35)}
+.scenario.featured .calc-tag{color:var(--gold-light)}
+.scenario .calc-tag{display:block;margin-bottom:14px;padding-top:0}
+.scenario h3{font-size:1.4rem;margin-bottom:16px}
+.scenario ul{list-style:none;margin:0;padding:0}
+.scenario li{position:relative;padding:13px 0 13px 32px;border-top:1px solid var(--line);font-size:.95rem;line-height:1.55;color:var(--card)}
+.scenario li:before{content:"✓";position:absolute;left:2px;color:var(--accent);font-weight:700}
+
+/* Why now */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:36px}
+.stat{padding:26px;background:var(--surface);border:1px solid var(--line);border-radius:16px;backdrop-filter:blur(16px) saturate(140%);-webkit-backdrop-filter:blur(16px) saturate(140%)}
+.stat b{display:block;font-family:'Space Grotesk',Manrope,Arial,sans-serif;font-size:clamp(1.9rem,2.6vw,2.5rem);font-weight:700;letter-spacing:-.03em;color:var(--accent);margin-bottom:10px}
+.stat p{margin:0;color:var(--card);font-size:.9rem;line-height:1.6}
+.why-text{margin-top:30px;max-width:760px;font-size:1rem;line-height:1.75;color:var(--muted)}
+.why-text strong{color:var(--text);font-weight:700}
+
+/* FAQ */
+.faq{display:grid;grid-template-columns:1fr 1.4fr;gap:90px}
+.faq-list details{border-top:1px solid var(--line)}
+.faq-list summary{display:flex;justify-content:space-between;gap:20px;padding:22px 0;cursor:pointer;font-size:1.05rem;font-weight:600;list-style:none}
+.faq-list summary::-webkit-details-marker{display:none}
+.faq-list summary span{color:var(--accent);font-size:1.35rem;transition:transform .2s;flex-shrink:0}
+.faq-list details[open] summary span{transform:rotate(45deg)}
+.faq-list p{margin:-4px 50px 24px 0;color:var(--muted);font-size:.95rem;line-height:1.65}
+
+/* Phone mockup — the bot */
+.phone-sec{display:grid;grid-template-columns:1.05fr .95fr;gap:70px;align-items:center}
+.get-list{list-style:none;margin:20px 0 0;padding:0}
+.get-list li{position:relative;padding:7px 0 7px 30px;font-size:.95rem;line-height:1.55;color:var(--muted)}
+.get-list li:before{content:"✓";position:absolute;left:2px;color:var(--accent);font-weight:700}
+.phone{width:min(330px,100%);margin-inline:auto;background:#05080a;border:1px solid rgba(16,185,129,.28);border-radius:40px;padding:11px;box-shadow:0 0 60px -16px rgba(16,185,129,.45)}
+.phone-screen{background:#0a1015;border-radius:30px;overflow:hidden;display:flex;flex-direction:column;min-height:520px}
+.chat-head{display:flex;align-items:center;gap:11px;padding:15px 16px 12px;border-bottom:1px solid rgba(255,255,255,.07)}
+.chat-ava{width:38px;height:38px;border-radius:50%;background:var(--accent);color:var(--ink);display:flex;align-items:center;justify-content:center;flex:0 0 auto;font-family:'Space Grotesk',Manrope,Arial,sans-serif;font-weight:700;font-size:1.05rem}
+.chat-head strong{display:block;font-size:.9rem;line-height:1.3}
+.chat-head span{font-size:.72rem;color:var(--faint)}
+.chat-body{padding:16px 13px;display:flex;flex-direction:column;gap:10px;flex:1}
+.bubble{background:rgba(255,255,255,.06);border-radius:14px;padding:11px 13px;font-size:.83rem;line-height:1.5;color:var(--text);max-width:92%}
+.bubble small{display:block;margin-top:5px;font-size:.68rem;color:var(--faint)}
+.play{width:42px;height:42px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;flex:0 0 auto;box-shadow:0 0 18px rgba(16,185,129,.5)}
+.play svg{width:15px;height:15px;fill:var(--ink);margin-left:2px}
+.bubble-reg{display:flex;gap:12px;align-items:center;border:1px solid rgba(16,185,129,.45);background:rgba(16,185,129,.07)}
+.bubble-reg strong{display:block;font-size:.85rem;color:var(--text)}
+.bubble-reg span{font-size:.74rem;color:var(--muted)}
+.chat-cta{margin:0 13px 16px;padding:13px;border-radius:9999px;background:var(--accent);color:var(--ink);text-align:center;font-weight:600;font-size:.88rem}
+
+/* Closing CTA */
+.closing{padding:42px 46px;background:var(--surface);border:1px solid var(--line);border-radius:24px;backdrop-filter:blur(16px) saturate(140%);-webkit-backdrop-filter:blur(16px) saturate(140%);box-shadow:0 0 40px -12px rgba(16,185,129,.35);display:flex;align-items:center;justify-content:space-between;gap:35px;margin-bottom:80px}
+.closing .eyebrow{margin-bottom:16px}
+.closing h2{font-size:2.5rem;margin-bottom:12px}
+.closing p{margin:0;font-size:1rem;line-height:1.7;color:var(--muted)}
+.closing .cta{min-width:255px}
+.closing-side{display:flex;flex-direction:column;gap:18px;align-items:stretch}
+.reg-link{display:inline-flex;align-items:center;gap:8px;font-size:.92rem;font-weight:600;color:var(--gold-light);border-bottom:1px solid rgba(212,175,55,.45);padding-bottom:2px;transition:color .3s ease,border-color .3s ease}
+.reg-link:hover{color:var(--gold);border-color:var(--gold)}
+
+/* Scroll reveal — content is never hidden: the .in class only drives the
+   distribution bars and counters, so every section is visible with or
+   without JavaScript and in any capture. */
+.rv{opacity:1;transform:none}
+.step-grid .rv:nth-child(2),.guard-grid .rv:nth-child(2),.stats .rv:nth-child(2),.transport-grid .rv:nth-child(2){transition-delay:.08s}
+.step-grid .rv:nth-child(3),.guard-grid .rv:nth-child(3),.stats .rv:nth-child(3){transition-delay:.16s}
+.guard-grid .rv:nth-child(4),.stats .rv:nth-child(4),.transport-grid .rv:nth-child(4){transition-delay:.24s}
+
+/* Footer */
+footer{padding-block:35px;border-top:1px solid var(--line);display:grid;grid-template-columns:auto auto;justify-content:space-between;gap:12px 20px;font-size:.75rem;color:var(--muted)}
+footer p{grid-column:1/-1;max-width:850px;margin:8px 0 0;line-height:1.6}
+.mobile-cta{display:none}
+
+@keyframes cta-pulse{0%{box-shadow:0 0 0 0 rgba(16,185,129,.4),0 0 34px -8px rgba(16,185,129,.5)}70%{box-shadow:0 0 0 15px rgba(16,185,129,0),0 0 34px -8px rgba(16,185,129,.5)}100%{box-shadow:0 0 0 0 rgba(16,185,129,0),0 0 34px -8px rgba(16,185,129,.5)}}
+@keyframes marquee{to{transform:translateX(-50%)}}
+@keyframes transport-drive{from{transform:scale(1.06) translateX(-1.5%)}to{transform:scale(1.10) translateX(1.5%)}}
+@keyframes transport-float{from{transform:scale(1.08) translateY(1.6%) rotate(-.35deg)}to{transform:scale(1.08) translateY(-1.6%) rotate(.35deg)}}
+@keyframes transport-drift{from{transform:scale(1.07) translateX(1.5%)}to{transform:scale(1.11) translateX(-1.5%)}}
+@keyframes transport-glide{from{transform:scale(1.06) translate(1%,.8%)}to{transform:scale(1.10) translate(-1%,-.8%)}}
+
+@media(max-width:1050px){
+  .wrap{width:calc(100% - 56px)}
+  .hero{gap:30px}
+  .pain{gap:45px}
+  .pool-grid,.faq{gap:45px}
+  .guard-grid{grid-template-columns:repeat(2,1fr)}
+  .stats{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:760px){
+  body{padding-bottom:78px}
+  .wrap{width:calc(100% - 40px)}
+  .header{padding-block:18px}
+  .header-note{display:none}
+  .header-cta{padding:10px 16px;font-size:.75rem}
+  .brand-name{font-size:1rem}
+  .brand-sub{font-size:.6rem}
+  .brand-mark{width:38px;height:38px;font-size:1.2rem}
+  .hero{display:flex;flex-direction:column;gap:12px;padding-block:12px 32px}
+  .hero-copy{padding-top:0;width:100%}
+  .fleet{order:-1;width:100%;padding-top:6px;gap:10px}
+  .fleet-badge{padding:11px 14px}
+  .fleet-badge b{font-size:1.05rem}
+  .fleet-badge span{font-size:.62rem}
+  h1{font-size:clamp(2.2rem,8vw,3.5rem);line-height:1.08;letter-spacing:-.02em;margin-bottom:23px}
+  .eyebrow{font-size:.65rem;letter-spacing:.22em;margin-bottom:22px}
+  .hero .eyebrow{margin-bottom:14px}
+  .intro{font-size:1rem;max-width:none;margin-bottom:26px}
+  .signup .cta{flex:1;max-width:320px;padding:15px 19px;font-size:.875rem;gap:12px}
+        .topics{flex-wrap:wrap;justify-content:center;gap:10px 14px;padding-block:22px;font-size:.75rem}
+  .topics>span:not(.topic-plus){flex-basis:40%}
+  .topics>span:last-child{flex-basis:100%}
+  .topics .topic-plus{font-size:1rem}
+  .topics .topic-plus:nth-child(4){display:none}
+  section.block{padding-block:52px}
+  h2{font-size:2rem}
+  h2 br,.showcase-heading h2 br{display:none}
+  .pain{grid-template-columns:1fr;gap:24px}
+  .pain li{padding-block:18px}
+  .step-grid{grid-template-columns:1fr;margin-top:24px}
+  .step-grid article{min-height:0;padding:23px}
+  .step-grid article>span{margin-bottom:22px}
+  .showcase-heading{grid-template-columns:1fr;gap:10px;margin-bottom:24px}
+  .showcase-heading>p{font-size:.94rem}
+  .transport-grid{grid-template-columns:1fr;gap:14px}
+  .transport-copy{padding:20px;gap:17px}
+  .transport-card:hover{transform:none}
+  .calc{margin-top:24px}
+  .calc-row{grid-template-columns:1fr;gap:8px;padding:20px}
+  .pool-grid{grid-template-columns:1fr;gap:24px}
+  .check-list li{padding-block:18px}
+  .guard-grid{grid-template-columns:1fr;margin-top:24px}
+  .guard-grid article{min-height:0;padding:23px}
+  .guard-grid article>span{margin-bottom:22px}
+  .scenario-grid{grid-template-columns:1fr;margin-top:24px}
+  .scenario{padding:24px}
+  .faq{grid-template-columns:1fr;gap:24px}
+  .faq-list summary{font-size:1rem}
+  .faq-list p{margin-right:10px}
+  .stats{grid-template-columns:1fr;gap:12px;margin-top:24px}
+  .closing{padding:28px 24px;flex-direction:column;align-items:stretch;gap:25px;margin-bottom:52px}
+  .closing h2{font-size:1.85rem}
+  .closing .cta{width:100%;font-size:1rem}
+  footer{font-size:.75rem;grid-template-columns:1fr;gap:8px;padding-block:28px}
+  footer p{grid-column:auto}
+  .mobile-cta{position:fixed;z-index:20;display:flex;align-items:center;justify-content:center;gap:10px;left:12px;right:12px;bottom:10px;min-height:58px;padding:14px 20px;border-radius:9999px;background:var(--accent);color:var(--ink);font-size:.92rem;font-weight:600;box-shadow:0 10px 30px rgba(0,0,0,.35);animation:cta-pulse 2.8s ease-out infinite}
+  .mobile-cta svg{width:20px;height:20px;fill:var(--ink);flex:0 0 auto}
+  .cta:hover{transform:none}
+  .hero-stats{gap:22px;margin-top:30px}
+  .hstat b{font-size:1.3rem}
+  .hstat span{font-size:.76rem;max-width:150px}
+  .contrast{grid-template-columns:1fr}
+  .contrast-card{padding:23px}
+  .route{margin-top:30px}
+  .route-steps{grid-template-columns:1fr}
+  .route-steps li.route-arrow{transform:rotate(90deg);justify-self:center}
+  .route-label{letter-spacing:.22em}
+  .cities-label{letter-spacing:.22em;margin-top:34px}
+  .phone-sec{grid-template-columns:1fr;gap:30px}
+  .phone-screen{min-height:480px}
+  .bar-row{grid-template-columns:1fr;gap:7px}
+}
+@media(hover:none){.cta:hover{transform:none}}
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .fleet img,.transport-image img,.marquee-track,.cta,.mobile-cta{animation:none}
+  .fleet img,.transport-image img{transform:none}
+  .cta,.cta:after,.cta-arrow,.transport-card,.header-cta{transition:none}
+  .bar i{transform:scaleX(1);transition:none}
+  .marquee-track{flex-wrap:wrap;width:auto}
+}
+  </style>
+</head>
+<body>
+  <header class="header wrap">
+    <a class="brand" href="#" aria-label="E-Transport — back to top">
+      <span class="brand-mark" aria-hidden="true">E</span>
+      <span><span class="brand-name">E-<span>Transport</span></span><span class="brand-sub" style="display:block">RENTAL OF ELECTRIC TRANSPORT</span></span>
+    </a>
+    <div class="header-actions"><span class="header-note">Registration in the official E-Transport bot</span><a class="header-cta" data-telegram href="https://t.me/linqa_ev_bot?start=DUC7DSW3"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.04 15.31l-.38 5.32c.54 0 .78-.23 1.06-.5l2.55-2.44 5.28 3.87c.97.53 1.66.25 1.92-.9l3.48-16.4c.31-1.42-.51-1.98-1.46-1.63L2.4 8.6c-1.4.54-1.38 1.32-.24 1.67l4.87 1.52L18.4 5.65c.53-.35 1.02-.16.62.19L9.04 15.31z"/></svg>Register</a></div>
+  </header>
+  <main>
+    <section class="hero wrap" aria-labelledby="hero-title">
+      <div class="hero-copy">
+        <p class="eyebrow"><span class="eyebrow-line"></span> HOW TRANSPORT RENTAL PAYS ITS OWNERS</p>
+        <h1 id="hero-title">The transport works — <span>the rental pays the owners</span></h1>
+        <p class="intro">E-bikes and scooters are rented by the minute, driverless cars complete paid trips, and drones make paid deliveries. On every one of these markets, the rental money goes to the transport owners — and to the people who hold a share of the fleet.</p>
+        <p class="intro">Below is the model itself: how it works, where exactly the money comes from, and how participation starts — alongside your main job. When you are ready, registration takes a couple of minutes in the official bot.</p>
+        <div class="signup">
+          <a class="cta" data-telegram href="https://t.me/linqa_ev_bot?start=DUC7DSW3"><span class="cta-label"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.04 15.31l-.38 5.32c.54 0 .78-.23 1.06-.5l2.55-2.44 5.28 3.87c.97.53 1.66.25 1.92-.9l3.48-16.4c.31-1.42-.51-1.98-1.46-1.63L2.4 8.6c-1.4.54-1.38 1.32-.24 1.67l4.87 1.52L18.4 5.65c.53-.35 1.02-.16.62.19L9.04 15.31z"/></svg><span>Register in E-Transport</span></span><span class="cta-arrow" aria-hidden="true">↗</span></a>
+        </div>
+        <p class="signup-note">The button opens the official E-Transport registration bot in Telegram — tap “Start” there and follow the steps. No browser, no long forms.</p>
+        <div class="hero-stats">
+          <div class="hstat"><b><span data-count="100" data-prefix="from $">from $100</span></b><span>where participation starts — then at your own pace</span></div>
+          <div class="hstat"><b><span data-count="500000" data-suffix="+">500,000+</span></b><span>paid robotaxi rides every week in US cities</span></div>
+          <div class="hstat"><b><span data-count="15">15</span></b><span>US cities where robotaxis already operate</span></div>
+        </div>
+      </div>
+      <div class="fleet" aria-label="The E-Transport fleet: e-bikes, scooters, driverless cars and delivery drones">
+        <figure><img src="assets/electric-bike.webp" alt="A modern city e-bike" width="1200" height="900" fetchpriority="high" decoding="async"><figcaption>Electric bikes</figcaption></figure>
+        <figure><img src="assets/electric-scooter.webp" alt="A modern city electric scooter" width="1200" height="900" decoding="async"><figcaption>Electric scooters</figcaption></figure>
+        <figure><img src="assets/autonomous-car.webp" alt="An autonomous electric car with a camera and sensor system" width="1200" height="900" loading="lazy" decoding="async"><figcaption>Driverless cars</figcaption></figure>
+        <figure><img src="assets/delivery-drone.webp" alt="An electric delivery drone with a parcel" width="1200" height="900" loading="lazy" decoding="async"><figcaption>Delivery drones</figcaption></figure>
+        <div class="fleet-badge"><b>4 formats</b><span>ONE RENTAL POOL</span></div>
+      </div>
+    </section>
+
+    <div class="topics wrap" aria-label="Types of transport"><span>Electric bikes</span><span class="topic-plus" aria-hidden="true">+</span><span>Electric scooters</span><span class="topic-plus" aria-hidden="true">+</span><span>Driverless cars</span><span class="topic-plus" aria-hidden="true">+</span><span>Delivery drones</span></div>
+
+    <p class="cities-label wrap">WHERE THIS ALREADY WORKS</p>
+    <div class="marquee" aria-label="Cities where robotaxis and drone delivery already operate: Phoenix, Los Angeles, San Francisco, Austin, Atlanta, Miami, Denver, San Diego, Tampa, Las Vegas, Dallas, Houston, Orlando">
+      <div class="marquee-track">
+        <div class="marquee-group"><span class="city">Phoenix</span><span class="city">Los Angeles</span><span class="city">San Francisco</span><span class="city">Austin</span><span class="city">Atlanta</span><span class="city">Miami</span><span class="city">Denver</span><span class="city">San Diego</span><span class="city">Tampa</span><span class="city">Las Vegas</span><span class="city">Dallas</span><span class="city">Houston</span><span class="city">Orlando</span></div>
+        <div class="marquee-group" aria-hidden="true"><span class="city">Phoenix</span><span class="city">Los Angeles</span><span class="city">San Francisco</span><span class="city">Austin</span><span class="city">Atlanta</span><span class="city">Miami</span><span class="city">Denver</span><span class="city">San Diego</span><span class="city">Tampa</span><span class="city">Las Vegas</span><span class="city">Dallas</span><span class="city">Houston</span><span class="city">Orlando</span></div>
+      </div>
+    </div>
+
+    <section class="pain wrap block" aria-labelledby="pain-title">
+      <div class="section-heading">
+        <p class="eyebrow">SOUND FAMILIAR?</p>
+        <h2 id="pain-title">The job is there. <br>But the money is <span>just barely enough.</span></h2>
+        <p class="lede">One salary means one source of income — and it can't keep up with prices.</p>
+      </div>
+      <div>
+        <ul>
+          <li>Prices grow faster than your salary — by the end of the month it's almost zero again</li>
+          <li>A second job? After your shift there is neither time nor energy left</li>
+          <li>Saving “for later” never works out — urgent expenses always show up</li>
+          <li>You want money to come in not only for the hours you personally worked</li>
+        </ul>
+        <p class="pain-answer"><strong>There is another way.</strong> You don't sell your time — real transport is rented out and works without your daily involvement. You start alongside your main job and grow your participation at your own pace.</p>
+      </div>
+      <div class="contrast">
+        <article class="contrast-card">
+          <h3><span class="mark-x" aria-hidden="true">✕</span> Only one salary</h3>
+          <ul>
+            <li>Income only for the hours you personally worked</li>
+            <li>A vacation, sick leave or losing the job — and the money stops</li>
+            <li>Everything depends on your time, energy and health</li>
+          </ul>
+        </article>
+        <article class="contrast-card good">
+          <h3><span class="mark-v" aria-hidden="true">✓</span> Salary + a share of the fleet</h3>
+          <ul>
+            <li>The transport is rented out every day — while you work and while you rest</li>
+            <li>The result is formed by the whole pool of devices, not a single unit</li>
+            <li>You start alongside your main job — no second shift</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <section class="wrap block" aria-labelledby="steps-title" style="padding-top:0">
+      <div class="section-heading">
+        <p class="eyebrow">HOW IT WORKS</p>
+        <h2 id="steps-title">Three steps — <br>and the transport is out working</h2>
+      </div>
+      <div class="step-grid">
+        <article><span>01</span><h3>You hold a share of real transport</h3><p>Participation starts from $100: a share in actual e-bikes, scooters, driverless cars or delivery drones that people rent every day.</p></article>
+        <article><span>02</span><h3>The transport is rented out</h3><p>People pay for rides and deliveries. The operators take care of the organisation, service, charging and city permits.</p></article>
+        <article><span>03</span><h3>The rental pays the share holders</h3><p>The net result of the fleet's work is distributed among the participants, the fleet's operating needs and the partner fund — the exact terms are shown openly in the registration bot — before you start, not after.</p></article>
+      </div>
+      <div class="route">
+        <p class="route-label">HOW YOU GET STARTED</p>
+        <ol class="route-steps">
+          <li><span>01</span><div><h3>Open the registration bot</h3><p>The button on this page opens the official E-Transport bot in Telegram — registration starts there.</p></div></li>
+          <li class="route-arrow" aria-hidden="true">→</li>
+          <li><span>02</span><div><h3>Talk it through</h3><p>Ask your questions and get the exact participation terms — openly, before you start, not after.</p></div></li>
+          <li class="route-arrow" aria-hidden="true">→</li>
+          <li><span>03</span><div><h3>Your first share</h3><p>Choose the format and your starting amount — from $100 — and join the rental pool at your own pace.</p></div></li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="wrap block" aria-labelledby="transport-title" style="padding-top:0">
+      <div class="showcase-heading">
+        <div><p class="eyebrow">WHERE THE MONEY COMES FROM</p><h2 id="transport-title">Four types of transport — <br>four rental markets</h2></div>
+        <p>Each of these formats already operates in major cities around the world. Here is how the rental works — and what the open market data says.</p>
+      </div>
+      <div class="transport-grid">
+        <article class="transport-card" data-transport="bike">
+          <div class="transport-image"><img src="assets/electric-bike.webp" alt="A modern city e-bike" width="1200" height="900" loading="lazy" decoding="async"></div>
+          <div class="transport-copy"><span>01</span><div>
+            <h3>Electric bikes</h3>
+            <p>Rented by the minute or by the day — for city rides, couriers and tourists. The simplest format for entering the rental business.</p>
+            <p class="fact"><b>MARKET NUMBERS</b>Tourist and storefront operators charge <strong>$50–80 per day</strong> for a single e-bike, and the average 30-minute shared e-bike ride in the US costs <strong>$14.30</strong> (US industry data).</p>
+          </div></div>
+        </article>
+        <article class="transport-card" data-transport="scooter">
+          <div class="transport-image"><img src="assets/electric-scooter.webp" alt="A modern city electric scooter" width="1200" height="900" loading="lazy" decoding="async"></div>
+          <div class="transport-copy"><span>02</span><div>
+            <h3>Electric scooters</h3>
+            <p>The most mass-scale format of city rental: a rider pays about $1 to unlock and $0.30–0.39 for every minute of the ride.</p>
+            <p class="fact"><b>MARKET NUMBERS</b>Well-managed fleets receive <strong>$300–800 per scooter per month</strong> in revenue. The key factor is utilisation: from 3 rides a day per scooter.</p>
+          </div></div>
+        </article>
+        <article class="transport-card" data-transport="car">
+          <div class="transport-image"><img src="assets/autonomous-car.webp" alt="An autonomous electric car with a camera and sensor system" width="1200" height="900" loading="lazy" decoding="async"></div>
+          <div class="transport-copy"><span>03</span><div>
+            <h3>Driverless cars</h3>
+            <p>Robotaxis drive themselves and take paid orders with no driver. The model follows the fleet-operator pattern: partners own and maintain the cars, while the platform provides the technology — this is how the big robotaxi services scale through ride-hailing platforms and fleet operators.</p>
+            <p class="fact"><b>MARKET NUMBERS</b>Robotaxis complete <strong>over 500,000 paid rides a week</strong> across 15 US cities — this is no longer testing, it is a working business.</p>
+          </div></div>
+        </article>
+        <article class="transport-card" data-transport="drone">
+          <div class="transport-image"><img src="assets/delivery-drone.webp" alt="An electric delivery drone with a parcel" width="1200" height="900" loading="lazy" decoding="async"></div>
+          <div class="transport-copy"><span>04</span><div>
+            <h3>Delivery drones</h3>
+            <p>Drones deliver food, medicine and parcels faster than couriers: a typical delivery by a major US retailer takes about 23 minutes from the order. Drone operators work together with major platforms and retail chains.</p>
+            <p class="fact"><b>MARKET NUMBERS</b>A major US retailer has passed <strong>1 million drone deliveries</strong>, the world's largest drone delivery operator has completed over <strong>2.5 million deliveries</strong> worldwide, and a major online retailer has announced a plan to expand to nearly 500 US cities by the end of 2026.</p>
+          </div></div>
+        </article>
+      </div>
+      <p class="source-note">Figures are from open sources and industry reviews from 2025–2026. They are market reference points, not a promise of a specific result: the outcome depends on the format, the city and the participation terms.</p>
+    </section>
+
+    <section class="wrap block" aria-labelledby="math-title" style="padding-top:0">
+      <div class="section-heading">
+        <p class="eyebrow">THE MATH OF ONE DEVICE</p>
+        <h2 id="math-title">How the rental result is calculated — <br><span>step by step</span></h2>
+        <p class="lede">A transparent calculation using the electric scooter as an example — the most mass-scale rental format. All figures below are industry market estimates from open sources, not a promise of income.</p>
+      </div>
+      <div class="calc">
+        <div class="calc-row"><span class="calc-tag">STEP 1 · RIDES</span><p>People rent the device: about <strong>$1 to unlock</strong> and <strong>$0.30–0.39 per minute</strong> of the ride. To cover its own costs, a device needs to make <strong>from 3 rides a day</strong>.</p></div>
+        <div class="calc-row"><span class="calc-tag">STEP 2 · REVENUE</span><p>Well-managed fleets receive <strong>$300–800 per scooter per month</strong> in revenue. The revenue level depends on the city, the location and how busy the device is.</p></div>
+        <div class="calc-row"><span class="calc-tag">STEP 3 · MINUS COSTS</span><p>The revenue pays for <strong>charging, repairs, insurance and permits</strong>. Most of the revenue goes exactly to keeping the fleet working every day instead of standing idle.</p></div>
+        <div class="calc-row"><span class="calc-tag">STEP 4 · NET RESULT</span><p>After all costs, the industry's typical net margin is <strong>10–20%</strong> of revenue. This is the modest but real economics of rental transport.</p></div>
+        <div class="calc-row"><span class="calc-tag">STEP 5 · DISTRIBUTION</span><div><p>The net result is shared between the participant, the fleet's operating needs and the partner fund. <strong>The exact distribution terms are shown openly in the registration bot</strong> — before you start, not after.</p>
+        <div class="bars" aria-hidden="true">
+          <div class="bar-row"><span>Participant</span><div class="bar"><i class="bar-green"></i></div></div>
+          <div class="bar-row"><span>Fleet operating needs</span><div class="bar"><i class="bar-green"></i></div></div>
+          <div class="bar-row"><span>Partner fund</span><div class="bar"><i class="bar-gold"></i></div></div>
+        </div>
+        <p class="bars-note">The bars show the structure of the distribution, not percentage shares — the exact terms are shown openly in the registration bot.</p></div></div>
+      </div>
+      <p class="source-note">Important: the figures are industry market estimates (open sources, 2025–2026). They show how the economics of this field work, but they do not guarantee a specific result.</p>
+    </section>
+
+    <section class="wrap block" aria-labelledby="pool-title" style="padding-top:0">
+      <div class="pool-grid">
+        <div class="section-heading">
+          <p class="eyebrow">THE POOL PRINCIPLE</p>
+          <h2 id="pool-title">The result comes from the whole fleet, <br><span>not from a single device</span></h2>
+        </div>
+        <div>
+          <p class="pool-text">Your result does not depend on the fate of one scooter or one bike. It is formed <strong>by the work of the entire fleet of devices</strong> — that is the pool principle.</p>
+          <ul class="check-list">
+            <li>One device is charging or being repaired — the rest keep carrying people and earning</li>
+            <li>Downtime of a single unit does not stop the work of the whole pool</li>
+            <li>The exposure is spread across many devices and several types of transport</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="wrap block" aria-labelledby="guard-title" style="padding-top:0">
+      <div class="section-heading">
+        <p class="eyebrow">PROTECTION</p>
+        <h2 id="guard-title">What protects the equipment <br><span>and the pool's work</span></h2>
+      </div>
+      <div class="guard-grid">
+        <article><span>01</span><h3>GPS tracking</h3><p>Every unit of equipment is tracked: it is visible where the device is, how it is working and whether everything is fine with it.</p></article>
+        <article><span>02</span><h3>Equipment insurance</h3><p>The devices are insured against damage and theft — a loss does not fall on a single participant.</p></article>
+        <article><span>03</span><h3>Reserve fund</h3><p>Part of the money is reserved for repairs, so a breakdown does not stop the fleet's work.</p></article>
+        <article><span>04</span><h3>Device replacement</h3><p>A unit that goes out of service is replaced with a working one — the fleet does not stand idle.</p></article>
+      </div>
+    </section>
+
+    <section class="wrap block" aria-labelledby="scenarios-title" style="padding-top:0">
+      <div class="section-heading">
+        <p class="eyebrow">PARTICIPATION FORMATS</p>
+        <h2 id="scenarios-title">Two formats — <br><span>choose yours</span></h2>
+      </div>
+      <div class="scenario-grid">
+        <article class="scenario">
+          <span class="calc-tag">FORMAT 1 · PASSIVE PARTICIPANT</span>
+          <h3>A share of the rental, alongside your job</h3>
+          <ul>
+            <li>A share in real transport that is rented out</li>
+            <li>The result is formed by the rental of devices across the whole pool</li>
+            <li>No team, no sales, no recruiting people</li>
+            <li>For those who want an additional source alongside their main job</li>
+          </ul>
+        </article>
+        <article class="scenario featured">
+          <span class="calc-tag">FORMAT 2 · PARTNER</span>
+          <h3>Participation plus your own team</h3>
+          <ul>
+            <li>Participation in the transport — the same as a passive participant</li>
+            <li>Plus building your own partner team within E-Transport</li>
+            <li>Access to the partner fund and its opportunities</li>
+            <li>For those who want to grow this direction over time</li>
+          </ul>
+        </article>
+      </div>
+      <p class="source-note">The details of both formats and the exact participation terms are shown in the registration bot when you sign up.</p>
+    </section>
+
+    <section class="wrap block" aria-labelledby="why-title" style="padding-top:0">
+      <div class="section-heading">
+        <p class="eyebrow">WHY NOW</p>
+        <h2 id="why-title">This market is growing <span>right now</span></h2>
+      </div>
+      <div class="stats">
+        <div class="stat"><b>500,000+</b><p>paid robotaxi rides every week across 15 US cities</p></div>
+        <div class="stat"><b>$16B</b><p>raised by the largest robotaxi service in 2026 — the money will fund launches in 20+ new cities</p></div>
+        <div class="stat"><b>1M</b><p>drone deliveries completed by a major US retailer's network — now expanding to 270+ locations</p></div>
+        <div class="stat"><b>2026</b><p>the largest robotaxi service plans public rides in London — driverless transport is moving beyond the US, into Europe</p></div>
+      </div>
+      <p class="why-text">Just a few years ago these were experiments. Today they are <strong>hundreds of thousands of paid rides and millions of deliveries every week</strong>, and the world's largest companies are investing billions in this field. The mechanics are already working at scale — and participation in this model starts with registration in the official bot.</p>
+    </section>
+
+    <section class="faq wrap block" aria-labelledby="faq-title" style="padding-top:0">
+      <div class="section-heading">
+        <p class="eyebrow">QUESTIONS &amp; ANSWERS</p>
+        <h2 id="faq-title">The essentials, <br>in short</h2>
+      </div>
+      <div class="faq-list">
+        <details><summary>How is the rental result of one device calculated?<span aria-hidden="true">+</span></summary><p>According to industry market estimates: a device earns on tariffs — about $1 to unlock and $0.30–0.39 per minute. Well-managed fleets receive $300–800 per scooter per month in revenue, and after the costs of charging, repairs, insurance and permits, the net margin is typically 10–20%. These are market reference points, not a guarantee of a specific result.</p></details>
+        <details><summary>What is the pool principle?<span aria-hidden="true">+</span></summary><p>The result is formed by the work of the entire fleet of devices, not one specific device. If one device is being repaired or charged, the rest keep working — so the downtime of a single unit does not stop the pool.</p></details>
+        <details><summary>What happens if a device breaks down or is stolen?<span aria-hidden="true">+</span></summary><p>Every unit is GPS-tracked, the equipment is insured, there is a reserve fund for repairs, and a device that goes out of service is replaced with a working one. That is why a single breakdown does not stop the whole fleet.</p></details>
+        <details><summary>How does a “Passive Participant” differ from a “Partner”?<span aria-hidden="true">+</span></summary><p>A passive participant takes part only in the transport rental — no team and no recruiting people. A partner additionally builds their own team within E-Transport and takes part in the partner fund. The exact terms of both formats are shown in the registration bot when you sign up.</p></details>
+        <details><summary>Is the income guaranteed?<span aria-hidden="true">+</span></summary><p>No. There are no income guarantees and there cannot be any: the figures on this page are industry market estimates, and the real result depends on the city, the season and how busy the devices are. The information is for general information only and is not financial advice — everyone makes their own decision, having weighed the risks.</p></details>
+        <details><summary>Where can I see the exact participation terms?<span aria-hidden="true">+</span></summary><p>In the official registration bot: tap any registration button on this page — the bot opens in Telegram and shows the participation terms, the formats and the next steps before you confirm anything.</p></details>
+      </div>
+    </section>
+
+    <section class="wrap block" aria-labelledby="bot-title" style="padding-top:0">
+      <div class="phone-sec">
+        <div class="phone-copy">
+          <p class="eyebrow">EVERYTHING INSIDE — ON YOUR PHONE</p>
+          <h2 id="bot-title">Registration lives <br><span>in the official bot</span></h2>
+          <p class="lede">No website sign-ups and no long forms. You tap the button — Telegram opens the official E-Transport bot, and registration happens right in the chat.</p>
+          <ul class="get-list">
+            <li>Registration in E-Transport — right inside Telegram, in a couple of minutes</li>
+            <li>The exact participation terms — shown in the bot before you confirm</li>
+            <li>Answers to your questions — right in the same chat</li>
+            <li>Your participation is linked to your Telegram account — no extra passwords</li>
+          </ul>
+          <div class="signup" style="margin-top:28px">
+            <a class="cta" data-telegram href="https://t.me/linqa_ev_bot?start=DUC7DSW3"><span class="cta-label"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.04 15.31l-.38 5.32c.54 0 .78-.23 1.06-.5l2.55-2.44 5.28 3.87c.97.53 1.66.25 1.92-.9l3.48-16.4c.31-1.42-.51-1.98-1.46-1.63L2.4 8.6c-1.4.54-1.38 1.32-.24 1.67l4.87 1.52L18.4 5.65c.53-.35 1.02-.16.62.19L9.04 15.31z"/></svg><span>Register in E-Transport</span></span><span class="cta-arrow" aria-hidden="true">↗</span></a>
+          </div>
+        </div>
+        <div class="phone" role="img" aria-label="Phone mockup: a chat with the official E-Transport registration bot">
+          <div class="phone-screen">
+            <div class="chat-head">
+              <span class="chat-ava" aria-hidden="true">E</span>
+              <div><strong>E-Transport</strong><span>@linqa_ev_bot · bot</span></div>
+            </div>
+            <div class="chat-body">
+              <div class="bubble">Welcome! This is the official E-Transport registration bot. A couple of steps — and your participation in the rental fleet is set up.<small>bot · just now</small></div>
+              <div class="bubble bubble-reg">
+                <div><strong>Register in E-Transport</strong><span>The registration page opens right inside Telegram — the final step of the chain.</span></div>
+              </div>
+            </div>
+            <a class="chat-cta" href="https://t.me/linqa_ev_bot?start=DUC7DSW3">Start registration</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="closing wrap" aria-labelledby="closing-title">
+      <div>
+        <p class="eyebrow">SEE HOW IT WORKS</p>
+        <h2 id="closing-title">Join the owners <br><span>the rental pays</span></h2>
+        <p>Registration is in the official E-Transport bot: the participation formats and the exact terms are shown there openly, before you start. In plain language, no fluff.</p>
+        <ul class="get-list">
+          <li>Registration right in Telegram — a couple of minutes</li>
+          <li>Participation from $100 — then at your own pace</li>
+          <li>The rental math and participation terms — openly, before you start</li>
+        </ul>
+      </div>
+      <div class="closing-side">
+        <a class="cta" data-telegram href="https://t.me/linqa_ev_bot?start=DUC7DSW3"><span class="cta-label"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.04 15.31l-.38 5.32c.54 0 .78-.23 1.06-.5l2.55-2.44 5.28 3.87c.97.53 1.66.25 1.92-.9l3.48-16.4c.31-1.42-.51-1.98-1.46-1.63L2.4 8.6c-1.4.54-1.38 1.32-.24 1.67l4.87 1.52L18.4 5.65c.53-.35 1.02-.16.62.19L9.04 15.31z"/></svg><span>Register in E-Transport</span></span><span class="cta-arrow" aria-hidden="true">↗</span></a>
+        <a class="reg-link" href="https://t.me/linqa_ev_bot?start=DUC7DSW3">Register in E-Transport ↗</a>
+      </div>
+    </section>
+  </main>
+  <footer class="wrap">
+    <span>© <span id="year">2026</span> E-Transport</span>
+    <span>Registration is free — in the official E-Transport bot.</span>
+    <p>The information on this site is for general information only and is not financial advice or a guarantee of income. Market figures are industry estimates from open sources; any decision requires your own assessment of the terms and risks.</p>
+  </footer>
+  <a class="mobile-cta" data-telegram href="https://t.me/linqa_ev_bot?start=DUC7DSW3"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.04 15.31l-.38 5.32c.54 0 .78-.23 1.06-.5l2.55-2.44 5.28 3.87c.97.53 1.66.25 1.92-.9l3.48-16.4c.31-1.42-.51-1.98-1.46-1.63L2.4 8.6c-1.4.54-1.38 1.32-.24 1.67l4.87 1.52L18.4 5.65c.53-.35 1.02-.16.62.19L9.04 15.31z"/></svg><span>Register in E-Transport</span><span aria-hidden="true">↗</span></a>
+
+  <script>
+  (function () {
+    'use strict';
+    document.getElementById('year').textContent = String(new Date().getFullYear());
+
+    // Registration buttons are plain <a href="https://t.me/..."> links on
+    // purpose: no click interception, so every CTA works in any embedded
+    // browser (including the Telegram mini-app webview) with or without JS.
+
+    var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // Animated number counters in the hero
+    function formatNum(n) {
+      return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+    }
+    function animateCount(el) {
+      var target = parseInt(el.getAttribute('data-count'), 10);
+      var prefix = el.getAttribute('data-prefix') || '';
+      var suffix = el.getAttribute('data-suffix') || '';
+      if (isNaN(target) || reduceMotion) {
+        el.textContent = prefix + formatNum(target || 0) + suffix;
+        return;
+      }
+      var start = null;
+      var duration = 1300;
+      function tick(ts) {
+        if (!start) start = ts;
+        var p = Math.min((ts - start) / duration, 1);
+        var eased = 1 - Math.pow(1 - p, 3);
+        el.textContent = prefix + formatNum(Math.round(target * eased)) + suffix;
+        if (p < 1) window.requestAnimationFrame(tick);
+      }
+      window.requestAnimationFrame(tick);
+    }
+
+    // Reveal blocks on scroll + start the counters and the distribution bars
+    var revealTargets = document.querySelectorAll(
+      '.block .section-heading, .pain > div, .contrast, .step-grid article, .route, .transport-card, .calc, .pool-grid > div, .guard-grid article, .scenario, .stat, .faq-list, .phone-copy, .phone, .closing'
+    );
+    if ('IntersectionObserver' in window && !reduceMotion) {
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('in');
+            io.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.12, rootMargin: '0px 0px -6% 0px' });
+      revealTargets.forEach(function (el) { el.classList.add('rv'); io.observe(el); });
+
+      var statIO = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) {
+            animateCount(entry.target);
+            statIO.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.4 });
+      document.querySelectorAll('[data-count]').forEach(function (el) { statIO.observe(el); });
+    } else {
+      document.querySelectorAll('[data-count]').forEach(function (el) { animateCount(el); });
+      var calcEl = document.querySelector('.calc');
+      if (calcEl) calcEl.classList.add('in');
+    }
+
+    // Light parallax of the hero fleet collage on scroll
+    var heroScene = document.querySelector('.fleet');
+    if (heroScene && !reduceMotion) {
+      var ticking = false;
+      window.addEventListener('scroll', function () {
+        if (!ticking) {
+          ticking = true;
+          window.requestAnimationFrame(function () {
+            var y = Math.min(window.scrollY * 0.05, 16);
+            if (window.scrollY < 900) {
+              heroScene.style.transform = 'translateY(' + y.toFixed(1) + 'px)';
+            }
+            ticking = false;
+          });
+        }
+      }, { passive: true });
+    }
+  })();
+    </script>
+</body>
+</html>
